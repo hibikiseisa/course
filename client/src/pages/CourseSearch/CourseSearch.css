@@ -1,0 +1,197 @@
+.course-search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 40px;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.course-search-title {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.course-search-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    width: 120px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    margin-right: 5px;
+}
+
+.toggle-button {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.toggle-button:hover {
+    background-color: #ccc;
+}
+
+.search-button {
+    width: 100px;
+    padding: 10px;
+    background-color: #5ba4e5;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    margin: 20px auto 0;
+}
+
+.search-button:hover {
+    background-color: #488ac8;
+}
+
+.advanced-search-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.more-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.more-form-group label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.more-form-group input[type="checkbox"],
+.more-form-group input[type="radio"] {
+    margin-right: 5px;
+}
+
+.more-form-group select,
+.more-form-group input[type="text"] {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    margin-top: 5px;
+}
+
+.course-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.course-table th,
+.course-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.course-table th {
+    background-color: #98D98E;
+    color: white;
+}
+
+.more-button {
+    padding: 5px 10px;
+    color: white;
+    background-color: #68BE8D;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.more-button:hover {
+    background-color: #45a049;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.results-per-page {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-buttons button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    cursor: pointer;
+}
+
+.pagination-buttons button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-buttons button:disabled {
+    background: #e9ecef;
+    cursor: not-allowed;
+}
+
+.jump-to-page {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.jump-to-page input {
+    width: 50px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}

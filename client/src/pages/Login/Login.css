@@ -1,0 +1,106 @@
+html, body, #root, .outer-container {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.outer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+  width: 100vw;
+  height: 100vh;
+}
+
+.login-container , .register-container  {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+h2 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;
+  font-weight: 600;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  flex: 10px 10px 0px; /* 控制標籤寬度 */
+  margin-right: 1rem;
+  color: #555;
+  font-weight: bold;
+}
+
+.form-group input {
+  flex: 1; /* 讓輸入框佔滿剩餘空間 */
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.form-group input::placeholder {
+  color: #999;
+}
+
+.form-group input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.login-button , .register-button{
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #7a9cbf;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover, .register-button:hover  {
+  background-color: #657d9a;
+}
+
+.register-link .login-link{
+  margin-top: 1rem;
+  color: #4a90e2;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+}
+
+.register-link:hover , .login-link:hover{
+  text-decoration: underline;
+}
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
