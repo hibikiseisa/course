@@ -1,14 +1,28 @@
-
-/* .admin-course-management{
-    background-color: #ffffff;
+.admin-course-management{
+    /* background-color: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-} */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    position: relative; /* 讓內部的絕對定位元素相對於這個容器定位 */
+    padding-bottom: 70px; /* 留出空間讓 data-count 不會被課程內容擋住 */
+}
 
 .admin-course-management h2{
     margin: 0 auto;
-    margin-top: 100px;    
+    margin-top: 70px;    
 }
+
+.data-count {
+  position: absolute;
+  bottom: 20px; /* 距離底部 20px */
+  right: 20px; /* 距離右邊 20px */
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  z-index: 1000; /* 確保顯示在其他內容上方 */
+}
+
 /* 模態框背景 */
 .modal-overlay {
     position: fixed;
@@ -199,11 +213,13 @@
     }
   } */
    /* 控制按鈕區 */
-.controls {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 10px;
-}
+   .controls {
+    display: flex;
+    justify-content: space-between; /* 按鈕群組和搜尋欄位分開 */
+    align-items: center;
+    width: 100%;
+  }
+  
 
 /* 顯示總數在右下角 */
 .data-count {
@@ -218,5 +234,25 @@
 }
 
   
-  
+.search-group {
+  display: flex;
+  justify-content: flex-end; /* 將內容推到最右邊 */
+  align-items: center; /* 垂直居中 */
+}
+
+.search-group select, 
+.search-group input {
+  margin-left: 10px; /* 增加一些間距 */
+}
+
+.search-button {
+  margin-left: 10px;
+}
+
+.no-results {
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+  padding: 20px;
+}
   

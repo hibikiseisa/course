@@ -1,10 +1,10 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './CourseManagement.css';
 
 const CourseManagement = () => {
-  const [selectedFile, setSelectedFile] = useState(null); // 選中的檔案
-  const [uploadMessage, setUploadMessage] = useState(''); // 上傳狀態訊息
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState({
@@ -14,313 +14,252 @@ const CourseManagement = () => {
     department: '',
     teacher: '',
   });
-  const [courses, setCourses] = useState([]);
-  const [selectedCourses, setSelectedCourses] = useState([]); // 儲存被勾選的課程 ID
-  const [filter, setFilter] = useState({ term: '', department: '', keyword: '' }); // 篩選條件
+  const [courses, setCourses] = useState(() => {
+    const savedCourses = localStorage.getItem('courses');
+    return savedCourses ? JSON.parse(savedCourses) : [];
+  });
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [filter, setFilter] = useState({ term: '', department: '', keyword: '' });
 
-  // 學期選項
   const terms = ['113上', '112下', '112上'];
-
-  // 系所選項（這裡使用假資料）
   const departments = ['資訊管理系', '護理系', '幼保系'];
 
-  // 檔案選擇
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file); // 更新檔案狀態
-  };
+  useEffect(() => {
+    setFilteredCourses(courses); // 頁面載入時顯示所有課程
+  }, [courses]);
+  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
-  // 上傳 CSV 檔案
   const handleUpload = async () => {
     if (!selectedFile) {
       setUploadMessage('請選擇一個 CSV 檔案');
       return;
     }
-
     const formData = new FormData();
     formData.append('file', selectedFile);
-
     try {
       const response = await axios.post('http://localhost:5000/api/upload-csv', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
       setUploadMessage(response.data.message || '檔案上傳成功');
     } catch (error) {
-      console.error('檔案上傳失敗:', error.response || error);
+      console.error('檔案上傳失敗:', error);
       setUploadMessage('檔案上傳失敗，請檢查檔案格式或內容');
     }
   };
-
-  // 更新課程詳細資訊
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCourseDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
+  
+  const handleDownloadCSV = () => {
+    const csvData = courses.map(course => ({
+      id: course.id,
+      name: course.name,
+      credits: course.credits,
+      department: course.department,
+      teacher: course.teacher,
+    }));
+    
+    const header = 'id,name,credits,department,teacher\n';
+    const rows = csvData.map(course => `${course.id},${course.name},${course.credits},${course.department},${course.teacher}`).join('\n');
+    const csvContent = header + rows;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'courses.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  // 儲存課程 (新增或更新)
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCourseDetails((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSaveCourse = () => {
     if (!courseDetails.id || !courseDetails.name || !courseDetails.credits) {
       alert('請填寫完整的課程資訊');
       return;
     }
-
+  
+    const isDuplicateId = courses.some(
+      (course) => course.id === courseDetails.id && course.id !== editingCourse?.id
+    );
+    if (isDuplicateId) {
+      alert('科目代號重複，請重新輸入');
+      return;
+    }
+  
+    let updatedCourses;
     if (editingCourse) {
-      setCourses((prevCourses) =>
-        prevCourses.map((course) =>
-          course.id === editingCourse.id ? { ...courseDetails } : course
-        )
+      updatedCourses = courses.map((course) =>
+        course.id === editingCourse.id ? { ...courseDetails } : course
       );
     } else {
-      setCourses((prevCourses) => [...prevCourses, courseDetails]);
+      updatedCourses = [...courses, courseDetails];
     }
+  
+    // 更新 courses 狀態
+    setCourses(updatedCourses);
+    // 更新 localStorage，確保課程被保存在本地存儲
+  localStorage.setItem('courses', JSON.stringify(updatedCourses));
 
+
+    // 更新 filteredCourses 根據過濾條件
+    setFilteredCourses(
+      updatedCourses.filter((course) => {
+        return (
+          (filter.term ? course.term === filter.term : true) &&
+          (filter.department ? course.department.includes(filter.department) : true) &&
+          (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
+        );
+      })
+    );
+  
     setShowModal(false);
     setEditingCourse(null);
     setCourseDetails({ id: '', name: '', credits: '', department: '', teacher: '' });
   };
-
-  // 編輯課程
   const handleEditCourse = (course) => {
     setEditingCourse(course);
-    setCourseDetails(course);
+    setCourseDetails({ ...course });
     setShowModal(true);
   };
 
-  // 處理單行選擇
   const handleRowSelect = (id) => {
-    setSelectedCourses((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((selectedId) => selectedId !== id)
-        : [...prevSelected, id]
+    setSelectedCourses((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
     );
   };
 
-  // 全選功能
   const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      const allIds = courses.map((course) => course.id);
-      setSelectedCourses(allIds);
+    if (e.target.checked && courses.length > 0) {
+      setSelectedCourses(courses.map((course) => course.id));
     } else {
       setSelectedCourses([]);
     }
   };
 
-  // 刪除選中課程
   const handleDeleteSelected = () => {
     if (selectedCourses.length === 0) {
       alert('請選擇至少一項課程進行刪除');
       return;
     }
-    setCourses((prevCourses) =>
-      prevCourses.filter((course) => !selectedCourses.includes(course.id))
-    );
+    const updatedCourses = courses.filter((course) => !selectedCourses.includes(course.id));
+    setCourses(updatedCourses);
+    localStorage.setItem('courses', JSON.stringify(updatedCourses));  // 更新 localStorage
     setSelectedCourses([]);
   };
-
-  // 篩選課程
-  const handleSearch = () => {
-    const filteredCourses = courses.filter((course) => {
-      return (
-        (filter.term ? course.term === filter.term : true) &&
-        (filter.department ? course.department.includes(filter.department) : true) &&
-        (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
-      );
-    });
-
-    setCourses(filteredCourses);
-  };
+  
+const handleSearch = () => {
+  const result = courses.filter((course) => {
+    return (
+      (filter.term ? course.term === filter.term : true) &&
+      (filter.department ? course.department.includes(filter.department) : true) &&
+      (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
+    );
+  });
+  setFilteredCourses(result);
+};
 
   return (
     <div className="admin-course-management">
       <h2>課程管理</h2>
 
-      {/* 匯入 CSV 部分 */}
-      <div className="upload-section">
-        <label htmlFor="file-upload" className="upload-label">匯入 CSV 檔案</label>
-        <input
-          type="file"
-          id="file-upload"
-          accept=".csv"
-          onChange={handleFileChange}
-        />
-        <button onClick={handleUpload} className="upload-button">上傳</button>
-        {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
-      </div>
-
-      {/* 篩選區 */}
-      <div className="filter-section">
-        <select
-          value={filter.term}
-          onChange={(e) => setFilter({ ...filter, term: e.target.value })}
-        >
-          <option value="">不分學期</option>
-          {terms.map((term, index) => (
-            <option key={index} value={term}>{term}</option>
-          ))}
-        </select>
-
-        <select
-          value={filter.department}
-          onChange={(e) => setFilter({ ...filter, department: e.target.value })}
-        >
-          <option value="">不分系所</option>
-          {departments.map((dept, index) => (
-            <option key={index} value={dept}>{dept}</option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          placeholder="課程名稱、教師"
-          value={filter.keyword}
-          onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
-        />
-
-        <button onClick={handleSearch} className="search-button">搜尋</button>
-      </div>
-
-      {/* 控制按鈕區域：刪除按鈕在左側，放在全選框上方 */}
       <div className="controls">
-        <button onClick={handleDeleteSelected} className="delete-button">
-          刪除
-        </button>
-        <button onClick={() => setShowModal(true)} className="control-button">
-          新增課程
-        </button>
+        <div className="button-group">
+          <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
+          <button onClick={() => setShowModal(true)} className="control-button">新增課程</button>
+          <button onClick={handleUpload} className="upload-button">匯入</button>
+          <button onClick={handleDownloadCSV} className="download-button">匯出</button>
+        </div>
+        
+        {/* 移動搜尋欄位到右邊 */}
+        <div className="search-group">
+          <select value={filter.term} onChange={(e) => setFilter({ ...filter, term: e.target.value })}>
+            <option value="">不分學期</option>
+            {terms.map((term) => (
+              <option key={term} value={term}>{term}</option>
+            ))}
+          </select>
+          <select value={filter.department} onChange={(e) => setFilter({ ...filter, department: e.target.value })}>
+            <option value="">不分系所</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="課程名稱、教師"
+            value={filter.keyword}
+            onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
+          />
+          <button onClick={handleSearch} className="search-button">搜尋</button>
+        </div>
       </div>
 
-      {/* 課程表格 */}
       <table className="course-table">
-        <thead>
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedCourses.length === courses.length && courses.length > 0}
-              />
-            </th>
-            <th>科目代號</th>
-            <th>課程名稱 (學分)</th>
-            <th>系所</th>
-            <th>教師</th>
-            <th>編輯</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses.length === 0 ? (
-            <tr>
-              <td colSpan="6">目前尚無課程</td>
-            </tr>
-          ) : courses.length > 0 ? (
-            courses.map((course) => (
-              <tr key={course.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedCourses.includes(course.id)}
-                    onChange={() => handleRowSelect(course.id)}
-                  />
-                </td>
-                <td>{course.id}</td>
-                <td>
-                  {course.name} ({course.credits})
-                </td>
-                <td>{course.department}</td>
-                <td>{course.teacher}</td>
-                <td>
-                  <button
-                    className="edit-button"
-                    onClick={() => handleEditCourse(course)}
-                  >
-                    編輯
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6">無符合條件的課程</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+  <thead>
+    <tr>
+      <th>
+        <input
+          type="checkbox"
+          onChange={handleSelectAll}
+          checked={selectedCourses.length === courses.length && courses.length > 0}
+        />
+      </th>
+      <th>科目代號</th>
+      <th>課程名稱 (學分)</th>
+      <th>系所</th>
+      <th>教師</th>
+      <th>編輯</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredCourses.length > 0 ? (
+      filteredCourses.map((course) => (
+        <tr key={course.id}>
+          <td>
+            <input
+              type="checkbox"
+              checked={selectedCourses.includes(course.id)}
+              onChange={() => handleRowSelect(course.id)}
+            />
+          </td>
+          <td>{course.id}</td>
+          <td>{course.name} ({course.credits})</td>
+          <td>{course.department}</td>
+          <td>{course.teacher}</td>
+          <td>
+            <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="6" className="no-results">
+          無符合條件的課程
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
 
-      {/* 課程總數計數顯示：右下角 */}
-      <div className="data-count">
-        總共 {courses.length} 筆資料
-      </div>
+      <div className="data-count">總共 {filteredCourses.length} 筆資料</div>
 
-      {/* 編輯課程 Modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
             <div className="modal-form">
-              <label>
-                科目代號:
-                <input
-                  type="text"
-                  name="id"
-                  value={courseDetails.id}
-                  onChange={handleInputChange}
-                  placeholder="輸入科目代號"
-                  required
-                />
-              </label>
-              <label>
-                課程名稱:
-                <input
-                  type="text"
-                  name="name"
-                  value={courseDetails.name}
-                  onChange={handleInputChange}
-                  placeholder="輸入課程名稱"
-                  required
-                />
-              </label>
-              <label>
-                學分:
-                <input
-                  type="number"
-                  name="credits"
-                  value={courseDetails.credits}
-                  onChange={handleInputChange}
-                  placeholder="輸入學分數"
-                  required
-                />
-              </label>
-              <label>
-                系所:
-                <input
-                  type="text"
-                  name="department"
-                  value={courseDetails.department}
-                  onChange={handleInputChange}
-                  placeholder="輸入系所名稱"
-                />
-              </label>
-              <label>
-                教師:
-                <input
-                  type="text"
-                  name="teacher"
-                  value={courseDetails.teacher}
-                  onChange={handleInputChange}
-                  placeholder="輸入授課教師"
-                />
-              </label>
+              <label>科目代號: <input type="text" name="id" value={courseDetails.id} onChange={handleInputChange} required /></label>
+              <label>課程名稱: <input type="text" name="name" value={courseDetails.name} onChange={handleInputChange} required /></label>
+              <label>學分: <input type="number" name="credits" value={courseDetails.credits} onChange={handleInputChange} required /></label>
+              <label>系所: <input type="text" name="department" value={courseDetails.department} onChange={handleInputChange} /></label>
+              <label>教師: <input type="text" name="teacher" value={courseDetails.teacher} onChange={handleInputChange} /></label>
             </div>
             <div className="modal-actions">
-              <button onClick={handleSaveCourse} className="add-button">
-                保存
-              </button>
-              <button onClick={() => setShowModal(false)} className="cancel-button">
-                取消
-              </button>
+              <button onClick={handleSaveCourse} className="add-button">保存</button>
+              <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
             </div>
           </div>
         </div>
