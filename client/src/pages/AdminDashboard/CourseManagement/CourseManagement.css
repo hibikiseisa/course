@@ -234,25 +234,37 @@
 }
 
   
+/* 搜尋欄位容器 */
 .search-group {
   display: flex;
-  justify-content: flex-end; /* 將內容推到最右邊 */
-  align-items: center; /* 垂直居中 */
+  align-items: center;
+  gap: 20px; /* 增加欄位間距 */
 }
 
-.search-group select, 
-.search-group input {
-  margin-left: 10px; /* 增加一些間距 */
+/* 每個搜尋欄位 */
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* 調整標籤和輸入框的間距 */
 }
 
-.search-button {
-  margin-left: 10px;
-}
-
-.no-results {
-  text-align: center;
-  color: #888;
+/* 每個搜尋欄位的標籤 */
+.search-item label {
   font-size: 16px;
-  padding: 20px;
+  font-weight: bold;
+  margin-right: 8px; /* 讓標籤和輸入框/下拉選單有間隔 */
 }
+
+/* 調整 select 和 input 的寬度，使其寬一些 */
+.search-group select,
+.search-group input {
+  width: 200px; /* 可以根據需要調整寬度 */
+  padding: 8px;
+  font-size: 16px;
+}
+
+
+
+
+
   

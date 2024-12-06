@@ -175,26 +175,34 @@ const handleSearch = () => {
         
         {/* 移動搜尋欄位到右邊 */}
         <div className="search-group">
-          <select value={filter.term} onChange={(e) => setFilter({ ...filter, term: e.target.value })}>
-            <option value="">不分學期</option>
-            {terms.map((term) => (
-              <option key={term} value={term}>{term}</option>
-            ))}
-          </select>
-          <select value={filter.department} onChange={(e) => setFilter({ ...filter, department: e.target.value })}>
-            <option value="">不分系所</option>
-            {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="課程名稱、教師"
-            value={filter.keyword}
-            onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
-          />
-          <button onClick={handleSearch} className="search-button">搜尋</button>
-        </div>
+  <div className="search-item">
+    <label>學期:</label>
+    <select value={filter.term} onChange={(e) => setFilter({ ...filter, term: e.target.value })}>
+      <option value="">不分學期</option>
+      {terms.map((term) => (
+        <option key={term} value={term}>{term}</option>
+      ))}
+    </select>
+  </div>
+  <div className="search-item">
+    <label>系所:</label>
+    <select value={filter.department} onChange={(e) => setFilter({ ...filter, department: e.target.value })}>
+      <option value="">不分系所</option>
+      {departments.map((dept) => (
+        <option key={dept} value={dept}>{dept}</option>
+      ))}
+    </select>
+  </div>
+  <div className="search-item">
+    <input
+      type="text"
+      placeholder="課程名稱、教師"
+      value={filter.keyword}
+      onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
+    />
+  </div>
+  <button onClick={handleSearch} className="search-button">搜尋</button>
+</div>
       </div>
 
       <table className="course-table">
