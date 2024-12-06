@@ -26,11 +26,12 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // 使用者 Schema 和 Model
 const userSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true }, // 帳號
-    username: { type: String, required: true }, // 使用者姓名
+    id: { type: String, required: true, unique: true }, // 帳號需唯一
+    username: { type: String, required: true }, // 使用者名稱，不需唯一
     password: { type: String, required: true },
     role: { type: String, enum: ['student', 'admin'], required: true },
 });
+
 
 
 const courseSchema = new mongoose.Schema({
@@ -62,6 +63,7 @@ const courseSchema = new mongoose.Schema({
 }, { collection: 'courses' });
 
 const User = mongoose.model('User', userSchema);
+
 const Course = mongoose.model('Course', courseSchema);
 // 註冊 API
 app.post('/api/register', async (req, res) => {
@@ -82,7 +84,7 @@ app.post('/api/register', async (req, res) => {
     if (password.length < 6 || password.length > 20) {
         return res.status(400).json({ message: '密碼必須介於 6 至 20 個字之間' });
     }
-    
+
 
     try {
         // 預設角色為 student
@@ -92,20 +94,26 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // 創建新用戶
-        const newUser = new User({ id, username, password: hashedPassword, role });
+
+        const newUser = new User({
+            id: id.toLowerCase(),
+            username,
+            password: hashedPassword,
+            role
+        });
 
         // 保存至資料庫
         await newUser.save();
-
         res.status(201).json({ message: '註冊成功' });
     } catch (error) {
-        if (error.code === 11000) { // 檢查重複鍵錯誤
+        if (error.code === 11000) {
             res.status(400).json({ message: '帳號已存在' });
         } else {
-            console.error('伺服器錯誤:', error);
+            console.error('註冊失敗:', error);
             res.status(500).json({ message: '伺服器錯誤，無法註冊' });
         }
     }
+
 });
 
 
@@ -125,50 +133,88 @@ app.post('/api/register', async (req, res) => {
 //     }
 // })();
 
-
-// 登入 API
 app.post('/api/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
+    const { id, password } = req.body;
 
-        // 查找用戶
-        const user = await User.findOne({ username });
-        console.log('找到的用戶:', user);
+    if (!id || !password) {
+        return res.status(400).json({ message: '帳號和密碼不可為空' });
+    }
+
+    try {
+        const user = await User.findOne({
+            $or: [
+                { id: { $regex: new RegExp(`^${id}$`, 'i') } }, // 忽略大小寫的 id
+                // { username: id }                                // 或直接匹配 username
+            ]
+        });
 
         if (!user) {
             return res.status(400).json({ message: '用戶不存在' });
         }
 
-        // 验证密码
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: '密碼錯誤' });
         }
 
-        // 检查角色是否存在
-        if (!user.role) {
-            return res.status(400).json({ message: '用戶角色未定義' });
-        }
-        console.log('用戶角色:', user.role);
-
-        // 生成 JWT Token，包含角色信息
         const token = jwt.sign(
-            { id: user._id, role: user.role },
+            { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        // 返回成功响应
-        res.status(200).json({
-            message: '登入成功',
-            token,
-            role: user.role, // 返回角色
-        });
+        res.status(200).json({ message: '登入成功', token, role: user.role });
     } catch (error) {
         console.error('登入失敗:', error);
         res.status(500).json({ message: '伺服器錯誤，無法登入' });
     }
 });
+
+
+// 登入 API
+// app.post('/api/login', async (req, res) => {
+//     try {
+//         const { id, password } = req.body;
+
+//         // 查找用戶
+//         const user = await User.findOne({ userSchema: id });
+//         console.log('找到的用戶:', user);
+
+//         if (!user) {
+//             return res.status(400).json({ message: '用戶不存在' });
+//         }
+
+//         // 验证密码
+//         const isMatch = await bcrypt.compare(password, user.password);
+//         if (!isMatch) {
+//             return res.status(400).json({ message: '密碼錯誤' });
+//         }
+
+//         // 检查角色是否存在
+//         if (!user.role) {
+//             return res.status(400).json({ message: '用戶角色未定義' });
+//         }
+//         console.log('用戶角色:', user.role);
+
+//         // 生成 JWT Token，包含角色信息
+//         const token = jwt.sign(
+//             { id: user.id, role: user.role },
+//             process.env.JWT_SECRET,
+//             { expiresIn: '1h' }
+//         );
+
+//         // 返回成功响应
+//         res.status(200).json({
+//             message: '登入成功',
+//             token,
+//             role: user.role, // 返回角色
+//         });
+//     } catch (error) {
+//         console.error('登入失敗:', error);
+//         res.status(500).json({ message: '伺服器錯誤，無法登入' });
+//     }
+// });
+
 
 app.get('/api/accounts', async (req, res) => {
     try {
