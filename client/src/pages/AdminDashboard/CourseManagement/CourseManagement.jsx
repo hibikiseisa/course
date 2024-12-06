@@ -171,7 +171,10 @@ const handleSearch = () => {
       <div className="controls">
   <div className="button-group">
     <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
-    <button onClick={() => setShowModal(true)} className="control-button">新增課程</button>
+    <button onClick={() => { 
+  setEditingCourse(null); // 确保编辑课程为 null
+  setShowModal(true); 
+}} className="control-button">新增課程</button>
     {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
     <button onClick={handleUpload} className="handleUpload">匯入</button>
     <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
@@ -297,6 +300,7 @@ const handleSearch = () => {
           </div>
         </div>
       )}
+      
     </div>
   );
 };

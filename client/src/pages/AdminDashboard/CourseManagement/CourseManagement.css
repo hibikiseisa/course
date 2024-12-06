@@ -10,7 +10,9 @@
 
 .admin-course-management h2 {
   margin: 0 auto;
-  margin-top: 70px;    
+  margin-top: 70px;   
+  color: green;
+ 
 }
 
 .data-count {
