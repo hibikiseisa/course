@@ -3,34 +3,40 @@
     justify-content: space-between;
     align-items: center;
     background-color: #5EBF88;
-    padding: 1rem 1vw;
+    padding: 0.5rem 1vw; /* 減少上下的 padding 來縮小導航欄高度 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
-    height: 8vh;
+    height: 9vh; /* 調整高度 */
     box-sizing: border-box;
     flex-wrap: wrap;
 }
 
+
 .navbar-logo {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* 將 logo 與標題上移 */
+    margin-top: 0px; /* 根據需要調整這個值 */
 }
+
 
 .logo-image {
     width: 3vw;
     height: auto;
     margin-right: 1vw;
+    
 }
 
 .navbar-title {
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
+    margin-top: 0px; /* 向上移動文字 */
 }
+
 
 .navbar-links {
     display: flex;

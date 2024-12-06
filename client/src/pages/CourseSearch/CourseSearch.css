@@ -1,21 +1,21 @@
-.course-search-container {
-    max-width: 1200px;
+.course-search-container {   /*整個頁面*/
+    max-width: 900px;
     margin: 0 auto;
-    margin-top: 40px;
+    margin-top: 10px;
     padding: 40px;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.course-search-title {
+.course-search-title {     /*頁面的文字內容*/
     font-size: 2rem;
     color: #333;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
-.course-search-form {
+.course-search-form {       /*查詢按鈕*/
     display: flex;
     flex-direction: column;
 }
@@ -23,6 +23,7 @@
 .form-group {
     display: flex;
     align-items: center;
+    
     margin-bottom: 15px;
 }
 
@@ -195,3 +196,31 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+
+/* 調整簡易查詢和進階查詢按鈕的居中 */
+.course-search-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.toggle-button {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0 auto; /* 使按鈕水平居中 */
+}
+
+.toggle-button:hover {
+    background-color: #ccc;
+}
+
+
+
+
+
+
