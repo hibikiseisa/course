@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
-const Login = ({ setIsLoggedIn, setUsername }) => {
-  const [inputUsername, setInputUsername] = useState('');
+const Login = ({ setIsLoggedIn, setUserid }) => {
+  const [id, setId] = useState(''); // 使用者帳號
   const [password, setPassword] = useState('');
   const [showRoleSelection, setShowRoleSelection] = useState(false); // 是否顯示角色選擇
   const [selectedPage, setSelectedPage] = useState(''); // 管理者選擇的頁面
@@ -14,17 +14,20 @@ const Login = ({ setIsLoggedIn, setUsername }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('handleSubmit 被触发了');
+    console.log('提交的帳號:', id);
+    console.log('提交的密碼:', password);
+
 
     try {
       // 如果正在選擇角色，直接跳轉到對應頁面
       if (showRoleSelection) {
         if (selectedPage === 'admin') {
           setIsLoggedIn(true);
-          setUsername(inputUsername);
+          setUserid(id);
           navigate('/AdminDashboard'); // 跳轉到管理者頁面
         } else if (selectedPage === 'student') {
           setIsLoggedIn(true);
-          setUsername(inputUsername);
+          setUserid(id);
           navigate('/CourseSearch'); // 跳轉到學生頁面
         } else {
           setError('請選擇角色頁面');
@@ -34,15 +37,15 @@ const Login = ({ setIsLoggedIn, setUsername }) => {
 
       // 第一次提交時，驗證用戶身份
       const response = await axios.post('http://localhost:5000/api/login', {
-        username: inputUsername,
-        password,
+        id,
+        password
       });
 
       const { token, role } = response.data;
 
       // 儲存 JWT Token 和角色到 localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('username', inputUsername);
+      localStorage.setItem('id', id); // 使用帳號作為標識
       localStorage.setItem('role', role);
 
       console.log('後端返回數據:', response.data);
@@ -56,7 +59,7 @@ const Login = ({ setIsLoggedIn, setUsername }) => {
       } else if (role === 'student') {
         // 如果是學生，直接跳轉到學生頁面
         setIsLoggedIn(true);
-        setUsername(inputUsername);
+        setUserid(id);
         navigate('/CourseSearch');
       }
     } catch (error) {
@@ -71,12 +74,12 @@ const Login = ({ setIsLoggedIn, setUsername }) => {
         <form onSubmit={handleSubmit} className="login-form">
           {error && <p className="error-message">{error}</p>} {/* 顯示錯誤訊息 */}
           <div className="form-group">
-            <label htmlFor="username">帳號</label>
+            <label htmlFor="id">帳號</label>
             <input
               type="text"
-              id="username"
-              value={inputUsername}
-              onChange={(e) => setInputUsername(e.target.value)}
+              id="id"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
               placeholder="請輸入帳號"
               required
             />

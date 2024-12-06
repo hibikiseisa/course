@@ -11,28 +11,28 @@ import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountM
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登陸狀態
-  const [username, setUsername] = useState(''); // 名字
+  const [Userid, setUserid] = useState(''); // 名字
 
 
   // 本地存取狀態
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const savedUsername = localStorage.getItem('username');
-    if (token && savedUsername) {
+    const savedUserid = localStorage.getItem('username');
+    if (token && savedUserid) {
       setIsLoggedIn(true);
-      setUsername(savedUsername);
+      setUsername(savedUserid);
     }
   }, []);
 
   return (
     <Router>
-      <Navbar isLoggedIn={isLoggedIn} username={username} setIsLoggedIn={setIsLoggedIn} />
+      <Navbar isLoggedIn={isLoggedIn} Userid={Userid} setIsLoggedIn={setIsLoggedIn} />
       <div className="content">
         <Routes>
         <Route path="/" element={<CourseSearch />} />
           <Route
             path="/login"
-            element={<Login setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />}
+            element={<Login setIsLoggedIn={setIsLoggedIn} setUserid={setUserid} />}
           />
           <Route path="/register" element={<Register />} />
           <Route path="/CourseSearch" element={<CourseSearch />} />
