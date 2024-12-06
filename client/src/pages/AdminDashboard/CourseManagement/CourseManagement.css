@@ -188,5 +188,34 @@
     background-color: #e74c3c;
     color: white;
   }
+
+  /* @keyframes fadeInOut {
+    0%, 90% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  } */
+   /* 控制按鈕區 */
+.controls {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+/* 顯示總數在右下角 */
+.data-count {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+}
+
+/* 其他必要的樣式 */
+.upload-section {
+  margin-bottom: 20px;
+}
+
+  
   
   
