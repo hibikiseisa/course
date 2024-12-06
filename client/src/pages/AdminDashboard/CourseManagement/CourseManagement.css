@@ -1,7 +1,12 @@
 .admin-course-management {
-  position: relative; /* 讓內部的絕對定位元素相對於這個容器定位 */
-  padding-bottom: 70px; /* 留出空間讓 data-count 不會被課程內容擋住 */
+  position: relative;
+  padding-bottom: 70px;
+  width: 100%; /* 使容器占满整个宽度 */
+  max-width: 1200px; /* 设置最大宽度 */
+  margin: 0 auto; /* 居中 */
+  overflow-x: hidden; /* 防止出现水平滚动条 */
 }
+
 
 .admin-course-management h2 {
   margin: 0 auto;
@@ -33,16 +38,22 @@
   align-items: center;
   z-index: 1000;
 }
+.modal-form {
+  max-height: 400px; /* 设置最大高度 */
+  overflow-y: auto;  /* 启用垂直滚动条 */
+}
 
 /* 模態框內容 */
 .modal-content {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  width: 400px;
+  width: 80%; /* 改为宽度百分比，适应更大的屏幕 */
+  max-width: 900px; /* 设置最大宽度 */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   position: relative;
 }
+
 
 .modal-form label {
   display: block;
@@ -117,10 +128,9 @@
 
 .filters {
   display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
+  justify-content: flex-start;  /* 左对齐 */
+  gap: 20px; /* 增加过滤器之间的间隔 */
 }
-
 .filter-select,
 .filter-input {
   margin-right: 10px;
@@ -128,9 +138,12 @@
 }
 
 .course-table {
-  width: 100%;
+  width: 100%;  /* 确保表格占满可用宽度 */
   border-collapse: collapse;
 }
+
+
+
 
 .course-table th,
 .course-table td {
@@ -240,4 +253,9 @@
 
 .add-button:hover {
   background-color: #45a049;
+}
+select {
+  width: 100%; /* 确保下拉框的宽度适应 */
+  padding: 5px; /* 添加内边距 */
+  margin-bottom: 10px; /* 添加底部间距 */
 }

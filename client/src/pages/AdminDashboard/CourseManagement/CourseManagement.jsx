@@ -13,8 +13,12 @@ const CourseManagement = () => {
     credits: '',
     department: '',
     teacher: '',
+    term: '',        // 新增学期
+    program: '',     // 新增学制
+    notes: '',       // 新增课程备注
+    file: null,      // 上传课程计划文件
   });
-  const [courses, setCourses] = useState(() => {
+      const [courses, setCourses] = useState(() => {
     const savedCourses = localStorage.getItem('courses');
     return savedCourses ? JSON.parse(savedCourses) : [];
   });
@@ -101,9 +105,8 @@ const CourseManagement = () => {
     // 更新 courses 狀態
     setCourses(updatedCourses);
     // 更新 localStorage，確保課程被保存在本地存儲
-  localStorage.setItem('courses', JSON.stringify(updatedCourses));
-
-
+    localStorage.setItem('courses', JSON.stringify(updatedCourses));
+  
     // 更新 filteredCourses 根據過濾條件
     setFilteredCourses(
       updatedCourses.filter((course) => {
@@ -117,9 +120,9 @@ const CourseManagement = () => {
   
     setShowModal(false);
     setEditingCourse(null);
-    setCourseDetails({ id: '', name: '', credits: '', department: '', teacher: '' });
+    setCourseDetails({ id: '', name: '', credits: '', department: '', teacher: '', term: '', program: '', notes: '' });
   };
-  const handleEditCourse = (course) => {
+    const handleEditCourse = (course) => {
     setEditingCourse(course);
     setCourseDetails({ ...course });
     setShowModal(true);
@@ -260,12 +263,33 @@ const handleSearch = () => {
           <div className="modal-content">
             <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
             <div className="modal-form">
-              <label>科目代號: <input type="text" name="id" value={courseDetails.id} onChange={handleInputChange} required /></label>
-              <label>課程名稱: <input type="text" name="name" value={courseDetails.name} onChange={handleInputChange} required /></label>
-              <label>學分: <input type="number" name="credits" value={courseDetails.credits} onChange={handleInputChange} required /></label>
-              <label>系所: <input type="text" name="department" value={courseDetails.department} onChange={handleInputChange} /></label>
-              <label>教師: <input type="text" name="teacher" value={courseDetails.teacher} onChange={handleInputChange} /></label>
-            </div>
+  <label>科目代號: <input type="text" name="id" value={courseDetails.id} onChange={handleInputChange} required /></label>
+  <label>課程名稱: <input type="text" name="name" value={courseDetails.name} onChange={handleInputChange} required /></label>
+  <label>學分: <input type="number" name="credits" value={courseDetails.credits} onChange={handleInputChange} required /></label>
+  <label>系所: 
+    <select name="department" value={courseDetails.department} onChange={handleInputChange}>
+      <option value="">選擇系所</option>
+      <option value="資訊管理系">資訊管理系</option>
+      <option value="護理系">護理系</option>
+      <option value="幼保系">幼保系</option>
+    </select>
+  </label>
+  <label>學期: 
+    <select name="term" value={courseDetails.term} onChange={handleInputChange}>
+      <option value="">選擇學期</option>
+      <option value="113上">113上</option>
+      <option value="112下">112下</option>
+      <option value="112上">112上</option>
+    </select>
+  </label>
+  <label>教師: <input type="text" name="teacher" value={courseDetails.teacher} onChange={handleInputChange} /></label>
+  <label>學制: <input type="text" name="program" value={courseDetails.program} onChange={handleInputChange} /></label>
+  <label>備註: <textarea name="notes" value={courseDetails.notes} onChange={handleInputChange} /></label>
+  
+  <label>課程計畫: 
+    <input type="file" name="file" onChange={handleFileChange} />
+  </label>
+</div>
             <div className="modal-actions">
               <button onClick={handleSaveCourse} className="add-button">保存</button>
               <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
