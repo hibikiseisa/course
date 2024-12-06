@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png"; // 确保图片路径正确
 
 const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
@@ -50,7 +50,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>
-                <button onClick={() => navigate("/course-management")} className="navbar-link">
+                <button onClick={() => navigate("/CourseManagement")} className="navbar-link">
                   課程管理
                 </button>
                 <button onClick={() => navigate("/account-management")} className="navbar-link">

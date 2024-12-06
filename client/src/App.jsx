@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './components/Navbar/Navbar.css'; // 引入 CSS
-import Login from './pages/Login/Login';
+import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement';
+import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
+import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
-import AdminDashboard from './pages/AdminDashboard/Home'
-import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登陸狀態
   const [username, setUsername] = useState(''); // 名字

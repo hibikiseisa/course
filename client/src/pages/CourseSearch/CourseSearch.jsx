@@ -3,7 +3,7 @@ import axios from 'axios';
 import './CourseSearch.css';
 import { FaAngleDoubleLeft } from "react-icons/fa";
 import { FaAngleDoubleRight } from "react-icons/fa";
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
 
 const CourseSearch = () => {
     const [advancedSearch, setAdvancedSearch] = useState(false);
