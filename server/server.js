@@ -26,7 +26,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // 使用者 Schema 和 Model
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
+    id: { type: String, required: true, unique: true }, // 帳號
+    username: { type: String, required: true }, // 使用者姓名
     password: { type: String, required: true },
     role: { type: String, enum: ['student', 'admin'], required: true },
 });
@@ -64,35 +65,50 @@ const User = mongoose.model('User', userSchema);
 const Course = mongoose.model('Course', courseSchema);
 // 註冊 API
 app.post('/api/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { id, username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: '帳號或密碼不可空白' });
+    // 檢查必填欄位
+    if (!id || !username || !password) {
+        return res.status(400).json({ message: '帳號、姓名或密碼不可為空' });
     }
 
+    // 檢查長度規範
+    if (id.length < 6 || id.length > 20) {
+        return res.status(400).json({ message: '帳號必須介於 6 至 20 個字之間' });
+    }
+    if (username.length < 2 || username.length > 20) {
+        return res.status(400).json({ message: '姓名必須介於 2 至 20 個字之間' });
+    }
+    if (password.length < 6 || password.length > 20) {
+        return res.status(400).json({ message: '密碼必須介於 6 至 20 個字之間' });
+    }
+    
+
     try {
-        // 默認角色為 student
+        // 預設角色為 student
         const role = 'student';
 
         // 加密密碼
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 創建用戶
-        const newUser = new User({ username, password: hashedPassword, role });
+        // 創建新用戶
+        const newUser = new User({ id, username, password: hashedPassword, role });
 
-        // 保存到數據庫
+        // 保存至資料庫
         await newUser.save();
 
         res.status(201).json({ message: '註冊成功' });
     } catch (error) {
-        if (error.code === 11000) { // 捕獲重複鍵錯誤
-            res.status(400).json({ message: '用戶名已存在' });
+        if (error.code === 11000) { // 檢查重複鍵錯誤
+            res.status(400).json({ message: '帳號已存在' });
         } else {
             console.error('伺服器錯誤:', error);
             res.status(500).json({ message: '伺服器錯誤，無法註冊' });
         }
     }
 });
+
+
 
 // (async () => {
 //     try {
@@ -151,6 +167,16 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('登入失敗:', error);
         res.status(500).json({ message: '伺服器錯誤，無法登入' });
+    }
+});
+
+app.get('/api/accounts', async (req, res) => {
+    try {
+        const users = await User.find({}, { password: 0 }); // 不返回密碼
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('獲取用戶失敗:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法獲取用戶' });
     }
 });
 

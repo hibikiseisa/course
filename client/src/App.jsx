@@ -7,6 +7,8 @@ import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
+import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountManagement';
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登陸狀態
   const [username, setUsername] = useState(''); // 名字
@@ -27,6 +29,7 @@ function App() {
       <Navbar isLoggedIn={isLoggedIn} username={username} setIsLoggedIn={setIsLoggedIn} />
       <div className="content">
         <Routes>
+        <Route path="/" element={<CourseSearch />} />
           <Route
             path="/login"
             element={<Login setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />}
@@ -35,6 +38,7 @@ function App() {
           <Route path="/CourseSearch" element={<CourseSearch />} />
           <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route path="/CourseManagement" element={<CourseManagement />} />
+          <Route path="/AccountManagement" element={<AccountManagement />} />
 
         </Routes>
       </div>
