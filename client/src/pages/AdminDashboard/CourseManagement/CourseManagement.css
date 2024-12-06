@@ -1,14 +1,11 @@
-.admin-course-management{
-    /* background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-    position: relative; /* 讓內部的絕對定位元素相對於這個容器定位 */
-    padding-bottom: 70px; /* 留出空間讓 data-count 不會被課程內容擋住 */
+.admin-course-management {
+  position: relative; /* 讓內部的絕對定位元素相對於這個容器定位 */
+  padding-bottom: 70px; /* 留出空間讓 data-count 不會被課程內容擋住 */
 }
 
-.admin-course-management h2{
-    margin: 0 auto;
-    margin-top: 70px;    
+.admin-course-management h2 {
+  margin: 0 auto;
+  margin-top: 70px;    
 }
 
 .data-count {
@@ -25,201 +22,152 @@
 
 /* 模態框背景 */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  /* 模態框內容 */
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    position: relative;
-  }
-  
-  .modal-form label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .modal-form input,
-  .modal-form textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  .modal-actions {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .add-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .cancel-button {
-    background-color: #f44336;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .add-course-message {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #4CAF50;
-  }
-  .course-management {
-    font-family: Arial, sans-serif;
-  }
-  
-  .header {
-    background-color: #2ecc71;
-    color: #fff;
-    padding: 10px;
-    text-align: center;
-  }
-  
-  .controls {
-    margin: 10px 0;
-    text-align: right;
-  }
-  
-  .control-button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #2ecc71;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .filters {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px 0;
-  }
-  
-  .filter-select,
-  .filter-input {
-    margin-right: 10px;
-    padding: 5px;
-  }
-  
-  .course-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .course-table th,
-  .course-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  
-  .course-table th {
-    background-color: #2ecc71;
-    color: white;
-  }
-  
-  .edit-button,
-  .delete-button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .edit-button {
-    background-color: #3498db;
-    color: #fff;
-  }
-  
-  .delete-button {
-    background-color: #e74c3c;
-    color: #fff;
-  }
-  
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-  }
-  
-  .modal-form label {
-    display: block;
-    margin: 10px 0;
-  }
-  
-  .add-button,
-  .cancel-button {
-    margin: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .add-button {
-    background-color: #2ecc71;
-    color: white;
-  }
-  
-  .cancel-button {
-    background-color: #e74c3c;
-    color: white;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  /* @keyframes fadeInOut {
-    0%, 90% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  } */
-   /* 控制按鈕區 */
-   .controls {
-    display: flex;
-    justify-content: space-between; /* 按鈕群組和搜尋欄位分開 */
-    align-items: center;
-    width: 100%;
-  }
-  
+/* 模態框內容 */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.modal-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.modal-form input,
+.modal-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-course-message {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #4CAF50;
+}
+
+.course-management {
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  background-color: #2ecc71;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+.controls {
+  margin: 10px 0;
+  text-align: right;
+}
+
+.control-button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  background-color: #2ecc71;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.filter-select,
+.filter-input {
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.course-table th,
+.course-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.course-table th {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.edit-button,
+.delete-button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.delete-button {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+/* 控制按鈕區 */
+.controls {
+  display: flex;
+  justify-content: space-between; /* 按鈕群組和搜尋欄位分開 */
+  align-items: center;
+  width: 100%;
+}
 
 /* 顯示總數在右下角 */
 .data-count {
@@ -233,7 +181,6 @@
   margin-bottom: 20px;
 }
 
-  
 /* 搜尋欄位容器 */
 .search-group {
   display: flex;
@@ -263,8 +210,34 @@
   font-size: 16px;
 }
 
+/* 確保匯入和匯出的按鈕樣式與新增課程的按鈕一致 */
+.handleUpload, .handleDownloadCSV {
+  background-color: #4CAF50;  /* 綠色背景 */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px; /* 調整按鈕間的間距 */
+}
 
+.handleUpload:hover, .handleDownloadCSV:hover {
+  background-color: #45a049; /* 變色 */
+}
 
+/* 按鈕通用樣式 */
+.add-button {
+  background-color: #4CAF50;  /* 綠色背景 */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px; /* 調整按鈕間的間距 */
+}
 
-
-  
+.add-button:hover {
+  background-color: #45a049;
+}
