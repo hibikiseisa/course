@@ -5,23 +5,24 @@ import './CourseManagement.css';
 const CourseManagement = () => {
   const [selectedFile, setSelectedFile] = useState(null); // 選中的檔案
   const [uploadMessage, setUploadMessage] = useState(''); // 上傳狀態訊息
-  const [showModal, setShowModal] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
+  const [showModal, setShowModal] = useState(false); // 控制新增課程視窗
+  const [editingCourse, setEditingCourse] = useState(null); // 編輯課程狀態
   const [courseDetails, setCourseDetails] = useState({
     id: '',
     name: '',
     credits: '',
     department: '',
     teacher: '',
-  });
-  const [courses, setCourses] = useState([]);
+  }); // 課程詳細資料
+  const [courses, setCourses] = useState([]); // 所有課程資料
   const [selectedCourses, setSelectedCourses] = useState([]); // 儲存被勾選的課程 ID
+  const [filter, setFilter] = useState({ term: '', department: '', keyword: '' }); // 篩選條件
 
-  // 檔案選擇
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file); // 更新檔案狀態
-  };
+  // 學期選項
+  const terms = ['113上', '112下', '112上'];
+
+  // 系所選項（這裡使用假資料）
+  const departments = ['資訊管理系', '護理系', '幼保系'];
 
   // 上傳 CSV 檔案
   const handleUpload = async () => {
@@ -31,7 +32,7 @@ const CourseManagement = () => {
     }
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    formData.append('file', selectedFile); 
 
     try {
       const response = await axios.post('http://localhost:5000/api/upload-csv', formData, {
@@ -40,7 +41,6 @@ const CourseManagement = () => {
         },
       });
 
-      // 根據後端返回的訊息更新狀態
       setUploadMessage(response.data.message || '檔案上傳成功');
     } catch (error) {
       console.error('檔案上傳失敗:', error.response || error);
@@ -76,42 +76,20 @@ const CourseManagement = () => {
     setCourseDetails({ id: '', name: '', credits: '', department: '', teacher: '' });
   };
 
-  // 編輯課程
-  const handleEditCourse = (course) => {
-    setEditingCourse(course);
-    setCourseDetails(course);
-    setShowModal(true);
-  };
+  // 篩選課程
+  const handleSearch = () => {
+    const filteredCourses = courses.filter((course) => {
+      return (
+        (filter.term ? course.term === filter.term : true) &&
+        (filter.department ? course.department.includes(filter.department) : true) &&
+        (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
+      );
+    });
 
-  // 處理單行選擇
-  const handleRowSelect = (id) => {
-    setSelectedCourses((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((selectedId) => selectedId !== id)
-        : [...prevSelected, id]
-    );
-  };
-
-  // 全選功能
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      const allIds = courses.map((course) => course.id);
-      setSelectedCourses(allIds);
-    } else {
-      setSelectedCourses([]);
-    }
-  };
-
-  // 刪除選中課程
-  const handleDeleteSelected = () => {
-    if (selectedCourses.length === 0) {
-      alert('請選擇至少一項課程進行刪除');
-      return;
-    }
-    setCourses((prevCourses) =>
-      prevCourses.filter((course) => !selectedCourses.includes(course.id))
-    );
-    setSelectedCourses([]);
+    setCourses(filteredCourses);
+    // 搜尋後清除篩選條件並回到新增課程畫面
+    setFilter({ term: '', department: '', keyword: '' }); // 重設搜尋欄位
+    setShowModal(true); // 顯示新增課程的視窗
   };
 
   return (
@@ -125,10 +103,42 @@ const CourseManagement = () => {
           type="file"
           id="file-upload"
           accept=".csv"
-          onChange={handleFileChange}
+          onChange={(e) => setSelectedFile(e.target.files[0])}
         />
         <button onClick={handleUpload} className="upload-button">上傳</button>
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
+      </div>
+
+      {/* 篩選區 */}
+      <div className="filter-section">
+        <select
+          value={filter.term}
+          onChange={(e) => setFilter({ ...filter, term: e.target.value })}
+        >
+          <option value="">不分學期</option>
+          {terms.map((term, index) => (
+            <option key={index} value={term}>{term}</option>
+          ))}
+        </select>
+
+        <select
+          value={filter.department}
+          onChange={(e) => setFilter({ ...filter, department: e.target.value })}
+        >
+          <option value="">不分系所</option>
+          {departments.map((dept, index) => (
+            <option key={index} value={dept}>{dept}</option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="課程名稱、教師"
+          value={filter.keyword}
+          onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
+        />
+
+        <button onClick={handleSearch} className="search-button">搜尋</button>
       </div>
 
       {/* 控制區 */}
@@ -145,13 +155,6 @@ const CourseManagement = () => {
       <table className="course-table">
         <thead>
           <tr>
-            <th>
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedCourses.length === courses.length && courses.length > 0}
-              />
-            </th>
             <th>科目代號</th>
             <th>課程名稱 (學分)</th>
             <th>系所</th>
@@ -163,17 +166,8 @@ const CourseManagement = () => {
           {courses.length > 0 ? (
             courses.map((course) => (
               <tr key={course.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedCourses.includes(course.id)}
-                    onChange={() => handleRowSelect(course.id)}
-                  />
-                </td>
                 <td>{course.id}</td>
-                <td>
-                  {course.name} ({course.credits})
-                </td>
+                <td>{course.name} ({course.credits})</td>
                 <td>{course.department}</td>
                 <td>{course.teacher}</td>
                 <td>
@@ -188,7 +182,7 @@ const CourseManagement = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="6">目前尚無課程資料</td>
+              <td colSpan="6">無課程</td>
             </tr>
           )}
         </tbody>
@@ -209,7 +203,6 @@ const CourseManagement = () => {
                   onChange={handleInputChange}
                   placeholder="輸入科目代號"
                   required
-                  disabled={!!editingCourse}
                 />
               </label>
               <label>
