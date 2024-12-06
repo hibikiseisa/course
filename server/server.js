@@ -65,6 +65,12 @@ const courseSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 const Course = mongoose.model('Course', courseSchema);
+
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // 註冊 API
 app.post('/api/register', async (req, res) => {
     const { id, username, password } = req.body;
@@ -132,7 +138,7 @@ app.post('/api/register', async (req, res) => {
 //         console.error('測試用戶插入失敗:', error);
 //     }
 // })();
-
+// 登入
 app.post('/api/login', async (req, res) => {
     const { id, password } = req.body;
 
@@ -171,61 +177,78 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-// 登入 API
-// app.post('/api/login', async (req, res) => {
-//     try {
-//         const { id, password } = req.body;
-
-//         // 查找用戶
-//         const user = await User.findOne({ userSchema: id });
-//         console.log('找到的用戶:', user);
-
-//         if (!user) {
-//             return res.status(400).json({ message: '用戶不存在' });
-//         }
-
-//         // 验证密码
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.status(400).json({ message: '密碼錯誤' });
-//         }
-
-//         // 检查角色是否存在
-//         if (!user.role) {
-//             return res.status(400).json({ message: '用戶角色未定義' });
-//         }
-//         console.log('用戶角色:', user.role);
-
-//         // 生成 JWT Token，包含角色信息
-//         const token = jwt.sign(
-//             { id: user.id, role: user.role },
-//             process.env.JWT_SECRET,
-//             { expiresIn: '1h' }
-//         );
-
-//         // 返回成功响应
-//         res.status(200).json({
-//             message: '登入成功',
-//             token,
-//             role: user.role, // 返回角色
-//         });
-//     } catch (error) {
-//         console.error('登入失敗:', error);
-//         res.status(500).json({ message: '伺服器錯誤，無法登入' });
-//     }
-// });
-
 
 app.get('/api/accounts', async (req, res) => {
     try {
-        const users = await User.find({}, { password: 0 }); // 不返回密碼
-        res.status(200).json(users);
+        const accounts = await User.find(); // User 是您的 Mongoose 模型
+        res.status(200).json(accounts);
     } catch (error) {
-        console.error('獲取用戶失敗:', error);
-        res.status(500).json({ message: '伺服器錯誤，無法獲取用戶' });
+        console.error('Error fetching accounts:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法獲取帳號列表' });
     }
 });
 
+app.post('/api/accounts', async (req, res) => {
+    const { id, username, password, role } = req.body;
+
+    if (!id || !username || !password || !role) {
+        return res.status(400).json({ message: '所有欄位均為必填' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ id, username, password: hashedPassword, role });
+        await newUser.save();
+        res.status(201).json({ message: '帳號新增成功' });
+    } catch (error) {
+        console.error('Error creating account:', error);
+        if (error.code === 11000) {
+            res.status(400).json({ message: '帳號已存在' });
+        } else {
+            res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
+        }
+    }
+});
+
+app.put('/api/accounts/:id', async (req, res) => {
+    const { id } = req.params;
+    const { username, role } = req.body;
+
+    if (!username || !role) {
+        return res.status(400).json({ message: '姓名和角色為必填' });
+    }
+
+    try {
+        const updatedAccount = await User.findOneAndUpdate(
+            { id },
+            { username, role },
+            { new: true }
+        );
+        if (!updatedAccount) {
+            return res.status(404).json({ message: '帳號不存在' });
+        }
+        res.status(200).json({ message: '帳號更新成功', account: updatedAccount });
+    } catch (error) {
+        console.error('Error updating account:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法更新帳號' });
+    }
+});
+
+app.delete('/api/accounts/:id', async (req, res) => {
+    const { id } = req.params;
+    console.log('傳遞的 ID:', id);
+
+    try {
+        const deletedAccount = await User.findOneAndDelete({ id: id.toLowerCase() });
+        if (!deletedAccount) {
+            return res.status(404).json({ message: '帳號不存在' });
+        }
+        res.status(200).json({ message: '帳號刪除成功' });
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法刪除帳號' });
+    }
+});
 
 
 app.get('/api/courses', async (req, res) => {

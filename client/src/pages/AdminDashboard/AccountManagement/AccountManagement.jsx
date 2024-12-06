@@ -10,7 +10,7 @@ const AccountManagement = () => {
   const [editingAccount, setEditingAccount] = useState(null);
   const [accountDetails, setAccountDetails] = useState({
     id: '',
-    name: '',
+    username: '',
     role: 'student',
   });
 
@@ -19,6 +19,7 @@ const AccountManagement = () => {
     fetchAccounts();
   }, []);
 
+  
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/accounts');
@@ -29,8 +30,8 @@ const AccountManagement = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAccountDetails({ ...accountDetails, [name]: value });
+    const { username, value } = e.target;
+    setAccountDetails({ ...accountDetails, [username]: value });
   };
 
   const handleSearchChange = (e) => {
@@ -50,18 +51,27 @@ const AccountManagement = () => {
       fetchAccounts();
       setShowModal(false);
       setEditingAccount(null);
-      setAccountDetails({ id: '', name: '', role: 'student' });
+      setAccountDetails({ id: '', username: '', role: 'student' });
     } catch (error) {
       console.error('Error saving account:', error);
     }
   };
 
   const handleDeleteAccount = async (id) => {
+    console.log('傳遞的 ID:', id);
     try {
       await axios.delete(`http://localhost:5000/api/accounts/${id}`);
       fetchAccounts();
+      alert('帳號刪除成功');
     } catch (error) {
-      console.error('Error deleting account:', error);
+        if (error.response && error.response.status === 404) {
+            alert('帳號不存在，無法刪除');
+            
+        } else {
+            console.error('Error deleting account:', error);
+            alert('刪除失敗，請稍後再試');
+        }
+
     }
   };
 
@@ -93,7 +103,7 @@ const AccountManagement = () => {
             className="search-select"
           >
             <option value="id">帳號</option>
-            <option value="name">姓名</option>
+            <option value="username">姓名</option>
           </select>
         </div>
         <button className="add-button" onClick={() => setShowModal(true)}>
@@ -158,8 +168,8 @@ const AccountManagement = () => {
                 姓名:
                 <input
                   type="text"
-                  name="name"
-                  value={accountDetails.name}
+                  name="username"
+                  value={accountDetails.username}
                   onChange={handleInputChange}
                   placeholder="輸入姓名"
                   required
