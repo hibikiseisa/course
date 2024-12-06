@@ -114,7 +114,7 @@ const AccountManagement = () => {
           {filteredAccounts.map((account) => (
             <tr key={account.id}>
               <td>{account.id}</td>
-              <td>{account.name}</td>
+              <td>{account.username}</td>
               <td>{account.role === 'admin' ? '✔️' : '❌'}</td>
               <td>
                 <button

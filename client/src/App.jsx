@@ -17,10 +17,10 @@ function App() {
   // 本地存取狀態
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const savedUserid = localStorage.getItem('username');
+    const savedUserid = localStorage.getItem('id');
     if (token && savedUserid) {
       setIsLoggedIn(true);
-      setUsername(savedUserid);
+      setUserid(savedUserid);
     }
   }, []);
 
