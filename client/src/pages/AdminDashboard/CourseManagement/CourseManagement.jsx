@@ -15,6 +15,8 @@ const CourseManagement = () => {
     teacher: '',
     term: '',        // 新增学期
     program: '',     // 新增学制
+    grade:'',//年級
+    course:'',//課別
     notes: '',       // 新增课程备注
     file: null,      // 上传课程计划文件
   });
@@ -28,6 +30,9 @@ const CourseManagement = () => {
 
   const terms = ['113上', '112下', '112上'];
   const departments = ['資訊管理系', '護理系', '幼保系'];
+  const program = ['四年制', '二年制'];
+  const grade = ['一年級', '二年級', '三年級'];
+  const course = ['通式必修', '通識選修', '專業必修','專業選修'];
 
   useEffect(() => {
     setFilteredCourses(courses); // 頁面載入時顯示所有課程
@@ -171,10 +176,16 @@ const handleSearch = () => {
       <div className="controls">
   <div className="button-group">
     <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
-    <button onClick={() => { 
-  setEditingCourse(null); // 确保编辑课程为 null
-  setShowModal(true); 
-}} className="control-button">新增課程</button>
+    <button
+  onClick={() => { 
+    setEditingCourse(null); // 确保编辑课程为 null
+    setShowModal(true); 
+  }}
+  className="handleUpload" // 使用相同的樣式類名
+>
+  新增課程
+</button>
+
     {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
     <button onClick={handleUpload} className="handleUpload">匯入</button>
     <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
@@ -286,7 +297,33 @@ const handleSearch = () => {
     </select>
   </label>
   <label>教師: <input type="text" name="teacher" value={courseDetails.teacher} onChange={handleInputChange} /></label>
-  <label>學制: <input type="text" name="program" value={courseDetails.program} onChange={handleInputChange} /></label>
+  <label>學制: 
+  <select name="program" value={courseDetails.program} onChange={handleInputChange}>
+    <option value="">選擇學制</option>
+    <option value="四年制">四年制</option>
+    <option value="二年制">二年制</option>
+  </select>
+</label>
+
+<label>年級: 
+  <select name="grade" value={courseDetails.grade} onChange={handleInputChange}>
+    <option value="">選擇年級</option>
+    <option value="一年級">一年級</option>
+    <option value="二年級">二年級</option>
+    <option value="三年級">三年級</option>
+  </select>
+</label>
+
+<label>課別: 
+  <select name="course" value={courseDetails.course} onChange={handleInputChange}>
+    <option value="">選擇課別</option>
+    <option value="通識必修">通識必修</option>
+    <option value="通識選修">通識選修</option>
+    <option value="專業必修">專業必修</option>
+    <option value="專業選修">專業選修</option>
+  </select>
+</label>
+
   <label>備註: <textarea name="notes" value={courseDetails.notes} onChange={handleInputChange} /></label>
   
   <label>課程計畫: 
