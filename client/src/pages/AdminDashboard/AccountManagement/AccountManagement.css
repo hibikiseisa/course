@@ -3,6 +3,10 @@
     font-family: Arial, sans-serif;
     background-color: #ffffff;
     border-radius: 8px;
+    width: 100%; /* 使容器占满整个宽度 */
+    max-width: 1200px; /* 设置最大宽度 */
+    margin: 0 auto; /* 居中 */
+  
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
   }
@@ -48,17 +52,18 @@
   }
   
   /* 新增按钮 */
-  .add-button {
+  .account-management .add-button {
+    width: 200px; /* 设置按钮的固定宽度 */
     padding: 10px 20px;
     background-color: #98D98E;
     color: white;
     border: none;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 20px;
     cursor: pointer;
     transition: background-color 0.3s;
   }
-  
+    
   .add-button:hover {
     background-color: #27ae60;
   }
@@ -68,6 +73,8 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    margin: 0 auto;
+
   }
   
   .account-table th,
