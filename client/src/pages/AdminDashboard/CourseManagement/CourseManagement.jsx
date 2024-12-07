@@ -32,7 +32,7 @@ const CourseManagement = () => {
   const departments = ['資訊管理系', '護理系', '幼保系'];
   const program = ['四年制', '二年制'];
   const grade = ['一年級', '二年級', '三年級'];
-  const course = ['通式必修', '通識選修', '專業必修','專業選修'];
+  const course = ['通識必修', '通識選修', '專業必修','專業選修'];
 
   useEffect(() => {
     setFilteredCourses(courses); // 頁面載入時顯示所有課程
