@@ -178,8 +178,8 @@
 /* 顯示總數在右下角 */
 .data-count {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
+  right: 0px;
+  bottom: 10px;
 }
 
 /* 其他必要的樣式 */
