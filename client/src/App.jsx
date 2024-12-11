@@ -8,11 +8,13 @@ import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
+import Coursesimulation from "./pages/student/Coursesimulation/course-simulation";
+import PersonalManagement from "./pages/student/PersonalManagement/personal-management";
+import MyFollowing from './pages/student/my-following';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 登陸狀態
-  const [Userid, setUserid] = useState(''); // 名字
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 登錄狀態
+  const [Userid, setUserid] = useState(''); // 用户 ID
 
   // 本地存取狀態
   useEffect(() => {
@@ -29,7 +31,7 @@ function App() {
       <Navbar isLoggedIn={isLoggedIn} Userid={Userid} setIsLoggedIn={setIsLoggedIn} />
       <div className="content">
         <Routes>
-        <Route path="/" element={<CourseSearch />} />
+          <Route path="/" element={<CourseSearch />} />
           <Route
             path="/login"
             element={<Login setIsLoggedIn={setIsLoggedIn} setUserid={setUserid} />}
@@ -39,6 +41,9 @@ function App() {
           <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route path="/CourseManagement" element={<CourseManagement />} />
           <Route path="/AccountManagement" element={<AccountManagement />} />
+          <Route path="/my-following" element={<MyFollowing />} />
+          <Route path="/course-simulation" element={<Coursesimulation />} />
+          <Route path="/personal-management" element={<PersonalManagement />} />
 
         </Routes>
       </div>

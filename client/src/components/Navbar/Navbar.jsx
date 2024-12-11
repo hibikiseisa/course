@@ -72,7 +72,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
                 <button onClick={() => navigate("/course-simulation")} className="navbar-link">
                   預選課模擬
                 </button>
-                <button onClick={() => navigate("/account-management")} className="navbar-link">
+                <button onClick={() => navigate("/personal-management")} className="navbar-link">
                   個人帳號管理
                 </button>
                 <button onClick={handleLogout} className="navbar-link">
