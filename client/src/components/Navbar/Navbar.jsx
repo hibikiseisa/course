@@ -37,7 +37,8 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
       {/* Logo 和标题 */}
       <div className="navbar-logo">
         <img src={logo} alt="Logo" className="logo-image" />
-        <span className="navbar-title">課程查詢系統</span>
+        <button onClick={()=> navigate("/CourseSearch")} className="navbar-link">
+        <span className="navbar-title">課程查詢系統</span></button>
       </div>
 
       {/* 动态右侧菜单 */}
@@ -47,6 +48,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
             {localStorage.getItem("role") === "admin" ? (
               // 管理者菜单
               <>
+
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>

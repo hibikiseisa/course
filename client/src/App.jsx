@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './components/Navbar/Navbar.css'; // 引入 CSS
-import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountManagement';
-import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement';
+import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountManagement'; //所有帳號管理
+import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement'; //課程管理
 import AdminDashboard from './pages/AdminDashboard/Home';
-import CourseSearch from './pages/CourseSearch/CourseSearch';
-import Login from './pages/Login/Login';
-import Register from './pages/Register/Register';
-import Coursesimulation from "./pages/student/Coursesimulation/course-simulation";
-import PersonalManagement from "./pages/student/PersonalManagement/personal-management";
-import MyFollowing from './pages/student/my-following';
+import CourseSearch from './pages/CourseSearch/CourseSearch'; //課程查詢頁面
+import Login from './pages/Login/Login'; //登入
+import Register from './pages/Register/Register'; //註冊
+import Coursesimulation from "./pages/student/Coursesimulation/course-simulation"; //預選課模擬
+import PersonalManagement from "./pages/student/PersonalManagement/personal-management"; //個人帳號管理
+import MyFollowing from './pages/student/my-following'; //我的追蹤名單
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登錄狀態

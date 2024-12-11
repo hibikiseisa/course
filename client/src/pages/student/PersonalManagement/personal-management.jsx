@@ -1,4 +1,5 @@
 import './personal-management.css';
+
 export default function PersonalManagement() {
 
 return (
