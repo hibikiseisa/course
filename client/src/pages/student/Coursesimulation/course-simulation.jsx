@@ -9,8 +9,8 @@ export default function CourseSimulation() {
 
   // 預設課程資料
   const availableCourses = {
-    '8:10~9:00': ['英文二 A', '數學一 A'],
-    '9:10~10:00': ['物理一 A', '化學一 A'],
+    '第一節\n8:10~9:00': ['英文二 A', '數學一 A'],
+    '第二節\n9:10~10:00': ['物理一 A', '化學一 A'],
     // 可根據需要繼續填充每個時間段的課程
   };
 
@@ -57,7 +57,9 @@ export default function CourseSimulation() {
           </tr>
         </thead>
         <tbody>
-          {['第一節\n8:10~9:00', '第一節\n9:10~10:00', '第一節\n10:10~11:00', '第一節\n11:10~12:00', '第一節\n12:40~13:30','第一節\n13:40 ~ 14:30','第一節\n14:40 ~ 15:30','第一節\n15:40 ~ 16:30','第一節\n16:40 ~ 17:30','第一節\n17:40 ~ 18:30'].map((time) => (
+          {['第一節\n8:10~9:00', '第二節\n9:10~10:00', '第三節\n10:10~11:00', 
+          '第四節\n11:10~12:00', '第五節\n12:40~13:30','第六節\n13:40 ~ 14:30',
+          '第七節\n14:40 ~ 15:30','第八節\n15:40 ~ 16:30','第九節\n16:40 ~ 17:30','第十節\n17:40 ~ 18:30'].map((time) => (
             <tr key={time}>
               <td>{time}</td>
               {['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'].map((day) => {
@@ -76,7 +78,7 @@ export default function CourseSimulation() {
                       </div>
                     ) : (
                       <button
-                        className="add-button"
+                        className="addcourse-button"
                         onClick={() => handleAddClick(day, time)}
                       >
                         +

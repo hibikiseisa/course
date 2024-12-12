@@ -21,8 +21,8 @@
   padding: 10px;
 }
 
-.add-button {
-  background-color: #4caf50;
+.addcourse-button {
+  background-color: #75757557;
   color: white;
   border: none;
   border-radius: 50%;
@@ -31,7 +31,10 @@
   width: 30px;
   height: 30px;
 }
+.addcourse-button:hover{
+  background-color: #000000;
 
+}
 .course-item {
   position: relative;
   padding: 5px;

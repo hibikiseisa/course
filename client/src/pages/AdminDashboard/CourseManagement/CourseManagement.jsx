@@ -263,7 +263,7 @@ const handleSearch = () => {
     ) : (
       <tr>
         <td colSpan="6" className="no-results">
-          無符合條件的課程
+          無課程
         </td>
       </tr>
     )}
@@ -331,7 +331,7 @@ const handleSearch = () => {
   </label>
 </div>
             <div className="modal-actions">
-              <button onClick={handleSaveCourse} className="add-button">保存</button>
+              <button onClick={handleSaveCourse} className="add-button">確定</button>
               <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
             </div>
           </div>

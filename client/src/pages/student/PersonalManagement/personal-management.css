@@ -1,0 +1,65 @@
+.personal-management-container {
+    width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .info-container {
+    margin: 20px 0;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .info-row p {
+    margin: 0;
+  }
+  
+  .edit-button,
+  .yes-button,
+  .no-button {
+    padding: 5px 10px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .edit-button {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .yes-button {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  .no-button {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 14px;
+  }
+  
+  .success-message {
+    color: #28a745;
+    font-size: 14px;
+  }
+  
