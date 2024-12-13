@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './course-simulation.css';
 
-export default function CourseSimulation() {
+const CourseSimulation = () => {
   const [schedule, setSchedule] = useState({}); // 存放選中的課程
   const [popupVisible, setPopupVisible] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
@@ -142,3 +142,4 @@ export default function CourseSimulation() {
     </div>
   );
 }
+export default CourseSimulation;

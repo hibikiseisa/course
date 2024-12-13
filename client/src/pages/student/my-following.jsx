@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './my-following.css';
 
-export default function MyFollowing() {
+const MyFollowing = () => {
   const [followingList, setFollowingList] = useState([]); // 收藏列表
   const [loading, setLoading] = useState(true); // 加載狀態
   const [sortOrder, setSortOrder] = useState('time-asc'); // 排序順序
@@ -124,3 +124,4 @@ export default function MyFollowing() {
     </div>
   );
 }
+export default MyFollowing;

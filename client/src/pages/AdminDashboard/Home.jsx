@@ -226,7 +226,7 @@ const Home = () => {
                         </tbody>
                     </table>
                 ) : (
-                    <p>無符合條件的課程</p>
+                    <p></p>
                 )}
             </div>
         </div>
