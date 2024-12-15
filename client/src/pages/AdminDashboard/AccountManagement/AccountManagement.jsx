@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import './AccountManagement.css'; // 引入 CSS 文件
 
 const AccountManagement = () => {
@@ -7,19 +7,21 @@ const AccountManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState('id');
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState(null);
   const [editingAccount, setEditingAccount] = useState(null);
   const [accountDetails, setAccountDetails] = useState({
     id: '',
     username: '',
     role: 'student',
   });
+  const [isSaving, setIsSaving] = useState(false); // 用於防止重複提交
 
   // 初始化加載使用者列表
   useEffect(() => {
     fetchAccounts();
   }, []);
 
-  
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/accounts');
@@ -30,8 +32,8 @@ const AccountManagement = () => {
   };
 
   const handleInputChange = (e) => {
-    const { username, value } = e.target;
-    setAccountDetails({ ...accountDetails, [username]: value });
+    const { name, value } = e.target;
+    setAccountDetails({ ...accountDetails, [name]: value });
   };
 
   const handleSearchChange = (e) => {
@@ -39,40 +41,63 @@ const AccountManagement = () => {
   };
 
   const handleSaveAccount = async () => {
+    const { id, username, role } = accountDetails;
+
+    // 驗證表單資料
+    if (!id || !username || !role) {
+      alert('請填寫完整的帳號資訊！');
+      return;
+    }
+
+    // 檢查是否重複 ID（僅在新增時）
+    if (!editingAccount && accounts.some((account) => account.id === id)) {
+      alert('此帳號 ID 已存在，請使用其他 ID！');
+      return;
+    }
+
+    setIsSaving(true); // 防止重複提交
     try {
       if (editingAccount) {
-        await axios.put(
-          `http://localhost:5000/api/accounts/${editingAccount.id}`,
-          accountDetails
-        );
+        // 編輯帳號
+        await axios.put(`http://localhost:5000/api/accounts/${editingAccount.id}`, accountDetails);
       } else {
+        // 新增帳號
         await axios.post('http://localhost:5000/api/accounts', accountDetails);
       }
+      alert(editingAccount ? '帳號更新成功！' : '帳號新增成功！');
       fetchAccounts();
       setShowModal(false);
-      setEditingAccount(null);
-      setAccountDetails({ id: '', username: '', role: 'student' });
+      resetForm();
     } catch (error) {
       console.error('Error saving account:', error);
+      alert('保存失敗，請稍後再試！');
+    } finally {
+      setIsSaving(false); // 恢復按鈕狀態
     }
   };
 
-  const handleDeleteAccount = async (id) => {
-    console.log('傳遞的 ID:', id);
-    try {
-      await axios.delete(`http://localhost:5000/api/accounts/${id}`);
-      fetchAccounts();
-      alert('帳號刪除成功');
-    } catch (error) {
+  const handleDeleteAccount = async () => {
+    if (accountToDelete) {
+      try {
+        await axios.delete(`http://localhost:5000/api/accounts/${accountToDelete}`);
+        fetchAccounts();
+        alert('帳號刪除成功');
+        setShowDeleteConfirm(false);
+        setAccountToDelete(null);
+      } catch (error) {
         if (error.response && error.response.status === 404) {
-            alert('帳號不存在，無法刪除');
-            
+          alert('帳號不存在，無法刪除');
         } else {
-            console.error('Error deleting account:', error);
-            alert('刪除失敗，請稍後再試');
+          console.error('Error deleting account:', error);
+          alert('刪除失敗，請稍後再試');
         }
-
+      }
     }
+  };
+
+  const handleConfirmDelete = (id) => {
+    setAccountToDelete(id);
+    setShowDeleteConfirm(true);
   };
 
   const handleEditAccount = (account) => {
@@ -81,8 +106,18 @@ const AccountManagement = () => {
     setShowModal(true);
   };
 
+  const handleAddAccount = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setAccountDetails({ id: '', username: '', role: 'student' });
+    setEditingAccount(null);
+  };
+
   const filteredAccounts = accounts.filter((account) =>
-    account[searchBy].toLowerCase().includes(searchTerm.toLowerCase())
+    account[searchBy]?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -106,7 +141,7 @@ const AccountManagement = () => {
             <option value="username">姓名</option>
           </select>
         </div>
-        <button className="add-button" onClick={() => setShowModal(true)}>
+        <button className="add-button" onClick={handleAddAccount}>
           新增帳號
         </button>
       </div>
@@ -137,7 +172,7 @@ const AccountManagement = () => {
               <td>
                 <button
                   className="delete-button"
-                  onClick={() => handleDeleteAccount(account.id)}
+                  onClick={() => handleConfirmDelete(account.id)}
                 >
                   刪除
                 </button>
@@ -189,11 +224,31 @@ const AccountManagement = () => {
               </label>
             </div>
             <div className="modal-actions">
-              <button onClick={handleSaveAccount} className="save-button">
+              <button
+                onClick={handleSaveAccount}
+                className="save-button"
+                disabled={isSaving} // 防止重複提交
+              >
                 保存
               </button>
+              <button onClick={() => setShowModal(false)} className="cancel-button">
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>確認刪除帳號?</h3>
+            <div className="modal-actions">
+              <button onClick={handleDeleteAccount} className="confirm-button">
+                確認刪除
+              </button>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowDeleteConfirm(false)}
                 className="cancel-button"
               >
                 取消
