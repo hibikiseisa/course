@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
+import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import './CourseSearch.css';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';

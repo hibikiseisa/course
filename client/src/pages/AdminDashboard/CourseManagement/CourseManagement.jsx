@@ -242,51 +242,51 @@ const CourseManagement = () => {
       </div>
 
       <table className="course-table">
-        <thead>
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedCourses.length === courses.length && courses.length > 0}
-              />
-            </th>
-            <th>科目代號</th>
-            <th>課程名稱 (學分)</th>
-            <th>系所</th>
-            <th>教師</th>
-            <th>編輯</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map((course) => (
-              <tr key={course.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedCourses.includes(course.id)}
-                    onChange={() => handleRowSelect(course.id)}
-                  />
-                </td>
-                <td>{course.id}</td>
-                <td>{course.name} ({course.credits})</td>
-                <td>{course.department}</td>
-                <td>{course.teacher}</td>
-                <td>
-                  <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="no-results">
-                無符合條件的課程
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+  <thead>
+    <tr>
+      <th>
+        <input
+          type="checkbox"
+          onChange={handleSelectAll}
+          checked={selectedCourses.length === courses.length && courses.length > 0}
+        />
+      </th>
+      <th>科目代號</th>
+      <th>課程名稱 (學分)</th>
+      <th>系所</th>
+      <th>教師</th>
+      <th>編輯</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredCourses.length > 0 ? (
+      filteredCourses.map((course) => (
+        <tr key={course.id}>
+          <td>
+            <input
+              type="checkbox"
+              checked={selectedCourses.includes(course.id)}
+              onChange={() => handleRowSelect(course.id)}
+            />
+          </td>
+          <td>{course.id}</td>
+          <td>{course.name} ({course.credits})</td>
+          <td>{course.department}</td>
+          <td>{course.teacher}</td>
+          <td>
+            <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="6" className="no-results">
+          無課程
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
 
       <div className="data-count">總共 {filteredCourses.length} 筆資料</div>
 
@@ -349,7 +349,7 @@ const CourseManagement = () => {
               </label>
             </div>
             <div className="modal-actions">
-              <button onClick={handleSaveCourse} className="add-button">保存</button>
+              <button onClick={handleSaveCourse} className="add-button">確定</button>
               <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
             </div>
           </div>

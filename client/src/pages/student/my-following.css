@@ -1,0 +1,84 @@
+.my-following-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .title {
+    text-align: left;
+    font-size: 35px;
+    margin-bottom: 20px;
+  }
+  
+  .following-table {
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    border-collapse: collapse;
+  }
+
+  .following-table th, .following-table td {
+    border-bottom: 1px solid #ccc; /* 為每個表格欄位添加下邊框 */
+    padding: 10px; /* 你可以根據需要調整內邊距 */
+    text-align: left;
+  }
+  
+  .table-divider {
+    border: none;
+    border-top: 1px solid #ccc; /* 添加上邊框 */
+    margin: 0; /* 消除多餘的上下間距 */
+  }
+    
+  .no-courses-message {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 16px;
+    color: #000000;
+    height: 100px; /* 根據需求設置高度 */
+  }
+  
+  .sort-container select {
+    padding: 2px 5px; /* 控制下拉選單內部的間距 */
+    font-size: 14px; /* 調整文字大小 */
+  }
+    
+  .sort-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 標題和選單靠右對齊 */
+    width: 100%; /* 填滿表格寬度 */
+  }
+  
+  .sort-container {
+    display: inline-block; /* 調整為內聯區塊 */
+    width: 200px; /* 增加容器寬度 */
+    margin-left: 10px; /* 與標籤保持適當距離 */
+  }
+  
+  .sort-select {
+    margin-left: 10px; /* 調整與標題間的間距 */
+    width: auto; /* 讓選單自適應內容寬度 */
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  
+  .unfollow-btn {
+    background: none;
+    border: none;
+    color: red;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .edit-btn {
+    background: none;
+    border: none;
+    color: blue;
+    cursor: pointer;
+  }
+  
+  .footer {
+    margin-top: 20px;
+    text-align: right;
+    font-size: 14px;
+  }
