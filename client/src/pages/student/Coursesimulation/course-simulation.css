@@ -1,6 +1,28 @@
 .course-simulation-container {
   padding: 40px;
   font-family: Arial, sans-serif;
+  justify-content: space-between; /* 左右對齊 */
+  align-items: center;      /* 垂直置中 */
+  margin-bottom: 10px;      /* 與課表區域留點間距 */
+
+}
+
+
+
+
+.editcourse-button {
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #5e5e5e; /* 黑色背景 */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.editcourse-button:hover {
+  background-color: #3b3b3b;
 }
 
 .account-management {
@@ -13,13 +35,13 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
 }
-
 .title {
   font-size: 40px;
   margin-bottom: 20px;
   color: #2ab162;
   text-align: left;
-  margin-top: 30px;    
+  margin-top: 30px;  
+  
 }
 
 .schedule-table {
