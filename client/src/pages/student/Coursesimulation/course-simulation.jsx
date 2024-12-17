@@ -47,14 +47,11 @@ const CourseSimulation = () => {
   };
 
   return (
-    <div className="course-simulation-container">
-      <h1 className="title">預選課模擬</h1>
-
-      {/* 編輯課表按鈕 */}
-      <button className="editcourse-button" onClick={toggleEditMode}>
-        {isEditMode ? '完成編輯' : '編輯課表'}
-      </button>
-
+<div className="course-simulation-container">
+  <h1 className="title">預選課模擬</h1>
+  <button className="editcourse-button" onClick={toggleEditMode}>
+    {isEditMode ? '完成編輯' : '編輯課表'}
+  </button>
       <table className="schedule-table">
         <thead>
           <tr>
