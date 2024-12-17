@@ -42,7 +42,9 @@ function App() {
           <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route path="/CourseManagement" element={<CourseManagement />} />
           <Route path="/AccountManagement" element={<AccountManagement />} />
-          <Route path="/course-simulation" element={<Coursesimulation />} />
+          <Route path="/Coursesimulation" element={<Coursesimulation />} />
+          <Route path="/FavoritesList" element={<FavoritesList />} />
+          <Route path="/PersonalInfo" element={<PersonalInfo />} />
 
           {/* <Route path="/CourseSimulator" element={<CourseSimulator />} /> */}
 

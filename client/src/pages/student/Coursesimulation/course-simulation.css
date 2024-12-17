@@ -3,25 +3,25 @@
   font-family: Arial, sans-serif;
 }
 
-.title {
+.course-simulation .title {
   text-align: center;
   font-size: 24px;
   margin-bottom: 20px;
 }
 
-.schedule-table {
+.course-simulation .schedule-table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
 }
 
-.schedule-table th,
-.schedule-table td {
+.course-simulation .schedule-table th,
+.course-simulation .schedule-table td {
   border: 1px solid #ccc;
   padding: 10px;
 }
 
-.addcourse-button {
+.course-simulation .addcourse-button {
   background-color: #75757557;
   color: white;
   border: none;
@@ -31,11 +31,11 @@
   width: 30px;
   height: 30px;
 }
-.addcourse-button:hover{
+.course-simulation .addcourse-button:hover{
   background-color: #000000;
 
 }
-.course-item {
+.course-simulation .course-item {
   position: relative;
   padding: 5px;
   color: white;
@@ -43,11 +43,11 @@
   border-radius: 5px;
 }
 
-.course-item.required {
+.course-simulation .course-item.required {
   background-color: #4c6cd4; /* 必修課程顯示藍色底色 */
 }
 
-.remove-course {
+.course-simulation .remove-course {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -56,7 +56,7 @@
   font-size: 20px;
 }
 
-.popup {
+.course-simulation .popup {
   position: fixed;
   top: 0;
   left: 0;
@@ -68,7 +68,7 @@
   align-items: center;
 }
 
-.popup-content {
+.course-simulation .popup-content {
   background-color: white;
   padding: 30px;
   border-radius: 10px;
@@ -77,23 +77,23 @@
   text-align: center;
 }
 
-.course-section {
+.course-simulation .course-section {
   margin-bottom: 20px;
 }
 
-.course-options label {
+.course-simulation .course-options label {
   display: block;
   margin-bottom: 10px;
 }
 
-.actions {
+.course-simulation .actions {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-.confirm-button,
-.close-button {
+.course-simulation .confirm-button,
+.course-simulation .close-button {
   background-color: #4caf50;
   color: white;
   border: none;
@@ -101,15 +101,15 @@
   cursor: pointer;
 }
 
-.close-button {
+.course-simulation .close-button {
   background-color: red;
 }
 
-.confirm-button:hover,
-.close-button:hover {
+.course-simulation .confirm-button:hover,
+.course-simulation .close-button:hover {
   background-color: darkgreen;
 }
 
-.close-button:hover {
+.course-simulation .close-button:hover {
   background-color: darkred;
 }

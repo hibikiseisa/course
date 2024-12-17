@@ -71,7 +71,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
                 <button onClick={() => navigate("/FavoritesList")} className="navbar-link">
                   我的追蹤名單
                 </button>
-                <button onClick={() => navigate("/CourseSimulator")} className="navbar-link">
+                <button onClick={() => navigate("/Coursesimulation")} className="navbar-link">
                   預選課模擬
                 </button>
                 <button onClick={() => navigate("/PersonalInfo")} className="navbar-link">

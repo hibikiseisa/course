@@ -5,14 +5,13 @@
     border-radius: 8px;
     width: 100%; /* 使容器占满整个宽度 */
     max-width: 1200px; /* 设置最大宽度 */
-    margin: 0 auto; /* 居中 */
-  
+    margin: 0 auto; /* 居中 */  
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
   }
   
   /* 标题样式 */
-  .title {
+  .account-management .title {
     font-size: 40px;
     margin-bottom: 20px;
     color: #2ecc71;
@@ -64,7 +63,7 @@
     transition: background-color 0.3s;
   }
     
-  .add-button:hover {
+  .account-management .add-button:hover {
     background-color: #27ae60;
   }
   
@@ -77,23 +76,23 @@
 
   }
   
-  .account-table th,
-  .account-table td {
+  .account-management .account-table th,
+  .account-management .account-table td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
     font-size: 14px;
   }
   
-  .account-table th {
+  .account-management .account-table th {
     background-color: #98D98E;
     color: white;
     font-weight: bold;
   }
   
   /* 按钮样式 */
-  .edit-button,
-  .delete-button {
+  .account-management .edit-button,
+  .account-management .delete-button {
     padding: 5px 10px;
     border: none;
     border-radius: 5px;
@@ -101,26 +100,26 @@
     font-size: 14px;
   }
   
-  .edit-button {
+  .account-management .edit-button {
     background-color: #3498db;
     color: white;
   }
   
-  .edit-button:hover {
+  .account-management .edit-button:hover {
     background-color: #2980b9;
   }
   
-  .delete-button {
+  .account-management .delete-button {
     background-color: #e74c3c;
     color: white;
   }
   
-  .delete-button:hover {
+  .account-management .delete-button:hover {
     background-color: #c0392b;
   }
   
   /* 模态框背景 */
-  .modal-overlay {
+  .account-management .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -134,7 +133,7 @@
   }
   
   /* 模态框内容 */
-  .modal-content {
+  .account-management .modal-content {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -142,14 +141,15 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
   
-  .modal-form label {
+  .account-management .modal-form label {
     display: block;
+    text-align: left;
     margin-bottom: 10px;
     font-weight: bold;
   }
   
-  .modal-form input,
-  .modal-form select {
+  .account-management .modal-form input,
+  .account-management .modal-form select {
     width: 100%;
     padding: 8px;
     margin-top: 5px;
@@ -160,12 +160,12 @@
   }
   
   /* 模态框按钮 */
-  .modal-actions {
+  .account-management .modal-actions {
     display: flex;
     justify-content: space-between;
   }
   
-  .save-button {
+  .account-management .save-button {
     background-color: #2ecc71;
     color: white;
     padding: 10px 20px;
@@ -175,11 +175,11 @@
     font-size: 14px;
   }
   
-  .save-button:hover {
+  .account-management .save-button:hover {
     background-color: #27ae60;
   }
   
-  .cancel-button {
+  .account-management .cancel-button {
     background-color: #e74c3c;
     color: white;
     padding: 10px 20px;
@@ -189,7 +189,7 @@
     font-size: 14px;
   }
   
-  .cancel-button:hover {
+  .account-management .cancel-button:hover {
     background-color: #c0392b;
   }
   

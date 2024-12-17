@@ -1,11 +1,10 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
-import './CourseSearch.css';
-import CourseSchedule from './CourseSchedule/CourseSchedule';
+
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import CourseModal from './CourseModal/CourseModal';
+import CourseSchedule from './CourseSchedule/CourseSchedule';
+import './CourseSearch.css';
 const departmentCategories = [
     { code: '431', name: '人工智慧與健康大數據研究系' },
     { code: '308', name: '國際運動科學專班系' },
