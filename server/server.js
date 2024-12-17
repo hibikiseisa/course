@@ -163,40 +163,40 @@ app.get('/api/accounts', async (req, res) => {
 
 app.post('/api/accounts', async (req, res) => {
     const { id, username, password, role } = req.body;
-  
+
     // 驗證輸入資料
     if (!id || !username || !password || !role) {
-      return res.status(400).json({ message: '所有欄位皆為必填' });
+        return res.status(400).json({ message: '所有欄位皆為必填' });
     }
-  
+
     if (password.length < 6) {
-      return res.status(400).json({ message: '密碼至少需6個字元' });
+        return res.status(400).json({ message: '密碼至少需6個字元' });
     }
-  
+
     try {
-      // 加密密碼
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // 新增帳號
-      const newAccount = new User({
-        id: id.toLowerCase(),
-        username,
-        password: hashedPassword,
-        role,
-      });
-  
-      await newAccount.save();
-      res.status(201).json({ message: '帳號新增成功' });
+        // 加密密碼
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 新增帳號
+        const newAccount = new User({
+            id: id.toLowerCase(),
+            username,
+            password: hashedPassword,
+            role,
+        });
+
+        await newAccount.save();
+        res.status(201).json({ message: '帳號新增成功' });
     } catch (error) {
-      if (error.code === 11000) {
-        res.status(400).json({ message: '帳號已存在' });
-      } else {
-        console.error('新增帳號失敗:', error);
-        res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
-      }
+        if (error.code === 11000) {
+            res.status(400).json({ message: '帳號已存在' });
+        } else {
+            console.error('新增帳號失敗:', error);
+            res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
+        }
     }
-  });
-  
+});
+
 
 app.put('/api/accounts/:id', async (req, res) => {
     const { id } = req.params;
@@ -387,7 +387,7 @@ const Course = mongoose.model('Course', courseSchema);
 // });
 
 
-  
+
 // 啟動伺服器
 
 app.get('/api/courses', async (req, res) => {
@@ -538,8 +538,42 @@ app.put('/api/user/change-password/:userId', async (req, res) => {
     }
 });
 
+// 課程查詢：根據星期和節次
+app.get('/api/courses/:day/:timeSlot', async (req, res) => {
+    const { day, timeSlot } = req.params; // day = 上課星期, timeSlot = 節次
+    try {
+        const courses = await Course.find({
+            上課星期: day, // 精確匹配星期
+            上課節次: { $regex: `(^|,)${timeSlot}(,|$)` } // 模糊匹配節次
+        });
+        res.status(200).json(courses);
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        res.status(500).json({ message: '查詢課程時發生錯誤' });
+    }
+});
+
+// 收藏課程查詢：根據使用者、星期與節次
+app.get('/api/favorites/:userId/:day/:timeSlot', async (req, res) => {
+    const { userId, day, timeSlot } = req.params;
+    try {
+        const favoriteCourses = await Favorite.find({ userId }).populate('courseId');
+        const filteredCourses = favoriteCourses.filter((favorite) => {
+            const course = favorite.courseId;
+            return (
+                course.上課星期 === day &&
+                course.上課節次.split(',').includes(timeSlot)
+            );
+        });
+        res.status(200).json(filteredCourses.map((f) => f.courseId));
+    } catch (error) {
+        console.error('Error fetching favorites:', error);
+        res.status(500).json({ message: '查詢收藏課程時發生錯誤' });
+    }
+});
 
 
 app.listen(PORT, () => {
     console.log(`伺服器正在 http://localhost:${PORT} 上運行`);
 });
+
