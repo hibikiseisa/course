@@ -1,27 +1,40 @@
 .course-simulation-container {
-  padding: 20px;
+  padding: 40px;
   font-family: Arial, sans-serif;
 }
 
-.course-simulation .title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 20px;
+.account-management {
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  border-radius: 8px;
+  width: 100%; /* 使容器占满整个宽度 */
+  max-width: 1200px; /* 设置最大宽度 */
+  margin: 0 auto; /* 居中 */  
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
-.course-simulation .schedule-table {
+.title {
+  font-size: 40px;
+  margin-bottom: 20px;
+  color: #2ab162;
+  text-align: left;
+  margin-top: 30px;    
+}
+
+.schedule-table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
 }
 
-.course-simulation .schedule-table th,
-.course-simulation .schedule-table td {
+.schedule-table th,
+.schedule-table td {
   border: 1px solid #ccc;
   padding: 10px;
 }
 
-.course-simulation .addcourse-button {
+.addcourse-button {
   background-color: #75757557;
   color: white;
   border: none;
@@ -31,11 +44,11 @@
   width: 30px;
   height: 30px;
 }
-.course-simulation .addcourse-button:hover{
+.addcourse-button:hover{
   background-color: #000000;
 
 }
-.course-simulation .course-item {
+.course-item {
   position: relative;
   padding: 5px;
   color: white;
@@ -43,11 +56,11 @@
   border-radius: 5px;
 }
 
-.course-simulation .course-item.required {
+.course-item.required {
   background-color: #4c6cd4; /* 必修課程顯示藍色底色 */
 }
 
-.course-simulation .remove-course {
+.remove-course {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -56,7 +69,7 @@
   font-size: 20px;
 }
 
-.course-simulation .popup {
+.popup {
   position: fixed;
   top: 0;
   left: 0;
@@ -68,7 +81,7 @@
   align-items: center;
 }
 
-.course-simulation .popup-content {
+.popup-content {
   background-color: white;
   padding: 30px;
   border-radius: 10px;
@@ -77,23 +90,23 @@
   text-align: center;
 }
 
-.course-simulation .course-section {
+.course-section {
   margin-bottom: 20px;
 }
 
-.course-simulation .course-options label {
+.course-options label {
   display: block;
   margin-bottom: 10px;
 }
 
-.course-simulation .actions {
+.actions {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-.course-simulation .confirm-button,
-.course-simulation .close-button {
+.confirm-button,
+.close-button {
   background-color: #4caf50;
   color: white;
   border: none;
@@ -101,15 +114,15 @@
   cursor: pointer;
 }
 
-.course-simulation .close-button {
+.close-button {
   background-color: red;
 }
 
-.course-simulation .confirm-button:hover,
-.course-simulation .close-button:hover {
+.confirm-button:hover,
+.close-button:hover {
   background-color: darkgreen;
 }
 
-.course-simulation .close-button:hover {
+.close-button:hover {
   background-color: darkred;
 }
