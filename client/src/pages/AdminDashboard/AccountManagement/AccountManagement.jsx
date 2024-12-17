@@ -14,14 +14,16 @@ const AccountManagement = () => {
     id: '',
     username: '',
     role: 'student',
+    password: '', // 添加密碼欄位
   });
-  const [isSaving, setIsSaving] = useState(false); // 用於防止重複提交
+    const [isSaving, setIsSaving] = useState(false);
 
   // 初始化加載使用者列表
   useEffect(() => {
     fetchAccounts();
   }, []);
 
+  // 獲取帳號列表
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/accounts');
@@ -31,39 +33,45 @@ const AccountManagement = () => {
     }
   };
 
+  // 處理輸入變化
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAccountDetails({ ...accountDetails, [name]: value });
   };
 
+  // 處理搜尋
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // 保存帳號（新增或編輯）
   const handleSaveAccount = async () => {
-    const { id, username, role } = accountDetails;
+    const { id, username, role, password } = accountDetails;
+
+    console.log('Saving account details:', accountDetails);
 
     // 驗證表單資料
-    if (!id || !username || !role) {
-      alert('請填寫完整的帳號資訊！');
+    if (!id.trim() || !username.trim() || !role.trim()) {
+      alert('所有欄位必須填寫完整！');
       return;
     }
 
-    // 檢查是否重複 ID（僅在新增時）
+    // 檢查重複 ID（僅在新增時檢查）
     if (!editingAccount && accounts.some((account) => account.id === id)) {
       alert('此帳號 ID 已存在，請使用其他 ID！');
       return;
     }
 
-    setIsSaving(true); // 防止重複提交
+    setIsSaving(true);
     try {
       if (editingAccount) {
         // 編輯帳號
         await axios.put(`http://localhost:5000/api/accounts/${editingAccount.id}`, accountDetails);
       } else {
         // 新增帳號
-        await axios.post('http://localhost:5000/api/accounts', accountDetails);
-      }
+        const { id, username, role, password } = accountDetails;
+        await axios.post('http://localhost:5000/api/accounts', { id, username, role, password });
+              }
       alert(editingAccount ? '帳號更新成功！' : '帳號新增成功！');
       fetchAccounts();
       setShowModal(false);
@@ -72,10 +80,11 @@ const AccountManagement = () => {
       console.error('Error saving account:', error);
       alert('保存失敗，請稍後再試！');
     } finally {
-      setIsSaving(false); // 恢復按鈕狀態
+      setIsSaving(false);
     }
   };
 
+  // 刪除帳號
   const handleDeleteAccount = async () => {
     if (accountToDelete) {
       try {
@@ -85,37 +94,38 @@ const AccountManagement = () => {
         setShowDeleteConfirm(false);
         setAccountToDelete(null);
       } catch (error) {
-        if (error.response && error.response.status === 404) {
-          alert('帳號不存在，無法刪除');
-        } else {
-          console.error('Error deleting account:', error);
-          alert('刪除失敗，請稍後再試');
-        }
+        console.error('Error deleting account:', error);
+        alert('刪除失敗，請稍後再試');
       }
     }
   };
 
+  // 確認刪除
   const handleConfirmDelete = (id) => {
     setAccountToDelete(id);
     setShowDeleteConfirm(true);
   };
 
+  // 編輯帳號
   const handleEditAccount = (account) => {
     setEditingAccount(account);
     setAccountDetails(account);
     setShowModal(true);
   };
 
+  // 新增帳號
   const handleAddAccount = () => {
     resetForm();
     setShowModal(true);
   };
 
+  // 重置表單
   const resetForm = () => {
     setAccountDetails({ id: '', username: '', role: 'student' });
     setEditingAccount(null);
   };
 
+  // 過濾帳號列表
   const filteredAccounts = accounts.filter((account) =>
     account[searchBy]?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -162,18 +172,12 @@ const AccountManagement = () => {
               <td>{account.username}</td>
               <td>{account.role === 'admin' ? '✔️' : '❌'}</td>
               <td>
-                <button
-                  className="edit-button"
-                  onClick={() => handleEditAccount(account)}
-                >
+                <button className="edit-button" onClick={() => handleEditAccount(account)}>
                   編輯
                 </button>
               </td>
               <td>
-                <button
-                  className="delete-button"
-                  onClick={() => handleConfirmDelete(account.id)}
-                >
+                <button className="delete-button" onClick={() => handleConfirmDelete(account.id)}>
                   刪除
                 </button>
               </td>
@@ -222,13 +226,21 @@ const AccountManagement = () => {
                   <option value="admin">管理者</option>
                 </select>
               </label>
+              <label>
+  密碼:
+  <input
+    type="password"
+    name="password"
+    value={accountDetails.password}
+    onChange={handleInputChange}
+    placeholder="輸入密碼"
+    required
+  />
+</label>
+
             </div>
             <div className="modal-actions">
-              <button
-                onClick={handleSaveAccount}
-                className="save-button"
-                disabled={isSaving} // 防止重複提交
-              >
+              <button onClick={handleSaveAccount} className="save-button" disabled={isSaving}>
                 保存
               </button>
               <button onClick={() => setShowModal(false)} className="cancel-button">
@@ -247,10 +259,7 @@ const AccountManagement = () => {
               <button onClick={handleDeleteAccount} className="confirm-button">
                 確認刪除
               </button>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="cancel-button"
-              >
+              <button onClick={() => setShowDeleteConfirm(false)} className="cancel-button">
                 取消
               </button>
             </div>
