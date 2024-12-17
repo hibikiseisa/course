@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const router = express.Router();
 dotenv.config();
 
 const app = express();
@@ -34,37 +34,10 @@ const userSchema = new mongoose.Schema({
 
 
 
-const courseSchema = new mongoose.Schema({
-    編號: String,
-    學期: String,
-    主開課教師姓名: String,
-    科目代碼: String,
-    系所代碼: String,
-    核心四碼: String,
-    科目組別: String,
-    年級: String,
-    上課班組: String,
-    科目中文名稱: String,
-    授課教師姓名: String,
-    上課人數: String,
-    男學生上課人數: String,
-    女學生上課人數: String,
-    學分數: String,
-    上課週次: String,
-    上課時數: String,
-    課別代碼: String,
-    課別名稱: String,
-    上課地點: String,
-    上課星期: String,
-    上課節次: String,
-    課表備註: String,
-    課程中文摘要: String, // 新增課程中文摘要欄位
-    課程英文摘要: String
-}, { collection: 'courses' });
 
 const User = mongoose.model('User', userSchema);
 
-const Course = mongoose.model('Course', courseSchema);
+
 
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
@@ -190,25 +163,40 @@ app.get('/api/accounts', async (req, res) => {
 
 app.post('/api/accounts', async (req, res) => {
     const { id, username, password, role } = req.body;
-
+  
+    // 驗證輸入資料
     if (!id || !username || !password || !role) {
-        return res.status(400).json({ message: '所有欄位均為必填' });
+      return res.status(400).json({ message: '所有欄位皆為必填' });
     }
-
+  
+    if (password.length < 6) {
+      return res.status(400).json({ message: '密碼至少需6個字元' });
+    }
+  
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ id, username, password: hashedPassword, role });
-        await newUser.save();
-        res.status(201).json({ message: '帳號新增成功' });
+      // 加密密碼
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      // 新增帳號
+      const newAccount = new User({
+        id: id.toLowerCase(),
+        username,
+        password: hashedPassword,
+        role,
+      });
+  
+      await newAccount.save();
+      res.status(201).json({ message: '帳號新增成功' });
     } catch (error) {
-        console.error('Error creating account:', error);
-        if (error.code === 11000) {
-            res.status(400).json({ message: '帳號已存在' });
-        } else {
-            res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
-        }
+      if (error.code === 11000) {
+        res.status(400).json({ message: '帳號已存在' });
+      } else {
+        console.error('新增帳號失敗:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
+      }
     }
-});
+  });
+  
 
 app.put('/api/accounts/:id', async (req, res) => {
     const { id } = req.params;
@@ -251,69 +239,307 @@ app.delete('/api/accounts/:id', async (req, res) => {
 });
 
 
+
+
+
+
+const courseSchema = new mongoose.Schema({
+    編號: String,
+    學期: String,
+    主開課教師姓名: String,
+    科目代碼: String,
+    系所代碼: String,
+    核心四碼: String,
+    科目組別: String,
+    年級: String,
+    上課班組: String,
+    科目中文名稱: String,
+    授課教師姓名: String,
+    上課人數: String,
+    男學生上課人數: String,
+    女學生上課人數: String,
+    學分數: String,
+    上課週次: String,
+    上課時數: String,
+    課別代碼: String,
+    課別名稱: String,
+    上課地點: String,
+    上課星期: String,
+    上課節次: String,
+    課表備註: String,
+    課程中文摘要: String, // 新增課程中文摘要欄位
+    課程英文摘要: String
+}, { collection: 'courses' });
+const Course = mongoose.model('Course', courseSchema);
+
+// app.get('/api/courses', async (req, res) => {
+
+
+
+//     const {
+//         semester, // 必填
+//         keyword,
+//         educationLevels,
+//         department,
+//         classType,
+//         grade,
+//         period,
+//         courseCategory,
+//         teacherCode,
+//         teacherName,
+//         classCode,
+//         className,
+//         courseCode,
+//         courseName,
+//         roomName,
+//     } = req.query;
+
+//     // 初始化查詢條件
+//     let query = {};
+
+//     // 必填條件：學期
+//     if (semester) {
+//         query.學期 = semester;
+//     } else {
+//         return res.status(400).json({ error: '缺少學期參數' });
+//     }
+
+//     // 可選條件：動態加入條件
+//     if (keyword) {
+//         query.$or = [
+//             { 科目中文名稱: { $regex: keyword, $options: 'i' } },
+//             { 授課教師姓名: { $regex: keyword, $options: 'i' } },
+//             { 課程中文摘要: { $regex: keyword, $options: 'i' } },
+//         ];
+//     }
+
+//     if (educationLevels) {
+//         query.學制 = { $in: educationLevels.split(',') };
+//     }
+
+//     if (department) {
+//         query.系所代碼 = { $regex: `^${department}`, $options: 'i' }; // 模糊匹配
+//     }
+
+//     if (classType) {
+//         query.課別名稱 = classType;
+//     }
+
+//     if (grade) {
+//         query.年級 = grade;
+//     }
+
+//     if (period) {
+//         const periodConditions = period.split(',').map((p) => {
+//             const [day, session] = p.split('-');
+//             return { 上課星期: day, 上課節次: session };
+//         });
+//         query.$and = periodConditions;
+//     }
+
+//     if (courseCategory) {
+//         query.科目組別 = courseCategory;
+//     }
+
+//     if (teacherCode) {
+//         query.教師代碼 = teacherCode;
+//     }
+
+//     if (teacherName) {
+//         query.授課教師姓名 = { $regex: teacherName, $options: 'i' };
+//     }
+
+//     if (classCode) {
+//         query.上課班組 = { $regex: classCode, $options: 'i' };
+//     }
+
+//     if (className) {
+//         query.班級名稱 = { $regex: className, $options: 'i' };
+//     }
+
+//     if (courseCode) {
+//         query.科目代碼 = { $regex: courseCode, $options: 'i' };
+//     }
+
+//     if (courseName) {
+//         query.科目中文名稱 = { $regex: courseName, $options: 'i' };
+//     }
+
+//     if (roomName) {
+//         query.上課地點 = { $regex: roomName, $options: 'i' };
+//     }
+
+//     try {
+//         // 查詢資料庫
+//         const courses = await Course.find(query);
+
+//         // 如果沒有符合的課程，回傳特定訊息
+//         if (courses.length === 0) {
+//             return res.status(404).json({ message: '沒有符合條件的課程' });
+//         }
+
+//         // 回傳查詢結果
+//         res.status(200).json(courses);
+//     } catch (error) {
+//         console.error('查詢課程失敗:', error);
+//         res.status(500).json({ error: '無法查詢課程' });
+//     }
+// });
+
+
+  
+// 啟動伺服器
+
 app.get('/api/courses', async (req, res) => {
     const {
-        semester,
-        keyword,
-        educationLevels,
-        department,
-        classType,
-        grade,
-        period,
-        courseCategory,
-        teacherCode,
-        teacherName,
-        classCode,
-        className,
-        courseCode,
-        courseName,
-        roomName,
-        courseSummary
+        semester, keyword, department, grade,
+        classType, teacherName, courseCode, roomName, period
     } = req.query;
 
-    // 動態構建查詢條件
-    let query = {};
+    // 初始化查詢條件
+    const query = {};
 
-    // 學期查詢條件
-    if (semester) {
-        query.學期 = semester;
-    }
-
-    // 關鍵字查詢（科目名稱、授課教師姓名）
+    if (semester) query.學期 = semester;
     if (keyword) {
         query.$or = [
             { 科目中文名稱: { $regex: keyword, $options: 'i' } },
-            { 授課教師姓名: { $regex: keyword, $options: 'i' } },
-            { 課程中文摘要: { $regex: keyword, $options: 'i' } }, // 新增摘要查詢
-            { 課程英文摘要: { $regex: keyword, $options: 'i' } }  // 新增摘要查詢
+            { 科目英文名稱: { $regex: keyword, $options: 'i' } },
+            { 授課教師姓名: { $regex: keyword, $options: 'i' } }
         ];
     }
-
-    if (educationLevels) query.學制 = { $in: educationLevels.split(',') };
-    if (department) query.系所代碼 = department;
-    if (classType) query.課別名稱 = classType;
+    if (department) query.系所代碼 = { $regex: `^${department}`, $options: 'i' };
     if (grade) query.年級 = grade;
-    if (period) query.上課節次 = period;
-    if (courseCategory) query.課程內容分類 = courseCategory;
-    if (teacherCode) query.授課教師代碼 = teacherCode;
+    if (classType) query.課別名稱 = { $regex: classType, $options: 'i' };
     if (teacherName) query.授課教師姓名 = { $regex: teacherName, $options: 'i' };
-    if (classCode) query.上課班組 = classCode;
-    if (className) query.班級名稱 = { $regex: className, $options: 'i' };
-    if (courseCode) query.科目代碼 = courseCode;
-    if (courseName) query.科目中文名稱 = { $regex: courseName, $options: 'i' };
+    if (courseCode) query.科目代碼 = { $regex: courseCode, $options: 'i' };
     if (roomName) query.上課地點 = { $regex: roomName, $options: 'i' };
+    if (period) query.上課節次 = { $regex: period, $options: 'i' }; // 模糊匹配節次
 
     try {
         const courses = await Course.find(query);
+
+        if (courses.length === 0) {
+            return res.status(404).json({ message: '沒有符合條件的課程' });
+        }
+
         res.status(200).json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
-        res.status(500).json({ message: '伺服器錯誤，無法取得課程資料' });
+        res.status(500).json({ error: '查詢課程時發生錯誤' });
     }
 });
 
 
-// 啟動伺服器
+const favoriteSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+    addedAt: { type: Date, default: Date.now }
+});
+
+const Favorite = mongoose.model('Favorite', favoriteSchema);
+
+
+app.post('/api/favorites', async (req, res) => {
+    const { userId, courseId } = req.body;
+
+    if (!userId || !courseId) {
+        return res.status(400).json({ message: '用戶ID和課程ID為必填' });
+    }
+
+    try {
+        // 檢查是否已存在
+        const existingFavorite = await Favorite.findOne({ userId, courseId });
+        if (existingFavorite) {
+            return res.status(400).json({ message: '該課程已收藏' });
+        }
+
+        // 保存新收藏
+        const favorite = new Favorite({ userId, courseId });
+        await favorite.save();
+
+        res.status(200).json({ message: '課程已成功收藏' });
+    } catch (error) {
+        console.error('收藏課程失敗:', error);
+        res.status(500).json({ message: '伺服器錯誤，無法收藏課程' });
+    }
+});
+
+
+
+app.get('/api/favorites/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // 透過 `populate` 帶出收藏課程的詳細資料
+        const favorites = await Favorite.find({ userId }).populate('courseId');
+
+        // 提取課程詳細資訊
+        const courses = favorites.map(fav => fav.courseId);
+
+        res.status(200).json(courses);
+    } catch (error) {
+        console.error('獲取收藏課程失敗:', error);
+        res.status(500).json({ message: '無法獲取收藏課程' });
+    }
+});
+
+app.delete('/api/favorites/:userId/:courseId', async (req, res) => {
+    const { userId, courseId } = req.params;
+
+    try {
+        await Favorite.findOneAndDelete({ userId, courseId });
+        res.status(200).json({ message: '成功取消收藏' });
+    } catch (error) {
+        console.error('取消收藏失敗:', error);
+        res.status(500).json({ message: '無法取消收藏' });
+    }
+});
+
+
+app.get('/api/user/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findOne({ id: userId });
+        if (!user) return res.status(404).json({ message: '用戶不存在' });
+
+        res.status(200).json({
+            id: user.id,
+            username: user.username,
+            role: user.role
+        });
+    } catch (error) {
+        console.error('獲取用戶資訊失敗:', error);
+        res.status(500).json({ message: '伺服器錯誤' });
+    }
+});
+
+app.put('/api/user/change-password/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({ id: userId });
+        if (!user) return res.status(404).json({ message: '用戶不存在' });
+
+        // 驗證舊密碼
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) return res.status(400).json({ message: '舊密碼錯誤' });
+
+        // 更新密碼
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: '密碼修改成功' });
+    } catch (error) {
+        console.error('修改密碼失敗:', error);
+        res.status(500).json({ message: '伺服器錯誤' });
+    }
+});
+
+
+
 app.listen(PORT, () => {
     console.log(`伺服器正在 http://localhost:${PORT} 上運行`);
 });

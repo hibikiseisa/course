@@ -35,7 +35,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
   return (
     <div className="navbar">
       {/* Logo 和标题 */}
-      <div className="navbar-logo">
+      <div className="navbar-logo" onClick={() => navigate("/CourseSearch")} style={{ cursor: "pointer" }}>
         <img src={logo} alt="Logo" className="logo-image" />
         <span className="navbar-title">課程查詢系統</span>
       </div>
@@ -66,13 +66,13 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>
-                <button onClick={() => navigate("/my-following")} className="navbar-link">
+                <button onClick={() => navigate("/FavoritesList")} className="navbar-link">
                   我的追蹤名單
                 </button>
-                <button onClick={() => navigate("/course-simulation")} className="navbar-link">
+                <button onClick={() => navigate("/CourseSimulator")} className="navbar-link">
                   預選課模擬
                 </button>
-                <button onClick={() => navigate("/account-management")} className="navbar-link">
+                <button onClick={() => navigate("/PersonalInfo")} className="navbar-link">
                   個人帳號管理
                 </button>
                 <button onClick={handleLogout} className="navbar-link">
@@ -92,7 +92,6 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
             </button>
           </>
         )}
-
 
         {/* 语言切换菜单 */}
         <div className="navbar-language" ref={dropdownRef}>

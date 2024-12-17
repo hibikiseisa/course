@@ -1,22 +1,43 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './CourseSearch.css';
-import { FaAngleDoubleLeft } from "react-icons/fa";
-import { FaAngleDoubleRight } from "react-icons/fa";
-import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
-
+import CourseSchedule from './CourseSchedule/CourseSchedule';
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import CourseModal from './CourseModal/CourseModal';
+const departmentCategories = [
+    { code: '431', name: '人工智慧與健康大數據研究系' },
+    { code: '308', name: '國際運動科學專班系' },
+    { code: '331', name: '生死與健康心理諮商系' },
+    { code: '231', name: '休閒產業與健康促進系' },
+    { code: '241', name: '長期照護系' },
+    { code: '131', name: '高齡健康照護系' },
+    { code: '211', name: '健康事業管理系' },
+    { code: '201', name: '健康科技學院系' },
+    { code: '268', name: '國際健康科技碩士學程系' },
+    { code: '421', name: '智慧健康科技' },
+    { code: '221', name: '資訊管理系' },
+    { code: '321', name: '運動保健系' },
+    { code: '251', name: '語言治療與聽力學系' },
+    { code: '311', name: '嬰幼兒保育系' },
+    { code: '1D1', name: '醫護教育暨數位學習系' },
+    { code: '1C1', name: '護理助產及婦女健康系' },
+    { code: '111', name: '護理系' },
+    { code: '114', name: '護理系碩士在職專班' },
+    { code: '112', name: '進修部護理系' },
+    { code: '113', name: '夜間部護理系' },
+];
 const CourseSearch = () => {
     const [advancedSearch, setAdvancedSearch] = useState(false);
-    const [selectedSemester, setSelectedSemester] = useState('1131'); // 預設值
+    const [selectedSemester, setSelectedSemester] = useState('1131');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [courses, setCourses] = useState([]);
+    const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
+    const [selectedPeriods, setSelectedPeriods] = useState([]);
 
-    // 進階查詢條件
     const [educationLevels, setEducationLevels] = useState([]);
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
     const [grade, setGrade] = useState('');
-    const [period, setPeriod] = useState('');
     const [courseCategory, setCourseCategory] = useState('');
     const [teacherCode, setTeacherCode] = useState('');
     const [teacherName, setTeacherName] = useState('');
@@ -26,20 +47,74 @@ const CourseSearch = () => {
     const [courseName, setCourseName] = useState('');
     const [roomName, setRoomName] = useState('');
 
-    const [currentPage, setCurrentPage] = useState(1); // 當前頁數
-    const [resultsPerPage, setResultsPerPage] = useState(10); // 每頁顯示
+    const [currentPage, setCurrentPage] = useState(1);
+    const [resultsPerPage, setResultsPerPage] = useState(10);
+
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
     const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
-    const totalPages = Math.ceil(courses.length / resultsPerPage); // 計算總頁數
+    const totalPages = Math.ceil(courses.length / resultsPerPage);
 
+
+    const [selectedCourse, setSelectedCourse] = useState(null); // 當前選中的課程
+    const [isModalOpen, setIsModalOpen] = useState(false); // 控制視窗開啟
 
     const toggleAdvancedSearch = () => {
         setAdvancedSearch(!advancedSearch);
     };
 
+    const handleCheckboxChange = (e) => {
+        const { value, checked } = e.target;
+        setEducationLevels((prev) =>
+            checked ? [...prev, value] : prev.filter((level) => level !== value)
+        );
+    };
 
+    const handleSearch = async (e) => {
+        e.preventDefault();
+
+        // 組成查詢參數
+        const params = {
+            semester: selectedSemester,
+            keyword: searchKeyword,
+            educationLevels: educationLevels.join(','), // 將陣列轉成逗號分隔字串
+            department, // 系所代碼
+            classType,  // 課別名稱
+            grade,      // 年級
+            teacherName, // 授課教師姓名
+            courseCode,  // 科目代碼
+            courseName,  // 科目中文名稱
+            roomName,    // 教室名稱
+            period: selectedPeriods.join(',') // 上課節次
+        };
+
+        try {
+            const response = await axios.get('http://localhost:5000/api/courses', { params });
+            setCourses(response.data); // 設置查詢結果
+            setCurrentPage(1);
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            setCourses([]); // 清空結果
+            alert('查詢失敗，請檢查輸入條件或伺服器狀態！');
+        }
+    };
+
+
+    const handlePeriodClick = (day, period) => {
+        const selected = `${day}-${period}`;
+        setSelectedPeriods((prev) =>
+            prev.includes(selected)
+                ? prev.filter((item) => item !== selected)
+                : [...prev, selected]
+        );
+    };
+
+    const handlePeriodSubmit = () => {
+        setIsPeriodModalOpen(false);
+    };
     const convertWeekdayToChinese = (weekday) => {
+        if (!weekday) return "未指定"; // 如果為 undefined 或 null，返回預設值「未指定」
+
         const mapping = {
             "1": "一",
             "2": "二",
@@ -47,44 +122,35 @@ const CourseSearch = () => {
             "4": "四",
             "5": "五",
             "6": "六",
-            "7": "日"
+            "7": "日",
         };
-        return weekday.split(',').map(day => mapping[day] || day).join(', ');
+        return weekday.split(',').map((day) => mapping[day] || day).join(', ');
     };
-    const handleCheckboxChange = (e) => {
-        const { value, checked } = e.target;
-        setEducationLevels((prev) =>
-            checked ? [...prev, value] : prev.filter((level) => level !== value)
-        );
+    const openMoreInfo = (course) => {
+        setSelectedCourse(course);
+        setIsModalOpen(true);
     };
-    const handleSearch = async (e) => {
-        e.preventDefault();
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedCourse(null);
+    };
+    const handleAddToFavorites = async (courseId) => {
+        const userId = localStorage.getItem('id'); // 從 localStorage 獲取用戶ID
+    
         try {
-            const response = await axios.get('http://localhost:5000/api/courses', {
-                params: {
-                    semester: selectedSemester,
-                    keyword: searchKeyword,
-                    educationLevels,
-                    department,
-                    classType,
-                    grade,
-                    period,
-                    courseCategory,
-                    teacherCode,
-                    teacherName,
-                    classCode,
-                    className,
-                    courseCode,
-                    courseName,
-                    roomName,
-                },
+            const response = await axios.post('http://localhost:5000/api/favorites', {
+                userId,
+                courseId, // 傳遞課程唯一ID
             });
-            setCourses(response.data);
-            setCurrentPage(1); // 重置为第一页
+            alert(response.data.message);
         } catch (error) {
-            console.error('Error fetching courses:', error);
+            console.error('收藏失敗:', error);
+            alert('收藏失敗，請重試');
         }
     };
+    
+    
 
     return (
         <div className="course-search-container">
@@ -93,6 +159,7 @@ const CourseSearch = () => {
                 <div className="form-group">
                     <label>學年期</label>
                     <select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)}>
+                        <option value="1132">1132</option>
                         <option value="1131">1131</option>
                         <option value="1122">1122</option>
                         <option value="1121">1121</option>
@@ -133,8 +200,11 @@ const CourseSearch = () => {
                             <label>系所</label>
                             <select value={department} onChange={(e) => setDepartment(e.target.value)}>
                                 <option value="">請選擇系所</option>
-                                <option value="資訊管理系">資訊管理系</option>
-                                <option value="護理系">護理系</option>
+                                {departmentCategories.map((dept) => (
+                                    <option key={dept.code} value={dept.code}>
+                                        {dept.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -155,23 +225,14 @@ const CourseSearch = () => {
                                 <label><input type="radio" name="grade" value="二年級" onChange={(e) => setGrade(e.target.value)} /> 二年級</label>
                                 <label><input type="radio" name="grade" value="三年級" onChange={(e) => setGrade(e.target.value)} /> 三年級</label>
                                 <label><input type="radio" name="grade" value="四年級" onChange={(e) => setGrade(e.target.value)} /> 四年級</label>
-                                <label><input type="radio" name="grade" value="五年級" onChange={(e) => setGrade(e.target.value)} /> 五年級</label>
-                                <label><input type="radio" name="grade" value="六年級" onChange={(e) => setGrade(e.target.value)} /> 六年級</label>
                             </div>
                         </div>
 
                         <div className="more-form-group">
                             <label>節次</label>
-                            <input type="text" value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="課表" />
-                        </div>
-
-                        <div className="more-form-group">
-                            <label>課程內容分類</label>
-                            <select value={courseCategory} onChange={(e) => setCourseCategory(e.target.value)}>
-                                <option value="">選擇系所</option>
-                                <option value="資訊管理">資訊管理</option>
-                                <option value="護理學">護理學</option>
-                            </select>
+                            <button type="button" onClick={() => setIsPeriodModalOpen(true)} className="period-button">
+                                課表
+                            </button>
                         </div>
 
                         <div className="more-form-group">
@@ -201,112 +262,121 @@ const CourseSearch = () => {
                 <button type="submit" className="search-button">查詢</button>
             </form>
 
-            <div>
-                {courses.length > 0 && (
-                    <>
-                        <div className="pagination-controls">
-                            <div className="results-per-page">
-                                每頁顯示
-                                <select
-                                    value={resultsPerPage}
-                                    onChange={(e) => {
-                                        setResultsPerPage(Number(e.target.value));
-                                        setCurrentPage(1); // 改变每页显示数后重置到第一页
-                                    }}
-                                >
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={20}>20</option>
-                                </select>
-                                個結果
-                            </div>
-                            <div className="pagination-buttons">
-                                <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+            <CourseSchedule
+                isOpen={isPeriodModalOpen}
+                onClose={() => setIsPeriodModalOpen(false)}
+                selectedPeriods={selectedPeriods}
+                setSelectedPeriods={setSelectedPeriods}
+            />
+            {courses.length > 0 && (
+                <>
+                    <div className="pagination-controls">
+                        <div className="results-per-page">
+                            每頁顯示
+                            <select
+                                value={resultsPerPage}
+                                onChange={(e) => {
+                                    setResultsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                            </select>
+                            個結果
+                        </div>
+                        <div className="pagination-buttons">
+                            <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
                                 <FaAngleDoubleLeft />
-                                </button>
-                                <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                                    &lt; <FaAngleLeft />
-                                </button>
-                                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                    .filter(
-                                        (page) =>
-                                            page === 1 || // 最前頁
-                                            page === totalPages || // 最後頁
-                                            (page >= currentPage - 2 && page <= currentPage + 2) // 前後各兩頁
-                                    )
-                                    .map((page) => (
-                                        <button
-                                            key={page}
-                                            className={currentPage === page ? "active" : ""}
-                                            onClick={() => setCurrentPage(page)}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                                <FaAngleRight /> &gt;
-                                </button>
-                                <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                            </button>
+                            <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                                <FaAngleLeft />
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                .filter((page) => page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2))
+                                .map((page) => (
+                                    <button
+                                        key={page}
+                                        className={currentPage === page ? 'active' : ''}
+                                        onClick={() => setCurrentPage(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                                <FaAngleRight />
+                            </button>
+                            <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
                                 <FaAngleDoubleRight />
-                                </button>
-                            </div>
-                            <div className="jump-to-page">
-                                跳至頁數
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max={totalPages}
-                                    value={currentPage}
-                                    onChange={(e) => {
-                                        const page = Number(e.target.value);
-                                        if (page >= 1 && page <= totalPages) setCurrentPage(page);
-                                    }}
-                                />
-                            </div>
+                            </button>
                         </div>
-
-                        <div className="course-results">
-                            <table className="course-table">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>學期</th>
-                                        <th>學制/系所</th>
-                                        <th>年級</th>
-                                        <th>科目代碼</th>
-                                        <th>課程名稱</th>
-                                        <th>教師</th>
-                                        <th>上課人數</th>
-                                        <th>上課時間/節次</th>
-                                        <th>學分</th>
-                                        <th>課別</th>
-                                        <th>更多</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {currentResults.map((course, index) => (
-                                        <tr key={course._id}>
-                                            <td>{index + 1}</td>
-                                            <td>{course.學期}</td>
-                                            <td>四年制/資管系</td>
-                                            <td>{course.年級}</td>
-                                            <td>{course.核心四碼}</td>
-                                            <td>{course.科目中文名稱}</td>
-                                            <td>{course.授課教師姓名}</td>
-                                            <td>{course.上課人數}</td>
-                                            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
-                                            <td>{course.學分數}</td>
-                                            <td>{course.課別名稱}</td>
-                                            <td><button className="more-button">更多資訊</button></td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="jump-to-page">
+                            跳至頁數
+                            <input
+                                type="number"
+                                min="1"
+                                max={totalPages}
+                                value={currentPage}
+                                onChange={(e) => {
+                                    const page = Number(e.target.value);
+                                    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+                                }}
+                            />
                         </div>
-                    </>
-                )}
-            </div>
+                    </div>
 
+                    <div className="course-results">
+                        <table className="course-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>學期</th>
+                                    <th>學制/系所</th>
+                                    <th>年級</th>
+                                    <th>科目代碼</th>
+                                    <th>課程名稱</th>
+                                    <th>教師</th>
+                                    <th>上課人數</th>
+                                    <th>上課時間/節次</th>
+                                    <th>學分</th>
+                                    <th>課別</th>
+                                    <th>更多</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentResults.map((course, index) => (
+                                    <tr key={course._id}>
+                                        <td>{index + 1}</td>
+                                        <td>{course.學期}</td>
+                                        <td>{course.系所代碼}</td>
+                                        <td>{course.年級}</td>
+                                        <td>{course.核心四碼}</td>
+                                        <td>{course.科目中文名稱}</td>
+                                        <td>{course.授課教師姓名}</td>
+                                        <td>{course.上課人數}</td>
+                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
+                                        <td>{course.學分數}</td>
+                                        <td>{course.課別名稱}</td>
+                                        <td>
+                                            <button onClick={() => openMoreInfo(course)} className="more-button">
+                                                更多資訊
+                                            </button>
+                                        </td>                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
+            {/* 更多資訊視窗 */}
+            {isModalOpen && selectedCourse && (
+               <CourseModal
+               course={selectedCourse}
+               onClose={closeModal}
+               onAddToFavorites={handleAddToFavorites}
+           />
+            )}
         </div>
     );
 };

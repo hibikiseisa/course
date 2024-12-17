@@ -8,6 +8,9 @@ import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
+import CourseSimulator from './pages/CourseSimulator/CourseSimulator';
+import FavoritesList from './pages/FavoritesList/FavoritesList';
+import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登陸狀態
@@ -39,7 +42,9 @@ function App() {
           <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route path="/CourseManagement" element={<CourseManagement />} />
           <Route path="/AccountManagement" element={<AccountManagement />} />
-
+          <Route path="/CourseSimulator" element={<CourseSimulator />} />
+          <Route path="/FavoritesList" element={<FavoritesList />} />
+          <Route path="/PersonalInfo" element={<PersonalInfo />} />
         </Routes>
       </div>
     </Router>
