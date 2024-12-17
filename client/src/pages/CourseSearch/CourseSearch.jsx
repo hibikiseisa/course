@@ -273,7 +273,7 @@ const CourseSearch = () => {
                 <>
                     <div className="pagination-controls">
                         <div className="results-per-page">
-                            每頁顯示
+                            <h4>每頁顯示</h4>
                             <select
                                 value={resultsPerPage}
                                 onChange={(e) => {
@@ -285,7 +285,7 @@ const CourseSearch = () => {
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
                             </select>
-                            個結果
+                            <h4>個結果</h4>
                         </div>
                         <div className="pagination-buttons">
                             <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
