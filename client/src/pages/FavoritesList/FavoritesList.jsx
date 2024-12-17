@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import './FavoritesList.css';
 
 const FavoritesList = () => {
@@ -37,7 +37,7 @@ const FavoritesList = () => {
 
     return (
         <div className="favorites-list-container">
-            <h1>我的追蹤清單</h1>
+      <h1 className="title">我的追蹤清單</h1>
             {favorites.length === 0 ? (
                 <p>目前沒有收藏的課程。</p>
             ) : (
