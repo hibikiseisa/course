@@ -1,5 +1,5 @@
 .course-search-container {   /*整個頁面*/
-    max-width: 900px;
+    max-width: 100%;
     margin: 0 auto;
     margin-top: 10px;
     padding: 40px;
