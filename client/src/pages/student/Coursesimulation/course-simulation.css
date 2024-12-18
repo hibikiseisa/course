@@ -70,13 +70,13 @@
   background-color: #000000;
 
 }
-.course-item {
+/* .course-item {
   position: relative;
   padding: 5px;
-  color: white;
+  color: #4c6cd4;
 
   border-radius: 5px;
-}
+} */
 
 .course-item.required {
   background-color: #4c6cd4; /* 必修課程顯示藍色底色 */
@@ -110,15 +110,20 @@
   width: 400px;
   max-width: 80%;
   text-align: center;
+  overflow-y: auto;
 }
 
 .course-section {
   margin-bottom: 20px;
+  max-height: 150px; /* 垂直區塊的最大高度 */
+  overflow-y: auto; /* 垂直滾動 */
 }
 
-.course-options label {
+.course-section label {
   display: block;
   margin-bottom: 10px;
+  font-size: 16px;
+    color: #333;
 }
 
 .actions {
@@ -148,3 +153,5 @@
 .close-button:hover {
   background-color: darkred;
 }
+
+
