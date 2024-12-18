@@ -1,6 +1,6 @@
 import axios from 'axios';
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import React, { useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import CourseModal from './CourseModal/CourseModal';
@@ -108,17 +108,23 @@ const handleExport = (format) => {
     }
 
     if (format === 'csv') {
+        
         const csvContent = courses.map(course =>
             [course.學期, course.系所代碼, course.科目中文名稱, course.授課教師姓名].join(',')
         ).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'courses.csv';
         link.click();
     } else if (format === 'pdf') {
+        jsPDF.API.events.push(['addFont', function () {
+            this.addFileToVFS('YourFontName.ttf', font);
+            this.addFont('YourFontName.ttf', 'YourFontName', 'normal');
+        }]);
         const pdf = new jsPDF();
+        pdf.setFont('YourFontName');
         pdf.text('課程資料匯出', 20, 20);
         pdf.autoTable({
             head: [['學期', '系所代碼', '課程名稱', '授課教師']],
@@ -131,21 +137,41 @@ const handleExport = (format) => {
         });
         pdf.save('courses.pdf');
     } else if (format === 'odt') {
-        const odtContent = `<xml version="1.0" encoding="UTF-8">
-            <office:document><body><table>`;
-        const rows = courses.map(course =>
-            `<tr><td>${course.學期}</td><td>${course.系所代碼}</td><td>${course.科目中文名稱}</td></tr>`
-        ).join('');
-        const finalContent = odtContent + rows + `</table></body></office:document>`;
-        const blob = new Blob([finalContent], { type: 'application/vnd.oasis.opendocument.text' });
+        const odtContent = `
+            <?xml version="1.0" encoding="UTF-8"?>
+            <office:document-content
+                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
+                <office:body>
+                    <office:spreadsheet>
+                        <table:table table:name="Courses">
+                            <table:table-row>
+                                <table:table-cell><text:p>學期</text:p></table:table-cell>
+                                <table:table-cell><text:p>系所代碼</text:p></table:table-cell>
+                                <table:table-cell><text:p>課程名稱</text:p></table:table-cell>
+                                <table:table-cell><text:p>授課教師</text:p></table:table-cell>
+                            </table:table-row>
+                            ${courses.map(course => `
+                                <table:table-row>
+                                    <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
+                                </table:table-row>`).join('')}
+                        </table:table>
+                    </office:spreadsheet>
+                </office:body>
+            </office:document-content>
+        `;
+        const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'courses.odt';
         link.click();
-        }  
+    }
 };
-
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
@@ -229,11 +255,16 @@ const handleExport = (format) => {
                 </div>
 {/* 新增匯出按鈕 */}
 <div className="form-group export-buttons">
-<div>
-                <button onClick={() => handleExport('csv')}>匯出 CSV</button>
-                <button onClick={() => handleExport('pdf')}>匯出 PDF</button>
-                <button onClick={() => handleExport('odt')}>匯出 ODT</button>
-            </div>
+                    <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
+                        匯出 CSV
+                    </button>
+                    
+                    <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
+                        匯出 PDF
+                    </button>
+                    <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
+                        匯出 ODT
+                    </button>
                 </div>
                 {advancedSearch && (
                     <div className="advanced-search-vertical">
@@ -325,7 +356,7 @@ const handleExport = (format) => {
                 <>
                     <div className="pagination-controls">
                         <div className="results-per-page">
-                            <h4>每頁顯示</h4>
+                            <h4>每頁筆數</h4>
                             <select
                                 value={resultsPerPage}
                                 onChange={(e) => {
@@ -337,7 +368,6 @@ const handleExport = (format) => {
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
                             </select>
-                            <h4>個結果</h4>
                         </div>
                         <div className="pagination-buttons">
                             <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
@@ -376,6 +406,7 @@ const handleExport = (format) => {
                                     if (page >= 1 && page <= totalPages) setCurrentPage(page);
                                 }}
                             />
+                             <span> / 共 {courses.length} 筆結果</span>
                         </div>
                     </div>
 
