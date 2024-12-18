@@ -538,6 +538,82 @@ app.put('/api/user/change-password/:userId', async (req, res) => {
     }
 });
 
+const scheduleSchema = new mongoose.Schema({
+    userId: { type: String, required: true, unique: true },
+    schedule: [
+        {
+            courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true }, // 參考 Course 集合
+            day: { type: String, required: true },
+            timeSlots: { type: [String], required: true }
+        }
+    ]
+});
+
+
+
+const Schedule = mongoose.model('Schedule', scheduleSchema);
+// 1. 儲存或更新課表
+
+app.post('/api/schedule', async (req, res) => {
+    const { userId, schedule } = req.body;
+
+    try {
+        console.log('接收到的使用者 ID:', userId);
+        console.log('接收到的課表資料:', JSON.stringify(schedule, null, 2));
+
+        // 驗證每個 courseId 是否為有效的 ObjectId
+        for (const entry of schedule) {
+            if (!mongoose.Types.ObjectId.isValid(entry.courseId)) {
+                return res.status(400).json({ message: `無效的課程 ID: ${entry.courseId}` });
+            }
+        }
+
+        const updatedSchedule = await Schedule.findOneAndUpdate(
+            { userId },
+            { schedule },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ message: '課表已儲存', data: updatedSchedule });
+    } catch (error) {
+        console.error('課表儲存失敗:', error);
+        res.status(500).json({ message: '儲存課表時發生錯誤' });
+    }
+});
+
+
+// 2. 獲取使用者的課表
+app.get('/api/schedule/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // 查詢指定 userId 的課表，並將 schedule 陣列中的 courseId 進行 populate
+        const userSchedule = await Schedule.findOne({ userId }).populate('schedule.courseId');
+
+        if (userSchedule && userSchedule.schedule) {
+            // 將返回資料轉換成前端需要的格式
+            const detailedSchedule = userSchedule.schedule.map((entry) => ({
+                courseId: entry.courseId._id,       // 課程 ID
+                courseName: entry.courseId.科目中文名稱, // 課程名稱
+                teacher: entry.courseId.授課教師姓名,   // 授課教師
+                credits: entry.courseId.學分數,       // 學分數
+                day: entry.day,                     // 星期幾
+                timeSlots: entry.timeSlots          // 節次
+            }));
+
+            res.status(200).json(detailedSchedule); // 返回轉換後的詳細課表
+        } else {
+            res.status(200).json([]); // 若無課表資料，返回空陣列
+        }
+    } catch (error) {
+        console.error('獲取課表失敗:', error);
+        res.status(500).json({ message: '無法獲取課表資料' });
+    }
+});
+
+
+
+
 // 課程查詢：根據星期和節次
 app.get('/api/courses/:day/:timeSlot', async (req, res) => {
     const { day, timeSlot } = req.params; // day = 上課星期, timeSlot = 節次
@@ -550,6 +626,20 @@ app.get('/api/courses/:day/:timeSlot', async (req, res) => {
     } catch (error) {
         console.error('Error fetching courses:', error);
         res.status(500).json({ message: '查詢課程時發生錯誤' });
+    }
+});
+app.get('/api/course/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const course = await Course.findById(id);
+        if (!course) {
+            return res.status(404).json({ message: '課程不存在' });
+        }
+        res.status(200).json({ courseName: course.科目中文名稱 });
+    } catch (error) {
+        console.error('查詢課程名稱失敗:', error);
+        res.status(500).json({ message: '無法查詢課程名稱' });
     }
 });
 
