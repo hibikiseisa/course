@@ -1,10 +1,12 @@
 import axios from 'axios';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import React, { useState } from 'react';
-
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
+
 const departmentCategories = [
     { code: '431', name: '人工智慧與健康大數據研究系' },
     { code: '308', name: '國際運動科學專班系' },
@@ -39,26 +41,24 @@ const CourseSearch = () => {
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
     const [grade, setGrade] = useState('');
-    const [courseCategory, setCourseCategory] = useState('');
     const [teacherCode, setTeacherCode] = useState('');
     const [teacherName, setTeacherName] = useState('');
-    const [classCode, setClassCode] = useState('');
-    const [className, setClassName] = useState('');
     const [courseCode, setCourseCode] = useState('');
     const [courseName, setCourseName] = useState('');
     const [roomName, setRoomName] = useState('');
+    const [classCode, setClassCode] = useState('');
+    const [className, setClassName] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [resultsPerPage, setResultsPerPage] = useState(10);
-
+    const [resultsPerPage] = useState(10);
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
     const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
+
     const totalPages = Math.ceil(courses.length / resultsPerPage);
 
-
-    const [selectedCourse, setSelectedCourse] = useState(null); // 當前選中的課程
-    const [isModalOpen, setIsModalOpen] = useState(false); // 控制視窗開啟
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(null);
 
     const toggleAdvancedSearch = () => {
         setAdvancedSearch(!advancedSearch);
@@ -100,6 +100,51 @@ const CourseSearch = () => {
         }
     };
 
+// 匯出功能處理函式
+const handleExport = (format) => {
+    if (courses.length === 0) {
+        alert('請先進行查詢後再匯出！');
+        return;
+    }
+
+    if (format === 'csv') {
+        const csvContent = courses.map(course =>
+            [course.學期, course.系所代碼, course.科目中文名稱, course.授課教師姓名].join(',')
+        ).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.csv';
+        link.click();
+    } else if (format === 'pdf') {
+        const pdf = new jsPDF();
+        pdf.text('課程資料匯出', 20, 20);
+        pdf.autoTable({
+            head: [['學期', '系所代碼', '課程名稱', '授課教師']],
+            body: courses.map(course => [
+                course.學期,
+                course.系所代碼,
+                course.科目中文名稱,
+                course.授課教師姓名
+            ]),
+        });
+        pdf.save('courses.pdf');
+    } else if (format === 'odt') {
+        const odtContent = `<xml version="1.0" encoding="UTF-8">
+            <office:document><body><table>`;
+        const rows = courses.map(course =>
+            `<tr><td>${course.學期}</td><td>${course.系所代碼}</td><td>${course.科目中文名稱}</td></tr>`
+        ).join('');
+        const finalContent = odtContent + rows + `</table></body></office:document>`;
+        const blob = new Blob([finalContent], { type: 'application/vnd.oasis.opendocument.text' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.odt';
+        link.click();
+        }  
+};
 
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
@@ -182,7 +227,14 @@ const CourseSearch = () => {
                         {advancedSearch ? '簡易查詢' : '進階查詢'}
                     </button>
                 </div>
-
+{/* 新增匯出按鈕 */}
+<div className="form-group export-buttons">
+<div>
+                <button onClick={() => handleExport('csv')}>匯出 CSV</button>
+                <button onClick={() => handleExport('pdf')}>匯出 PDF</button>
+                <button onClick={() => handleExport('odt')}>匯出 ODT</button>
+            </div>
+                </div>
                 {advancedSearch && (
                     <div className="advanced-search-vertical">
                         <div className="more-form-group">
