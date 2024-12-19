@@ -1,8 +1,9 @@
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import up from "../../assets/up.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
@@ -30,6 +31,8 @@ const departmentCategories = [
     { code: '113', name: '夜間部護理系' },
 ];
 const CourseSearch = () => {
+    const [showButton, setShowButton] = useState(false);
+
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1131');
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -50,7 +53,7 @@ const CourseSearch = () => {
     const [className, setClassName] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [resultsPerPage] = useState(10);
+    const [resultsPerPage, setResultsPerPage] = useState(10);
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
     const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
@@ -70,7 +73,16 @@ const CourseSearch = () => {
             checked ? [...prev, value] : prev.filter((level) => level !== value)
         );
     };
-
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowButton(window.scrollY > 200);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+    
     const handleSearch = async (e) => {
         e.preventDefault();
 
@@ -124,7 +136,6 @@ const handleExport = (format) => {
             this.addFont('YourFontName.ttf', 'YourFontName', 'normal');
         }]);
         const pdf = new jsPDF();
-        pdf.setFont('YourFontName');
         pdf.text('課程資料匯出', 20, 20);
         pdf.autoTable({
             head: [['學期', '系所代碼', '課程名稱', '授課教師']],
@@ -136,7 +147,7 @@ const handleExport = (format) => {
             ]),
         });
         pdf.save('courses.pdf');
-    } else if (format === 'odt') {
+            } else if (format === 'odt') {
         const odtContent = `
             <?xml version="1.0" encoding="UTF-8"?>
             <office:document-content
@@ -223,7 +234,7 @@ const handleExport = (format) => {
     };
     
     
-
+    
     return (
         <div className="course-search-container">
             <h1 className="course-search-title">課程查詢系統</h1>
@@ -358,16 +369,16 @@ const handleExport = (format) => {
                         <div className="results-per-page">
                             <h4>每頁筆數</h4>
                             <select
-                                value={resultsPerPage}
-                                onChange={(e) => {
-                                    setResultsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                            </select>
+    value={resultsPerPage}
+    onChange={(e) => {
+        setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
+        setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
+    }}
+>
+    <option value={5}>5</option>
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+</select>
                         </div>
                         <div className="pagination-buttons">
                             <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
@@ -428,29 +439,32 @@ const handleExport = (format) => {
                                     <th>更多</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {currentResults.map((course, index) => (
-                                    <tr key={course._id}>
-                                        <td>{index + 1}</td>
-                                        <td>{course.學期}</td>
-                                        <td>{course.系所代碼}</td>
-                                        <td>{course.年級}</td>
-                                        <td>{course.核心四碼}</td>
-                                        <td>{course.科目中文名稱}</td>
-                                        <td>{course.授課教師姓名}</td>
-                                        <td>{course.上課人數}</td>
-                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
-                                        <td>{course.學分數}</td>
-                                        <td>{course.課別名稱}</td>
-                                        <td>
-                                            <button onClick={() => openMoreInfo(course)} className="more-button">
-                                                更多資訊
-                                            </button>
-                                        </td>                                    </tr>
-                                ))}
-                            </tbody>
+
+                            {currentResults.map((course, index) => (
+  <tbody>
+        <tr>
+            <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
+            <td>{course.學期}</td>
+            <td>{course.系所代碼}</td>
+            <td>{course.年級}</td>
+            <td>{course.核心四碼}</td>
+            <td>{course.科目中文名稱}</td>
+            <td>{course.授課教師姓名}</td>
+            <td>{course.上課人數}</td>
+            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
+            <td>{course.學分數}</td>
+            <td>{course.課別名稱}</td>
+            <td>
+                <button onClick={() => openMoreInfo(course)} className="more-button">
+                    更多資訊
+                </button>
+            </td>
+        </tr>
+    </tbody>
+))}
                         </table>
                     </div>
+                
                 </>
             )}
             {/* 更多資訊視窗 */}
@@ -461,7 +475,18 @@ const handleExport = (format) => {
                onAddToFavorites={handleAddToFavorites}
            />
             )}
+            {showButton && (
+            <><button
+                    className="scroll-to-top"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                ><img src={up} alt="up" className="up-image" />
+                    
+                </button></>
+)}
+
+
         </div>
+        
     );
 };
 
