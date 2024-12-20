@@ -50,7 +50,16 @@ const CourseSearch = () => {
         "運動保健系",
         "語言治療與聽力學系"
     ];
+    const [expandedTeachers, setExpandedTeachers] = useState([]);
 
+    const handleToggleExpand = (teacherId) => {
+        setExpandedTeachers((prev) =>
+            prev.includes(teacherId)
+                ? prev.filter((id) => id !== teacherId)
+                : [...prev, teacherId]
+        );
+    };
+    
     const toggleAdvancedSearch = () => {
         setAdvancedSearch(!advancedSearch);
     };
@@ -112,13 +121,13 @@ const CourseSearch = () => {
         );
     };
 
-  const handlePeriodSubmit = () => {
-    const databaseFormat = convertSelectedPeriodsToDatabaseFormat(selectedPeriods);
-    console.log('Database Format:', JSON.stringify(databaseFormat)); // 確認格式是否正確
-    onClose();
-    // 確保上層組件使用 JSON.stringify 傳遞節次數據
-    props.onPeriodSelect(JSON.stringify(databaseFormat));
-};
+    const handlePeriodSubmit = () => {
+        const databaseFormat = convertSelectedPeriodsToDatabaseFormat(selectedPeriods);
+        console.log('Database Format:', JSON.stringify(databaseFormat)); // 確認格式是否正確
+        onClose();
+        // 確保上層組件使用 JSON.stringify 傳遞節次數據
+        props.onPeriodSelect(JSON.stringify(databaseFormat));
+    };
 
 
     const convertWeekdayToChinese = (weekday) => {
@@ -160,7 +169,28 @@ const CourseSearch = () => {
             alert('收藏失敗，請重試');
         }
     };
-
+    const handleClearFilters = () => {
+        setSelectedSemester('');
+        setSearchKeyword('');
+        setEducationLevels([]);
+        setDepartment('');
+        setClassType('');
+        setGrade('');
+        setTeacherCode('');
+        setTeacherName('');
+        setClassCode('');
+        setClassName('');
+        setCourseCode('');
+        setCourseName('');
+        setRoomName('');
+        setSelectedPeriods([]);
+    };
+    const handleClassTypeChange = (value) => {
+        setClassType((prevValue) => (prevValue === value ? '' : value));
+    };
+    const handleGradeChange = (value) => {
+        setGrade((prevValue) => (prevValue === value ? '' : value));
+    };
     return (
         <div className="course-search-container">
             <h1 className="course-search-title">課程查詢系統</h1>
@@ -199,7 +229,7 @@ const CourseSearch = () => {
                                 <label><input type="checkbox" value="二年制" onChange={handleCheckboxChange} /> 二年制</label>
                                 <label><input type="checkbox" value="二年制進修部" onChange={handleCheckboxChange} /> 二年制進修部</label>
                                 <label><input type="checkbox" value="四年制" onChange={handleCheckboxChange} /> 四年制</label>
-                                <label><input type="checkbox" value="學士後學位學程" onChange={handleCheckboxChange} /> 學士後學位學程</label>        
+                                <label><input type="checkbox" value="學士後學位學程" onChange={handleCheckboxChange} /> 學士後學位學程</label>
                                 <label><input type="checkbox" value="學士後系" onChange={handleCheckboxChange} />學士後系</label>
                                 <label><input type="checkbox" value="碩士班" onChange={handleCheckboxChange} /> 碩士班</label>
                                 <label><input type="checkbox" value="博士班" onChange={handleCheckboxChange} /> 博士班</label>
@@ -219,20 +249,20 @@ const CourseSearch = () => {
                         <div className="more-form-group">
                             <label>課別</label>
                             <div>
-                                <label><input type="radio" name="classType" value="通識必修(通識)" onChange={(e) => setClassType(e.target.value)} /> 通識必修</label>
-                                <label><input type="radio" name="classType" value="通識選修(通識)" onChange={(e) => setClassType(e.target.value)} /> 通識選修</label>
-                                <label><input type="radio" name="classType" value="專業必修(系所)" onChange={(e) => setClassType(e.target.value)} /> 專業必修</label>
-                                <label><input type="radio" name="classType" value="專業選修(系所)" onChange={(e) => setClassType(e.target.value)} /> 專業選修</label>
+                                <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修'}onChange={() => handleClassTypeChange('通識必修')} /> 通識必修</label>
+                                <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修'}onChange={() => handleClassTypeChange('通識選修')} /> 通識選修</label>
+                                <label><input type="radio" name="classType" value="專業必修(系所)" checked={classType === '專業必修'}onChange={() => handleClassTypeChange('專業必修')}/> 專業必修</label>
+                                <label><input type="radio" name="classType" value="專業選修(系所)" checked={classType === '專業選修'}onChange={() => handleClassTypeChange('專業選修')} /> 專業選修</label>
                             </div>
                         </div>
 
                         <div className="more-form-group">
                             <label>年級</label>
                             <div>
-                                <label><input type="radio" name="grade" value="1" onChange={(e) => setGrade(e.target.value)} /> 一年級</label>
-                                <label><input type="radio" name="grade" value="2" onChange={(e) => setGrade(e.target.value)} /> 二年級</label>
-                                <label><input type="radio" name="grade" value="3" onChange={(e) => setGrade(e.target.value)} /> 三年級</label>
-                                <label><input type="radio" name="grade" value="4" onChange={(e) => setGrade(e.target.value)} /> 四年級</label>
+                                <label><input type="radio" name="grade" value="1" checked={grade === '一年級'} onChange={() => handleGradeChange('一年級')} /> 一年級</label>
+                                <label><input type="radio" name="grade" value="2" checked={grade === '二年級'} onChange={() => handleGradeChange('二年級')}  /> 二年級</label>
+                                <label><input type="radio" name="grade" value="3" checked={grade === '三年級'} onChange={() => handleGradeChange('三年級')}  /> 三年級</label>
+                                <label><input type="radio" name="grade" value="4" checked={grade === '四年級'} onChange={() => handleGradeChange('四年級')}  /> 四年級</label>
                             </div>
                         </div>
 
@@ -262,8 +292,20 @@ const CourseSearch = () => {
                             <label>教室</label>
                             <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="教室名稱" />
                         </div>
+                        <div className="form-group">
+    <button
+        type="button"
+        onClick={handleClearFilters}
+        className="clear-button"
+    >
+        清除條件
+    </button>
+</div>
+
                     </div>
+                    
                 )}
+                
                 <button type="submit" className="search-button">查詢</button>
             </form>
 
@@ -354,11 +396,23 @@ const CourseSearch = () => {
                                     <tr key={course._id}>
                                         <td>{index + 1}</td>
                                         <td>{course.學期}</td>
-                                        <td>{course.系所代碼}</td>
+                                        <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱}</td>
                                         <td>{course.年級}</td>
-                                        <td>{course.核心四碼}</td>
+                                        <td>{course.科目代碼}</td>
                                         <td>{course.科目中文名稱}</td>
-                                        <td>{course.授課教師姓名}</td>
+                                        <td>
+                                            <span
+                                                className="teacher-name"
+                                                onClick={() => handleToggleExpand(course._id)}
+                                            >
+                                                {expandedTeachers.includes(course._id)
+                                                    ? course.授課教師姓名
+                                                    : course.授課教師姓名.length > 6
+                                                        ? course.授課教師姓名.slice(0, 6) + "..."
+                                                        : course.授課教師姓名}
+                                            </span>
+                                        </td>
+
                                         <td>{course.上課人數}</td>
                                         <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
                                         <td>{course.學分數}</td>
@@ -376,11 +430,11 @@ const CourseSearch = () => {
                 </>
             )}
             {isModalOpen && selectedCourse && (
-               <CourseModal
-               course={selectedCourse}
-               onClose={closeModal}
-               onAddToFavorites={handleAddToFavorites}
-           />
+                <CourseModal
+                    course={selectedCourse}
+                    onClose={closeModal}
+                    onAddToFavorites={handleAddToFavorites}
+                />
             )}
         </div>
     );

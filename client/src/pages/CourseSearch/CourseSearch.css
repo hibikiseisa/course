@@ -355,3 +355,12 @@
 }
 
 
+.teacher-name {
+    cursor: pointer;
+    /* color: #007bff; */
+    text-decoration: underline;
+}
+
+.teacher-name:hover {
+    color: #0056b3;
+}
