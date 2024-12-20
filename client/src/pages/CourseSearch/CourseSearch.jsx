@@ -12,7 +12,6 @@ const CourseSearch = () => {
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
     const [searchKeyword, setSearchKeyword] = useState('');
-    const [courses, setCourses] = useState([]);
     const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
 
@@ -32,7 +31,7 @@ const CourseSearch = () => {
     const [resultsPerPage, setResultsPerPage] = useState(10);
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
-    const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
+    const currentResults = courses?.slice(indexOfFirstResult, indexOfLastResult) || [];
     const totalPages = Math.ceil(courses.length / resultsPerPage);
 
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -52,7 +51,9 @@ const CourseSearch = () => {
         "運動保健系",
         "語言治療與聽力學系"
     ];
+
     const [expandedTeachers, setExpandedTeachers] = useState([]);
+
 
     const handleToggleExpand = (teacherId) => {
         setExpandedTeachers((prev) =>
@@ -61,7 +62,7 @@ const CourseSearch = () => {
                 : [...prev, teacherId]
         );
     };
-    
+
     const toggleAdvancedSearch = () => {
         setAdvancedSearch(!advancedSearch);
     };
@@ -113,62 +114,72 @@ const CourseSearch = () => {
 
         try {
             const response = await axios.get('http://localhost:5000/api/courses', { params });
-            setCourses(response.data);
+            if (response.data && Array.isArray(response.data)) {
+                setCourses(response.data);
+                console.log('Fetched Courses:', response.data);
+
+            } else {
+                setCourses([]); // 保證狀態正確
+                // console.log('Fetched Courses:', response.data);
+
+            }
             setCurrentPage(1);
         } catch (error) {
             console.error('Error fetching courses:', error);
-            setCourses([]);
-            alert('查詢失敗，請檢查輸入條件或伺服器狀態！');
+
+            setCourses([]); // 清空課程資料
+            alert('查詢失敗，請檢查伺服器狀態！');
         }
+
     };
 
-// 匯出功能處理函式
-const handleExport = (format) => {
-    if (courses.length === 0) {
-        alert('請先進行查詢後再匯出！');
-        return;
-    }
+    // 匯出功能處理函式
+    const handleExport = (format) => {
+        if (courses.length === 0) {
+            alert('請先進行查詢後再匯出！');
+            return;
+        }
 
-    if (format === 'csv') {
-        const csvHeader = ['學期', '系所代碼', '年級', '科目代碼', '科目中文名稱', '授課教師姓名', '上課人數', '學分數', '課別名稱', '上課星期/節次'].join(',');
-    
-        const csvContent = courses.map(course =>
-            [
-                course.學期, 
-                course.系所代碼, 
-                course.年級, 
-                course.科目代碼, 
-                course.科目中文名稱, 
-                course.授課教師姓名, 
-                course.上課人數,
-                course.學分數, 
-                course.課別名稱, 
-                `${course.上課星期} ${course.上課節次}`  // 合併「上課星期」和「節次」
-            ].join(',')
-        ).join('\n');
-    
-        const blob = new Blob([`\ufeff${csvHeader}\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'courses.csv';
-        link.click();
-    
+        if (format === 'csv') {
+            const csvHeader = ['學期', '系所代碼', '年級', '科目代碼', '科目中文名稱', '授課教師姓名', '上課人數', '學分數', '課別名稱', '上課星期/節次'].join(',');
+
+            const csvContent = courses.map(course =>
+                [
+                    course.學期,
+                    course.系所代碼,
+                    course.年級,
+                    course.科目代碼,
+                    course.科目中文名稱,
+                    course.授課教師姓名,
+                    course.上課人數,
+                    course.學分數,
+                    course.課別名稱,
+                    `${course.上課星期} ${course.上課節次}`  // 合併「上課星期」和「節次」
+                ].join(',')
+            ).join('\n');
+
+            const blob = new Blob([`\ufeff${csvHeader}\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'courses.csv';
+            link.click();
+
         } else if (format === 'pdf') {
-        const pdf = new jsPDF();
-        pdf.text('課程資料匯出', 20, 20);
-        pdf.autoTable({
-            head: [['學期', '系所代碼', '課程名稱', '授課教師']],
-            body: courses.map(course => [
-                course.學期,
-                course.系所代碼,
-                course.科目中文名稱,
-                course.授課教師姓名
-            ]),
-        });
-        pdf.save('courses.pdf');
-    } else if (format === 'odt') {
-        const odtContent = `
+            const pdf = new jsPDF();
+            pdf.text('課程資料匯出', 20, 20);
+            pdf.autoTable({
+                head: [['學期', '系所代碼', '課程名稱', '授課教師']],
+                body: courses.map(course => [
+                    course.學期,
+                    course.系所代碼,
+                    course.科目中文名稱,
+                    course.授課教師姓名
+                ]),
+            });
+            pdf.save('courses.pdf');
+        } else if (format === 'odt') {
+            const odtContent = `
             <?xml version="1.0" encoding="UTF-8"?>
             <office:document-content
                 xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
@@ -195,14 +206,14 @@ const handleExport = (format) => {
                 </office:body>
             </office:document-content>
         `;
-        const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'courses.odt';
-        link.click();
-    }
-};
+            const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'courses.odt';
+            link.click();
+        }
+    };
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
@@ -311,14 +322,14 @@ const handleExport = (format) => {
                         {advancedSearch ? '簡易查詢' : '進階查詢'}
                     </button>
                 </div>
-{/* 新增匯出按鈕 */}
-<div className="form-group export-buttons">
+                {/* 新增匯出按鈕 */}
+                <div className="form-group export-buttons">
                     <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
                         匯出 CSV
                     </button>
-                    
+
                     <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
-                    <img src={pdf} alt="pdf" className="pdf-image" />
+                        <img src={pdf} alt="pdf" className="pdf-image" />
                     </button>
                     <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
                         匯出 ODT
@@ -352,10 +363,10 @@ const handleExport = (format) => {
                         <div className="more-form-group">
                             <label>課別</label>
                             <div>
-                                <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修'}onChange={() => handleClassTypeChange('通識必修')} /> 通識必修</label>
-                                <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修'}onChange={() => handleClassTypeChange('通識選修')} /> 通識選修</label>
-                                <label><input type="radio" name="classType" value="專業必修(系所)" checked={classType === '專業必修'}onChange={() => handleClassTypeChange('專業必修')}/> 專業必修</label>
-                                <label><input type="radio" name="classType" value="專業選修(系所)" checked={classType === '專業選修'}onChange={() => handleClassTypeChange('專業選修')} /> 專業選修</label>
+                                <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修'} onChange={() => handleClassTypeChange('通識必修')} /> 通識必修</label>
+                                <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修'} onChange={() => handleClassTypeChange('通識選修')} /> 通識選修</label>
+                                <label><input type="radio" name="classType" value="專業必修(系所)" checked={classType === '專業必修'} onChange={() => handleClassTypeChange('專業必修')} /> 專業必修</label>
+                                <label><input type="radio" name="classType" value="專業選修(系所)" checked={classType === '專業選修'} onChange={() => handleClassTypeChange('專業選修')} /> 專業選修</label>
                             </div>
                         </div>
 
@@ -363,9 +374,9 @@ const handleExport = (format) => {
                             <label>年級</label>
                             <div>
                                 <label><input type="radio" name="grade" value="1" checked={grade === '一年級'} onChange={() => handleGradeChange('一年級')} /> 一年級</label>
-                                <label><input type="radio" name="grade" value="2" checked={grade === '二年級'} onChange={() => handleGradeChange('二年級')}  /> 二年級</label>
-                                <label><input type="radio" name="grade" value="3" checked={grade === '三年級'} onChange={() => handleGradeChange('三年級')}  /> 三年級</label>
-                                <label><input type="radio" name="grade" value="4" checked={grade === '四年級'} onChange={() => handleGradeChange('四年級')}  /> 四年級</label>
+                                <label><input type="radio" name="grade" value="2" checked={grade === '二年級'} onChange={() => handleGradeChange('二年級')} /> 二年級</label>
+                                <label><input type="radio" name="grade" value="3" checked={grade === '三年級'} onChange={() => handleGradeChange('三年級')} /> 三年級</label>
+                                <label><input type="radio" name="grade" value="4" checked={grade === '四年級'} onChange={() => handleGradeChange('四年級')} /> 四年級</label>
                             </div>
                         </div>
 
@@ -396,19 +407,19 @@ const handleExport = (format) => {
                             <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="教室名稱" />
                         </div>
                         <div className="form-group">
-    <button
-        type="button"
-        onClick={handleClearFilters}
-        className="clear-button"
-    >
-        清除條件
-    </button>
-</div>
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="clear-button"
+                            >
+                                清除條件
+                            </button>
+                        </div>
 
                     </div>
-                    
+
                 )}
-                
+
                 <button type="submit" className="search-button">查詢</button>
             </form>
 
