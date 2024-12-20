@@ -512,38 +512,46 @@ const CourseSearch = () => {
                             </thead>
                            
                             {currentResults.map((course, index) => (
-                                 <tbody>
-                                     <tr>
-                                     <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
-                                        <td>{course.學期}</td>
-                                        <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱}</td>
-                                        <td>{course.年級}</td>
-                                        <td>{course.科目代碼}</td>
-                                        <td>{course.科目中文名稱}</td>
-                                        <td>
-                                            <span
-                                                className="teacher-name"
-                                                onClick={() => handleToggleExpand(course._id)}
-                                            >
-                                                {expandedTeachers.includes(course._id)
-                                                    ? course.授課教師姓名
-                                                    : course.授課教師姓名.length > 6
-                                                        ? course.授課教師姓名.slice(0, 6) + "..."
-                                                        : course.授課教師姓名}
-                                            </span>
-                                        </td>
-
-                                        <td>{course.上課人數}</td>
-                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
-                                        <td>{course.學分數}</td>
-                                        <td>{course.課別名稱}</td>
-                                        <td>
-                                            <button onClick={() => openMoreInfo(course)} className="more-button">
-                                                更多資訊
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
+                              <tbody>
+                              {currentResults?.length > 0 ? (
+                                currentResults.map((course, index) => (
+                                  <tr key={course._id}>
+                                    <td>{index + 1}</td>
+                                    <td>{course.學期 || "未提供"}</td>
+                                    <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
+                                    <td>{course.年級 || "未提供"}</td>
+                                    <td>{course.科目代碼 || "未提供"}</td>
+                                    <td>{course.科目中文名稱 || "未提供"}</td>
+                                    <td>
+                                      <span
+                                        className="teacher-name"
+                                        onClick={() => handleToggleExpand(course._id)}
+                                      >
+                                        {expandedTeachers.includes(course._id)
+                                          ? course.授課教師姓名
+                                          : course.授課教師姓名?.length > 6
+                                          ? course.授課教師姓名.slice(0, 6) + "..."
+                                          : course.授課教師姓名 || "未提供"}
+                                      </span>
+                                    </td>
+                                    <td>{course.上課人數 || "未提供"}</td>
+                                    <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
+                                    <td>{course.學分數 || "未提供"}</td>
+                                    <td>{course.課別名稱 || "未提供"}</td>
+                                    <td>
+                                      <button onClick={() => openMoreInfo(course)} className="more-button">
+                                        更多資訊
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan="12">暫無資料</td>
+                                </tr>
+                              )}
+                            </tbody>
+                            
                                 ))}
                             
                         </table>
