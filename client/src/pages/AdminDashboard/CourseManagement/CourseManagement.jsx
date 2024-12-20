@@ -259,33 +259,33 @@ const CourseManagement = () => {
     </tr>
   </thead>
   <tbody>
-    {filteredCourses.length > 0 ? (
-      filteredCourses.map((course) => (
-        <tr key={course.id}>
-          <td>
-            <input
-              type="checkbox"
-              checked={selectedCourses.includes(course.id)}
-              onChange={() => handleRowSelect(course.id)}
-            />
-          </td>
-          <td>{course.id}</td>
-          <td>{course.name} ({course.credits})</td>
-          <td>{course.department}</td>
-          <td>{course.teacher}</td>
-          <td>
-            <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
-          </td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan="6" className="no-results">
-          無課程
+  {filteredCourses.length > 0 ? (
+    filteredCourses.map((course) => (
+      <tr key={course.id}> {/* Added the key prop here */}
+        <td>
+          <input
+            type="checkbox"
+            checked={selectedCourses.includes(course.id)}
+            onChange={() => handleRowSelect(course.id)}
+          />
+        </td>
+        <td>{course.科目代碼}</td>
+        <td>{course.科目中文名稱} ({course.學分數})</td>
+        <td>{course.系所代碼}</td>
+        <td>{course.主開課教師姓名}</td>
+        <td>
+          <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
         </td>
       </tr>
-    )}
-  </tbody>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="no-results">
+        無課程
+      </td>
+    </tr>
+  )}
+</tbody>
 </table>
 
       <div className="data-count">總共 {filteredCourses.length} 筆資料</div>
@@ -295,11 +295,11 @@ const CourseManagement = () => {
           <div className="modal-content">
             <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
             <div className="modal-form">
-              <label>科目代號: <input type="text" name="id" value={courseDetails.id} onChange={handleInputChange} required /></label>
-              <label>課程名稱: <input type="text" name="name" value={courseDetails.name} onChange={handleInputChange} required /></label>
-              <label>學分: <input type="number" name="credits" value={courseDetails.credits} onChange={handleInputChange} required /></label>
+              <label>科目代號: <input type="text" name="id" value={courseDetails.科目代碼} onChange={handleInputChange} required /></label>
+              <label>課程名稱: <input type="text" name="name" value={courseDetails.科目中文名稱} onChange={handleInputChange} required /></label>
+              <label>學分: <input type="number" name="credits" value={courseDetails.學分數} onChange={handleInputChange} required /></label>
               <label>系所:
-                <select name="department" value={courseDetails.department} onChange={handleInputChange}>
+                <select name="department" value={courseDetails.系所代碼} onChange={handleInputChange}>
                   <option value="">選擇系所</option>
                   <option value="資訊管理系">資訊管理系</option>
                   <option value="護理系">護理系</option>
@@ -307,14 +307,14 @@ const CourseManagement = () => {
                 </select>
               </label>
               <label>學期:
-                <select name="term" value={courseDetails.term} onChange={handleInputChange}>
+                <select name="term" value={courseDetails.學期} onChange={handleInputChange}>
                   <option value="">選擇學期</option>
                   <option value="113上">113上</option>
                   <option value="112下">112下</option>
                   <option value="112上">112上</option>
                 </select>
               </label>
-              <label>教師: <input type="text" name="teacher" value={courseDetails.teacher} onChange={handleInputChange} /></label>
+              <label>教師: <input type="text" name="teacher" value={courseDetails.主開課教師姓名} onChange={handleInputChange} /></label>
               <label>學制:
                 <select name="program" value={courseDetails.program} onChange={handleInputChange}>
                   <option value="">選擇學制</option>
@@ -324,7 +324,7 @@ const CourseManagement = () => {
               </label>
 
               <label>年級:
-                <select name="grade" value={courseDetails.grade} onChange={handleInputChange}>
+                <select name="grade" value={courseDetails.年級} onChange={handleInputChange}>
                   <option value="">選擇年級</option>
                   <option value="一年級">一年級</option>
                   <option value="二年級">二年級</option>
@@ -333,7 +333,7 @@ const CourseManagement = () => {
               </label>
 
               <label>課別:
-                <select name="course" value={courseDetails.course} onChange={handleInputChange}>
+                <select name="course" value={courseDetails.課別名稱} onChange={handleInputChange}>
                   <option value="">選擇課別</option>
                   <option value="通識必修">通識必修</option>
                   <option value="通識選修">通識選修</option>

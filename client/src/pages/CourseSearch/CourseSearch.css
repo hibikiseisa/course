@@ -336,4 +336,22 @@
     background-color: #c9302c;
 }
 
+.scroll-to-top {
+    position: fixed;
+    bottom: 10px;
+    right: 50px;
+    width: 30px; /* 設置按鈕大小 */
+    height: 50px;
+    border: none; /* 移除邊框 */
+    display: flex; /* 讓內容居中對齊 */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 增加陰影 */
+    z-index: 1000; /* 確保在最上層 */
+}
+.scroll-to-top img {
+    filter: opacity(0.5); /* 調整透明度，0.6 是圖片變淡的例子 */
+}
+
 

@@ -1,10 +1,13 @@
 import axios from 'axios';
-import React, { useState } from 'react';
-
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import up from "../../assets/up.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
+
 const departmentCategories = [
     { code: '431', name: '人工智慧與健康大數據研究系' },
     { code: '308', name: '國際運動科學專班系' },
@@ -28,6 +31,8 @@ const departmentCategories = [
     { code: '113', name: '夜間部護理系' },
 ];
 const CourseSearch = () => {
+    const [showButton, setShowButton] = useState(false);
+
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1131');
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -39,26 +44,24 @@ const CourseSearch = () => {
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
     const [grade, setGrade] = useState('');
-    const [courseCategory, setCourseCategory] = useState('');
     const [teacherCode, setTeacherCode] = useState('');
     const [teacherName, setTeacherName] = useState('');
-    const [classCode, setClassCode] = useState('');
-    const [className, setClassName] = useState('');
     const [courseCode, setCourseCode] = useState('');
     const [courseName, setCourseName] = useState('');
     const [roomName, setRoomName] = useState('');
+    const [classCode, setClassCode] = useState('');
+    const [className, setClassName] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
     const [resultsPerPage, setResultsPerPage] = useState(10);
-
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
     const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
+
     const totalPages = Math.ceil(courses.length / resultsPerPage);
 
-
-    const [selectedCourse, setSelectedCourse] = useState(null); // 當前選中的課程
-    const [isModalOpen, setIsModalOpen] = useState(false); // 控制視窗開啟
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(null);
 
     const toggleAdvancedSearch = () => {
         setAdvancedSearch(!advancedSearch);
@@ -70,7 +73,16 @@ const CourseSearch = () => {
             checked ? [...prev, value] : prev.filter((level) => level !== value)
         );
     };
-
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowButton(window.scrollY > 200);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+    
     const handleSearch = async (e) => {
         e.preventDefault();
 
@@ -100,7 +112,77 @@ const CourseSearch = () => {
         }
     };
 
+// 匯出功能處理函式
+const handleExport = (format) => {
+    if (courses.length === 0) {
+        alert('請先進行查詢後再匯出！');
+        return;
+    }
 
+    if (format === 'csv') {
+        
+        const csvContent = courses.map(course =>
+            [course.學期, course.系所代碼, course.科目中文名稱, course.授課教師姓名].join(',')
+        ).join('\n');
+        const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.csv';
+        link.click();
+    } else if (format === 'pdf') {
+        jsPDF.API.events.push(['addFont', function () {
+            this.addFileToVFS('YourFontName.ttf', font);
+            this.addFont('YourFontName.ttf', 'YourFontName', 'normal');
+        }]);
+        const pdf = new jsPDF();
+        pdf.text('課程資料匯出', 20, 20);
+        pdf.autoTable({
+            head: [['學期', '系所代碼', '課程名稱', '授課教師']],
+            body: courses.map(course => [
+                course.學期,
+                course.系所代碼,
+                course.科目中文名稱,
+                course.授課教師姓名
+            ]),
+        });
+        pdf.save('courses.pdf');
+            } else if (format === 'odt') {
+        const odtContent = `
+            <?xml version="1.0" encoding="UTF-8"?>
+            <office:document-content
+                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
+                <office:body>
+                    <office:spreadsheet>
+                        <table:table table:name="Courses">
+                            <table:table-row>
+                                <table:table-cell><text:p>學期</text:p></table:table-cell>
+                                <table:table-cell><text:p>系所代碼</text:p></table:table-cell>
+                                <table:table-cell><text:p>課程名稱</text:p></table:table-cell>
+                                <table:table-cell><text:p>授課教師</text:p></table:table-cell>
+                            </table:table-row>
+                            ${courses.map(course => `
+                                <table:table-row>
+                                    <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
+                                </table:table-row>`).join('')}
+                        </table:table>
+                    </office:spreadsheet>
+                </office:body>
+            </office:document-content>
+        `;
+        const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.odt';
+        link.click();
+    }
+};
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
@@ -152,7 +234,7 @@ const CourseSearch = () => {
     };
     
     
-
+    
     return (
         <div className="course-search-container">
             <h1 className="course-search-title">課程查詢系統</h1>
@@ -182,7 +264,19 @@ const CourseSearch = () => {
                         {advancedSearch ? '簡易查詢' : '進階查詢'}
                     </button>
                 </div>
-
+{/* 新增匯出按鈕 */}
+<div className="form-group export-buttons">
+                    <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
+                        匯出 CSV
+                    </button>
+                    
+                    <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
+                        匯出 PDF
+                    </button>
+                    <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
+                        匯出 ODT
+                    </button>
+                </div>
                 {advancedSearch && (
                     <div className="advanced-search-vertical">
                         <div className="more-form-group">
@@ -273,19 +367,18 @@ const CourseSearch = () => {
                 <>
                     <div className="pagination-controls">
                         <div className="results-per-page">
-                            <h4>每頁顯示</h4>
+                            <h4>每頁筆數</h4>
                             <select
-                                value={resultsPerPage}
-                                onChange={(e) => {
-                                    setResultsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                            </select>
-                            <h4>個結果</h4>
+    value={resultsPerPage}
+    onChange={(e) => {
+        setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
+        setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
+    }}
+>
+    <option value={5}>5</option>
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+</select>
                         </div>
                         <div className="pagination-buttons">
                             <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
@@ -324,6 +417,7 @@ const CourseSearch = () => {
                                     if (page >= 1 && page <= totalPages) setCurrentPage(page);
                                 }}
                             />
+                             <span> / 共 {courses.length} 筆結果</span>
                         </div>
                     </div>
 
@@ -345,29 +439,32 @@ const CourseSearch = () => {
                                     <th>更多</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {currentResults.map((course, index) => (
-                                    <tr key={course._id}>
-                                        <td>{index + 1}</td>
-                                        <td>{course.學期}</td>
-                                        <td>{course.系所代碼}</td>
-                                        <td>{course.年級}</td>
-                                        <td>{course.核心四碼}</td>
-                                        <td>{course.科目中文名稱}</td>
-                                        <td>{course.授課教師姓名}</td>
-                                        <td>{course.上課人數}</td>
-                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
-                                        <td>{course.學分數}</td>
-                                        <td>{course.課別名稱}</td>
-                                        <td>
-                                            <button onClick={() => openMoreInfo(course)} className="more-button">
-                                                更多資訊
-                                            </button>
-                                        </td>                                    </tr>
-                                ))}
-                            </tbody>
+
+                            {currentResults.map((course, index) => (
+  <tbody>
+        <tr>
+            <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
+            <td>{course.學期}</td>
+            <td>{course.系所代碼}</td>
+            <td>{course.年級}</td>
+            <td>{course.核心四碼}</td>
+            <td>{course.科目中文名稱}</td>
+            <td>{course.授課教師姓名}</td>
+            <td>{course.上課人數}</td>
+            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次}</td>
+            <td>{course.學分數}</td>
+            <td>{course.課別名稱}</td>
+            <td>
+                <button onClick={() => openMoreInfo(course)} className="more-button">
+                    更多資訊
+                </button>
+            </td>
+        </tr>
+    </tbody>
+))}
                         </table>
                     </div>
+                
                 </>
             )}
             {/* 更多資訊視窗 */}
@@ -378,7 +475,18 @@ const CourseSearch = () => {
                onAddToFavorites={handleAddToFavorites}
            />
             )}
+            {showButton && (
+            <><button
+                    className="scroll-to-top"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                ><img src={up} alt="up" className="up-image" />
+                    
+                </button></>
+)}
+
+
         </div>
+        
     );
 };
 
