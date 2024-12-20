@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import pdf from "../../assets/pdf.png"; // 确保图片路径正确
+
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
@@ -112,6 +114,87 @@ const CourseSearch = () => {
         }
     };
 
+// 匯出功能處理函式
+const handleExport = (format) => {
+    if (courses.length === 0) {
+        alert('請先進行查詢後再匯出！');
+        return;
+    }
+
+    if (format === 'csv') {
+        const csvHeader = ['學期', '系所代碼', '年級', '科目代碼', '科目中文名稱', '授課教師姓名', '上課人數', '學分數', '課別名稱', '上課星期/節次'].join(',');
+    
+        const csvContent = courses.map(course =>
+            [
+                course.學期, 
+                course.系所代碼, 
+                course.年級, 
+                course.科目代碼, 
+                course.科目中文名稱, 
+                course.授課教師姓名, 
+                course.上課人數,
+                course.學分數, 
+                course.課別名稱, 
+                `${course.上課星期} ${course.上課節次}`  // 合併「上課星期」和「節次」
+            ].join(',')
+        ).join('\n');
+    
+        const blob = new Blob([`\ufeff${csvHeader}\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.csv';
+        link.click();
+    
+        } else if (format === 'pdf') {
+        const pdf = new jsPDF();
+        pdf.text('課程資料匯出', 20, 20);
+        pdf.autoTable({
+            head: [['學期', '系所代碼', '課程名稱', '授課教師']],
+            body: courses.map(course => [
+                course.學期,
+                course.系所代碼,
+                course.科目中文名稱,
+                course.授課教師姓名
+            ]),
+        });
+        pdf.save('courses.pdf');
+    } else if (format === 'odt') {
+        const odtContent = `
+            <?xml version="1.0" encoding="UTF-8"?>
+            <office:document-content
+                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
+                <office:body>
+                    <office:spreadsheet>
+                        <table:table table:name="Courses">
+                            <table:table-row>
+                                <table:table-cell><text:p>學期</text:p></table:table-cell>
+                                <table:table-cell><text:p>系所代碼</text:p></table:table-cell>
+                                <table:table-cell><text:p>課程名稱</text:p></table:table-cell>
+                                <table:table-cell><text:p>授課教師</text:p></table:table-cell>
+                            </table:table-row>
+                            ${courses.map(course => `
+                                <table:table-row>
+                                    <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
+                                    <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
+                                </table:table-row>`).join('')}
+                        </table:table>
+                    </office:spreadsheet>
+                </office:body>
+            </office:document-content>
+        `;
+        const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'courses.odt';
+        link.click();
+    }
+};
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
@@ -220,7 +303,19 @@ const CourseSearch = () => {
                         {advancedSearch ? '簡易查詢' : '進階查詢'}
                     </button>
                 </div>
-
+{/* 新增匯出按鈕 */}
+<div className="form-group export-buttons">
+                    <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
+                        匯出 CSV
+                    </button>
+                    
+                    <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
+                    <img src={pdf} alt="pdf" className="pdf-image" />
+                    </button>
+                    <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
+                        匯出 ODT
+                    </button>
+                </div>
                 {advancedSearch && (
                     <div className="advanced-search-vertical">
                         <div className="more-form-group">
