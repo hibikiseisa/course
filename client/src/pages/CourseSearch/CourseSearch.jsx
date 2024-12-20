@@ -6,8 +6,12 @@ import up from "../../assets/up.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const CourseSearch = () => {
+    const [courses, setCourses] = useState([]);
+
     const [showButton, setShowButton] = useState(false);
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
