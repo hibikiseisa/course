@@ -1,13 +1,14 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import pdf from "../../assets/pdf.png"; // 确保图片路径正确
-
+import up from "../../assets/up.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
 
 const CourseSearch = () => {
+    const [showButton, setShowButton] = useState(false);
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -29,7 +30,6 @@ const CourseSearch = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [resultsPerPage, setResultsPerPage] = useState(10);
-
     const indexOfLastResult = currentPage * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
     const currentResults = courses.slice(indexOfFirstResult, indexOfLastResult);
@@ -72,7 +72,15 @@ const CourseSearch = () => {
             checked ? [...prev, value] : prev.filter((level) => level !== value)
         );
     };
-
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowButton(window.scrollY > 200);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
     const handleSearch = async (e) => {
         e.preventDefault();
 
@@ -412,20 +420,20 @@ const handleExport = (format) => {
             />
             {courses.length > 0 && (
                 <>
-                    <div className="pagination-controls">
+                     <div className="pagination-controls">
                         <div className="results-per-page">
-                            <h4>每頁顯示</h4>
+                            <h4>每頁筆數</h4>
                             <select
-                                value={resultsPerPage}
-                                onChange={(e) => {
-                                    setResultsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                            </select>
+                                     value={resultsPerPage}
+                                     onChange={(e) => {
+                                         setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
+                                         setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
+                                     }}
+                                 >
+                                     <option value={5}>5</option>
+                                     <option value={10}>10</option>
+                                     <option value={20}>20</option>
+                                 </select>
                             <h4>個結果</h4>
                         </div>
                         <div className="pagination-buttons">
@@ -465,6 +473,7 @@ const handleExport = (format) => {
                                     if (page >= 1 && page <= totalPages) setCurrentPage(page);
                                 }}
                             />
+                             <span> / 共 {courses.length} 筆結果</span>
                         </div>
                     </div>
 
@@ -486,10 +495,11 @@ const handleExport = (format) => {
                                     <th>更多</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {currentResults.map((course, index) => (
-                                    <tr key={course._id}>
-                                        <td>{index + 1}</td>
+                           
+                            {currentResults.map((course, index) => (
+                                 <tbody>
+                                     <tr>
+                                     <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
                                         <td>{course.學期}</td>
                                         <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱}</td>
                                         <td>{course.年級}</td>
@@ -518,8 +528,9 @@ const handleExport = (format) => {
                                             </button>
                                         </td>
                                     </tr>
+                                    </tbody>
                                 ))}
-                            </tbody>
+                            
                         </table>
                     </div>
                 </>
@@ -531,6 +542,15 @@ const handleExport = (format) => {
                     onAddToFavorites={handleAddToFavorites}
                 />
             )}
+            {showButton && (
+            <><button
+                    className="scroll-to-top"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                ><img src={up} alt="up" className="up-image" />
+                    
+                </button></>
+)}
+        
         </div>
     );
 };
