@@ -3,7 +3,9 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import pdf from "../../assets/pdf.png"; // 确保图片路径正确
 import up from "../../assets/up.png"; // 确保图片路径正确
+
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
@@ -120,21 +122,31 @@ const handleExport = (format) => {
     }
 
     if (format === 'csv') {
-        
+        const csvHeader = ['學期', '系所代碼', '年級', '科目代碼', '科目中文名稱', '授課教師姓名', '上課人數', '學分數', '課別名稱', '上課星期/節次'].join(',');
+    
         const csvContent = courses.map(course =>
-            [course.學期, course.系所代碼, course.科目中文名稱, course.授課教師姓名].join(',')
+            [
+                course.學期, 
+                course.系所代碼, 
+                course.年級, 
+                course.科目代碼, 
+                course.科目中文名稱, 
+                course.授課教師姓名, 
+                course.上課人數,
+                course.學分數, 
+                course.課別名稱, 
+                `${course.上課星期} ${course.上課節次}`  // 合併「上課星期」和「節次」
+            ].join(',')
         ).join('\n');
-        const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    
+        const blob = new Blob([`\ufeff${csvHeader}\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'courses.csv';
         link.click();
-    } else if (format === 'pdf') {
-        jsPDF.API.events.push(['addFont', function () {
-            this.addFileToVFS('YourFontName.ttf', font);
-            this.addFont('YourFontName.ttf', 'YourFontName', 'normal');
-        }]);
+    
+        } else if (format === 'pdf') {
         const pdf = new jsPDF();
         pdf.text('課程資料匯出', 20, 20);
         pdf.autoTable({
@@ -147,7 +159,7 @@ const handleExport = (format) => {
             ]),
         });
         pdf.save('courses.pdf');
-            } else if (format === 'odt') {
+    } else if (format === 'odt') {
         const odtContent = `
             <?xml version="1.0" encoding="UTF-8"?>
             <office:document-content
@@ -271,7 +283,7 @@ const handleExport = (format) => {
                     </button>
                     
                     <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
-                        匯出 PDF
+                    <img src={pdf} alt="pdf" className="pdf-image" />
                     </button>
                     <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
                         匯出 ODT
