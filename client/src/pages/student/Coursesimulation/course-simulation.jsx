@@ -14,8 +14,10 @@ const CourseSimulation = () => {
   const [selectedPeriod, setSelectedPeriod] = useState(''); // 存放當前選擇的節次
   const [conflictInfo, setConflictInfo] = useState(null); // 正確初始化
   const [originalSchedule, setOriginalSchedule] = useState({});
-  const userId = localStorage.getItem('id') || 'defaultUserId';
 
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState('');
+  const userId = localStorage.getItem('id') || 'defaultUserId';
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -30,7 +32,7 @@ const CourseSimulation = () => {
             formattedSchedule[key] = {
               courseId: item.courseId, // 課程ID
               courseName: item.courseName, // 課程名稱
-              teacher: item.teacher // 授課教師（可選）
+              teacher: item.teacher ,// 授課教師（可選）
             };
           });
         });
@@ -103,6 +105,11 @@ const CourseSimulation = () => {
     }
   };
 
+  // 動態篩選課程
+  const filteredCourses = availableCourses.filter((course) =>
+    course.科目中文名稱.includes(searchKeyword) ||
+    course.授課教師姓名.includes(searchKeyword)
+  );
   const handleCourseSelect = (course) => {
     const selected = availableCourses.find((c) => c._id === course._id) || course;
 
@@ -220,6 +227,16 @@ const CourseSimulation = () => {
     setIsEditMode(false);
     alert('更改已取消，恢復到原始課表！');
   };
+  const filteredMyCourses = myCourses.filter(
+    (course) =>
+      (course.科目中文名稱.includes(searchKeyword) || course.授課教師姓名.includes(searchKeyword))
+  );
+
+  const filteredAvailableCourses = availableCourses.filter(
+    (course) =>
+   
+      (course.科目中文名稱.includes(searchKeyword) || course.授課教師姓名.includes(searchKeyword))
+  );
 
   return (
     <div className="course-simulation-container">
@@ -300,40 +317,66 @@ const CourseSimulation = () => {
         <div className="popup">
           <div className="popup-content">
             <h2>選擇課程</h2>
+            {/* 學年期選擇 */}
+            {/* <div className="form-group">
+              <label htmlFor="semester-select">學年期</label>
+              <select
+                id="semester-select"
+                value={selectedSemester}
+                onChange={(e) => setSelectedSemester(e.target.value)}
+              >
+                <option value="">所有學年期</option>
+                <option value="1132">1132</option>
+                <option value="1131">1131</option>
+                <option value="1122">1122</option>
+                <option value="1121">1121</option>
+              </select>
+            </div> */}
+            <div className="form-group">
+              <label htmlFor="keyword-search">關鍵字查詢</label>
+              <input
+                id="keyword-search"
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="請輸入課程名稱或教師名稱"
+              />
+            </div>
+
             <div className="course-section">
               <h3>我的收藏課程</h3>
-              {myCourses.length > 0 ? (
-                myCourses.map((course) => (
-                  <label key={course._id}>
-                    <input
-                      type="radio"
-                      name="course"
-                      value={course.科目中文名稱}
-                      onChange={() => setSelectedCourse(course.科目中文名稱)}
-                    />
-                    {course.科目中文名稱} ({course.授課教師姓名})
-                  </label>
-                ))
-              ) : (
-                <p>沒有收藏課程</p>
-              )}
-            </div>
-            <div className="course-section">
-              <h3>可選課程</h3>
-              {availableCourses.length > 0 ? (
-                availableCourses.map((course) => (
+              {filteredMyCourses.length > 0 ? (
+                filteredMyCourses.map((course) => (
                   <label key={course._id}>
                     <input
                       type="radio"
                       name="course"
                       value={course._id}
-                      onChange={() => setSelectedCourse(course)} // 儲存整個課程物件
+                      onChange={() => setSelectedCourse(course)}
                     />
                     {course.科目中文名稱} ({course.授課教師姓名})
                   </label>
                 ))
               ) : (
-                <p>沒有可選課程</p>
+                <p>沒有符合條件的收藏課程</p>
+              )}
+            </div>
+            <div className="course-section">
+              <h3>可選課程</h3>
+              {filteredAvailableCourses.length > 0 ? (
+                filteredAvailableCourses.map((course) => (
+                  <label key={course._id}>
+                    <input
+                      type="radio"
+                      name="course"
+                      value={course._id}
+                      onChange={() => setSelectedCourse(course)}
+                    />
+                    {course.科目中文名稱} ({course.授課教師姓名})
+                  </label>
+                ))
+              ) : (
+                <p>沒有符合條件的課程</p>
               )}
             </div>
 
