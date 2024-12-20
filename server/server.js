@@ -243,191 +243,102 @@ app.delete('/api/accounts/:id', async (req, res) => {
 
 
 
-const courseSchema = new mongoose.Schema({
-    編號: String,
-    學期: String,
-    主開課教師姓名: String,
-    科目代碼: String,
-    系所代碼: String,
-    核心四碼: String,
-    科目組別: String,
-    年級: String,
-    上課班組: String,
-    科目中文名稱: String,
-    授課教師姓名: String,
-    上課人數: String,
-    男學生上課人數: String,
-    女學生上課人數: String,
-    學分數: String,
-    上課週次: String,
-    上課時數: String,
-    課別代碼: String,
-    課別名稱: String,
-    上課地點: String,
-    上課星期: String,
-    上課節次: String,
-    課表備註: String,
-    課程中文摘要: String, // 新增課程中文摘要欄位
-    課程英文摘要: String
-}, { collection: 'courses' });
+const courseSchema = new mongoose.Schema(
+    {
+        編號: String,
+        學期: String,
+        主開課教師姓名: String,
+        課程全碼: String, // 更新為新的欄位名稱
+        系所代碼: String,
+        系所名稱: String, // 新增
+        學制: String,     // 新增
+        科目代碼: String,
+        科目組別: String,
+        年級: String,
+        上課班組: String,
+        科目中文名稱: String,
+        科目英文名稱: String, // 新增
+        授課教師姓名: String,
+        上課人數: String,
+        男學生上課人數: String,
+        女學生上課人數: String,
+        學分數: String,
+        上課週次: String,
+        上課時數: String, // 修改名稱
+        課別代碼: String,
+        課別名稱: String,
+        上課地點: String,
+        上課星期: String,
+        上課節次: String,
+        課表備註: String,
+        課程中文摘要: String, // 新增課程中文摘要欄位
+        課程英文摘要: String, // 新增課程英文摘要欄位
+        授課教師代碼: String, // 新增欄位
+    },
+    { collection: 'courses' }
+);
+
+module.exports = mongoose.model('Course', courseSchema);
+
 const Course = mongoose.model('Course', courseSchema);
 
-// app.get('/api/courses', async (req, res) => {
-
-
-
-//     const {
-//         semester, // 必填
-//         keyword,
-//         educationLevels,
-//         department,
-//         classType,
-//         grade,
-//         period,
-//         courseCategory,
-//         teacherCode,
-//         teacherName,
-//         classCode,
-//         className,
-//         courseCode,
-//         courseName,
-//         roomName,
-//     } = req.query;
-
-//     // 初始化查詢條件
-//     let query = {};
-
-//     // 必填條件：學期
-//     if (semester) {
-//         query.學期 = semester;
-//     } else {
-//         return res.status(400).json({ error: '缺少學期參數' });
-//     }
-
-//     // 可選條件：動態加入條件
-//     if (keyword) {
-//         query.$or = [
-//             { 科目中文名稱: { $regex: keyword, $options: 'i' } },
-//             { 授課教師姓名: { $regex: keyword, $options: 'i' } },
-//             { 課程中文摘要: { $regex: keyword, $options: 'i' } },
-//         ];
-//     }
-
-//     if (educationLevels) {
-//         query.學制 = { $in: educationLevels.split(',') };
-//     }
-
-//     if (department) {
-//         query.系所代碼 = { $regex: `^${department}`, $options: 'i' }; // 模糊匹配
-//     }
-
-//     if (classType) {
-//         query.課別名稱 = classType;
-//     }
-
-//     if (grade) {
-//         query.年級 = grade;
-//     }
-
-//     if (period) {
-//         const periodConditions = period.split(',').map((p) => {
-//             const [day, session] = p.split('-');
-//             return { 上課星期: day, 上課節次: session };
-//         });
-//         query.$and = periodConditions;
-//     }
-
-//     if (courseCategory) {
-//         query.科目組別 = courseCategory;
-//     }
-
-//     if (teacherCode) {
-//         query.教師代碼 = teacherCode;
-//     }
-
-//     if (teacherName) {
-//         query.授課教師姓名 = { $regex: teacherName, $options: 'i' };
-//     }
-
-//     if (classCode) {
-//         query.上課班組 = { $regex: classCode, $options: 'i' };
-//     }
-
-//     if (className) {
-//         query.班級名稱 = { $regex: className, $options: 'i' };
-//     }
-
-//     if (courseCode) {
-//         query.科目代碼 = { $regex: courseCode, $options: 'i' };
-//     }
-
-//     if (courseName) {
-//         query.科目中文名稱 = { $regex: courseName, $options: 'i' };
-//     }
-
-//     if (roomName) {
-//         query.上課地點 = { $regex: roomName, $options: 'i' };
-//     }
-
-//     try {
-//         // 查詢資料庫
-//         const courses = await Course.find(query);
-
-//         // 如果沒有符合的課程，回傳特定訊息
-//         if (courses.length === 0) {
-//             return res.status(404).json({ message: '沒有符合條件的課程' });
-//         }
-
-//         // 回傳查詢結果
-//         res.status(200).json(courses);
-//     } catch (error) {
-//         console.error('查詢課程失敗:', error);
-//         res.status(500).json({ error: '無法查詢課程' });
-//     }
-// });
-
-
-
-// 啟動伺服器
-
 app.get('/api/courses', async (req, res) => {
-    const {
-        semester, keyword, department, grade,
-        classType, teacherName, courseCode, roomName, period
-    } = req.query;
-
-    // 初始化查詢條件
-    const query = {};
-
-    if (semester) query.學期 = semester;
-    if (keyword) {
-        query.$or = [
-            { 科目中文名稱: { $regex: keyword, $options: 'i' } },
-            { 科目英文名稱: { $regex: keyword, $options: 'i' } },
-            { 授課教師姓名: { $regex: keyword, $options: 'i' } }
-        ];
-    }
-    if (department) query.系所代碼 = { $regex: `^${department}`, $options: 'i' };
-    if (grade) query.年級 = grade;
-    if (classType) query.課別名稱 = { $regex: classType, $options: 'i' };
-    if (teacherName) query.授課教師姓名 = { $regex: teacherName, $options: 'i' };
-    if (courseCode) query.科目代碼 = { $regex: courseCode, $options: 'i' };
-    if (roomName) query.上課地點 = { $regex: roomName, $options: 'i' };
-    if (period) query.上課節次 = { $regex: period, $options: 'i' }; // 模糊匹配節次
-
     try {
-        const courses = await Course.find(query);
+        const {
+            semester,
+            keyword,
+            educationLevels,
+            department,
+            classType,
+            grade,
+            teacherName,
+            courseCode,
+            courseName,
+            roomName,
+            period
+        } = req.query;
 
-        if (courses.length === 0) {
-            return res.status(404).json({ message: '沒有符合條件的課程' });
+        // 查詢條件
+        const query = {};
+
+        // 動態增加條件（僅當有對應的查詢參數時才加上）
+        if (semester) query.學期 = semester;
+        if (keyword) {
+            query.$or = [
+                { 科目中文名稱: { $regex: keyword, $options: 'i' } },
+                { 授課教師姓名: { $regex: keyword, $options: 'i' } },
+            ];
         }
-
-        res.status(200).json(courses);
+        if (educationLevels) query.學制 = { $in: educationLevels.split(',') };
+        if (department) query.系所名稱 = { $regex: department, $options: 'i' }; // 支援模糊查詢
+        if (classType) query.課別名稱 = classType;
+        if (grade) query.年級 = grade;
+        if (teacherName) query.授課教師姓名 = { $regex: teacherName, $options: 'i' };
+        if (courseCode) query.科目代碼 = courseCode;
+        if (courseName) query.科目中文名稱 = { $regex: courseName, $options: 'i' };
+        if (roomName) query.上課地點 = { $regex: roomName, $options: 'i' };
+        // if (req.query.period) {
+        //     const periodConditions = req.query.period.split(';').map((item) => {
+        //         const [day, periods] = item.split('-');
+        //         return {
+        //             上課星期: day,
+        //             上課節次: { $in: periods.split(',') },
+        //         };
+        //     });
+        //     query.$and = periodConditions;
+        // }
+        
+        // 進行查詢
+        console.log('Generated Query:', query); // 偵錯用
+        const courses = await Course.find(query);
+        res.json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
-        res.status(500).json({ error: '查詢課程時發生錯誤' });
+        res.status(500).json({ message: 'Error fetching courses' });
     }
 });
+
+
 
 
 const favoriteSchema = new mongoose.Schema({
