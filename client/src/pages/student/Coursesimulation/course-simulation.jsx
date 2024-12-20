@@ -13,7 +13,7 @@ const CourseSimulation = () => {
   const [selectedWeekday, setSelectedWeekday] = useState(''); // 存放當前選擇的星期
   const [selectedPeriod, setSelectedPeriod] = useState(''); // 存放當前選擇的節次
   const [conflictInfo, setConflictInfo] = useState(null); // 正確初始化
-
+  const [originalSchedule, setOriginalSchedule] = useState({});
   const userId = localStorage.getItem('id') || 'defaultUserId';
 
 
@@ -22,7 +22,7 @@ const CourseSimulation = () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/schedule/${userId}`);
         console.log('後端返回的課表資料:', response.data);
-  
+
         const formattedSchedule = {};
         response.data.forEach((item) => {
           item.timeSlots.forEach((slot) => {
@@ -34,35 +34,36 @@ const CourseSimulation = () => {
             };
           });
         });
-  
+
         console.log('格式化後的課表:', formattedSchedule);
         setSchedule(formattedSchedule);
+        setOriginalSchedule(formattedSchedule);
       } catch (error) {
         console.error('獲取課表失敗:', error);
       }
     };
-  
+
     if (userId) {
       fetchSchedule();
     }
   }, [userId]);
-  
+
   // 儲存課表到後端
   const saveSchedule = async () => {
     const formattedSchedule = Object.entries(schedule).map(([key, value]) => {
       const [dayPart, periodPart] = key.split('-');
       const day = dayPart.replace('星期', ''); // 星期轉成數字
       const period = periodPart.replace('第', '').replace('節', ''); // 移除多餘文字
-  
+
       return {
         courseId: value.courseId, // 使用 courseId 傳回後端
         day: day,
         timeSlots: [period],
       };
     });
-  
+
     console.log('送出的課表資料:', JSON.stringify(formattedSchedule, null, 2));
-  
+
     try {
       const response = await axios.post('http://localhost:5000/api/schedule', {
         userId,
@@ -76,8 +77,8 @@ const CourseSimulation = () => {
       alert('儲存課表時發生錯誤');
     }
   };
-  
-  
+
+
   // 打開課程選擇視窗並發送 API 請求
   const handleAddClick = async (dayIndex, periodIndex) => {
     const weekday = (dayIndex + 1).toString(); // 星期 1~7
@@ -104,32 +105,35 @@ const CourseSimulation = () => {
 
   const handleCourseSelect = (course) => {
     const selected = availableCourses.find((c) => c._id === course._id) || course;
-  
+
     const newTimeSlots = selected.上課節次.split(',');
     const conflictSlots = [];
     const conflictingCourses = [];
-  
+
     newTimeSlots.forEach((slot) => {
       const key = `星期${selectedWeekday}-第${slot}節`;
       if (schedule[key]) {
         conflictSlots.push(slot);
-        conflictingCourses.push(schedule[key]);
+        conflictingCourses.push(schedule[key]); // 確保 schedule[key] 是一個完整的物件
       }
     });
-  
+
     if (conflictSlots.length > 0) {
       setConflictInfo({ newCourse: selected, conflictingCourses, conflictSlots });
+      console.log('衝堂資訊:', { newCourse: selected, conflictingCourses, conflictSlots }); // Debug
+      console.log('衝堂視窗資料:', conflictInfo);
     } else {
       addCourseToSchedule(selected, newTimeSlots);
     }
   };
-  
+
+
 
 
   // 新增: 處理課程加入課表
   const addCourseToSchedule = (course, timeSlots) => {
     const updatedSchedule = { ...schedule };
-  
+
     timeSlots.forEach((slot) => {
       const key = `星期${selectedWeekday}-第${slot}節`;
       updatedSchedule[key] = {
@@ -138,28 +142,39 @@ const CourseSimulation = () => {
         teacher: course.授課教師姓名 || course.teacher,       // 顯示用教師
       };
     });
-  
+
     setSchedule(updatedSchedule);
     setPopupVisible(false);
     setConflictInfo(null);
   };
-  
+
 
 
   // 新增: 用戶確認取代衝堂課程
-  const handleConfirmReplace = () => {
-    const { newCourse, conflictSlots } = conflictInfo;
 
-    // 移除衝突課程
-    const updatedSchedule = { ...schedule };
-    conflictSlots.forEach((slot) => {
-      const key = `星期${selectedWeekday}-第${slot}節`;
-      delete updatedSchedule[key];
+  const handleConfirmReplace = () => {
+    if (!conflictInfo) return;
+
+    const { newCourse, conflictingCourses } = conflictInfo;
+
+    // 刪除所有衝堂課程
+    conflictingCourses.forEach((conflictingCourse) => {
+      Object.keys(schedule).forEach((key) => {
+        if (schedule[key].courseId === conflictingCourse.courseId) {
+          delete schedule[key];
+        }
+      });
     });
 
     // 加入新課程
     addCourseToSchedule(newCourse, newCourse.上課節次.split(','));
+
+    // 清除衝堂資訊
+    setConflictInfo(null);
   };
+
+
+
 
   // 新增: 用戶取消選擇新課程
   const handleCancelReplace = () => {
@@ -170,9 +185,20 @@ const CourseSimulation = () => {
 
 
   const handleCourseRemove = (key) => {
+    const courseToRemove = schedule[key];
     const updatedSchedule = { ...schedule };
-    delete updatedSchedule[key];
+
+    // 移除該課程的所有節次
+    Object.keys(updatedSchedule).forEach((scheduleKey) => {
+      if (updatedSchedule[scheduleKey].courseId === courseToRemove.courseId) {
+        delete updatedSchedule[scheduleKey];
+      }
+    });
+
     setSchedule(updatedSchedule);
+
+    // 標記該課程為刪除，等待完成編輯時同步到資料庫
+    setDeletedCourses((prev) => [...prev, courseToRemove.courseId]);
   };
 
   const toggleEditMode = () => {
@@ -186,20 +212,35 @@ const CourseSimulation = () => {
   };
   const clearSchedule = () => {
     setSchedule({});
-    alert('課表已清空');
+    alert('課表已清空！');
   };
-  
-  
+
+  const cancelEdit = () => {
+    setSchedule(originalSchedule); // 恢復到初始狀態
+    setIsEditMode(false);
+    alert('更改已取消，恢復到原始課表！');
+  };
 
   return (
     <div className="course-simulation-container">
       <h1 className="title">預選課模擬</h1>
 
       {/* 編輯模式切換按鈕 */}
-      <button className="editcourse-button" onClick={toggleEditMode}>
-        {isEditMode ? '完成編輯' : '編輯課表'}
-      </button>
-
+      <div className="actions">
+        <button className="editcourse-button" onClick={toggleEditMode}>
+          {isEditMode ? '完成編輯' : '編輯課表'}
+        </button>
+        {isEditMode && (
+          <>
+            <button className="cancel-edit-button" onClick={cancelEdit}>
+              取消編輯
+            </button>
+            <button className="clear-schedule-button" onClick={clearSchedule}>
+              清除課表
+            </button>
+          </>
+        )}
+      </div>
       <table className="schedule-table">
         <thead>
           <tr>
@@ -228,25 +269,25 @@ const CourseSimulation = () => {
                 const key = `星期${dayIndex + 1}-第${periodIndex + 1}節`;
                 return (
                   <td key={key}>
-                  {schedule[key] ? (
-                    <div className="course-item">
-                      <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
-                      <div>{schedule[key].teacher}</div>    {/* 顯示授課教師 */}
-                      {isEditMode && (
-                        <span className="remove-course" onClick={() => handleCourseRemove(key)}>
-                          ×
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    isEditMode && (
-                      <button className="addcourse-button" onClick={() => handleAddClick(dayIndex, periodIndex)}>
-                        +
-                      </button>
-                    )
-                  )}
-                </td>
-                
+                    {schedule[key] ? (
+                      <div className="course-item">
+                        <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
+                        <div>{schedule[key].teacher}</div>    {/* 顯示授課教師 */}
+                        {isEditMode && (
+                          <span className="remove-course" onClick={() => handleCourseRemove(key)}>
+                            ×
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      isEditMode && (
+                        <button className="addcourse-button" onClick={() => handleAddClick(dayIndex, periodIndex)}>
+                          +
+                        </button>
+                      )
+                    )}
+                  </td>
+
                 );
               })}
             </tr>
@@ -311,6 +352,7 @@ const CourseSimulation = () => {
           onCancel={handleCancelReplace}
         />
       )}
+
 
     </div>
   );
