@@ -113,15 +113,15 @@ const CourseSimulation = () => {
 
     // 檢查 course 是否存在且屬性有效
     if (!course || !course.上課星期 || !course.上課節次) {
-        console.warn(`跳過無效的課程: ${JSON.stringify(course)}`);
-        return false;
+      console.warn(`跳過無效的課程: ${JSON.stringify(course)}`);
+      return false;
     }
 
     return (
-        course.上課星期 === day &&
-        course.上課節次.split(',').includes(timeSlot)
+      course.上課星期 === day &&
+      course.上課節次.split(',').includes(timeSlot)
     );
-});
+  });
 
   const handleCourseSelect = (course) => {
     const selected = availableCourses.find((c) => c._id === course._id) || course;
@@ -278,7 +278,7 @@ const CourseSimulation = () => {
           </>
         )}
       </div>
-    <table className="schedule-table">
+      <table className="schedule-table">
         <thead>
           <tr>
             <th>時間</th>
@@ -288,64 +288,64 @@ const CourseSimulation = () => {
           </tr>
         </thead>
         <tbody>
-  {[
-    '第一節\n8:10~9:00', '第二節\n9:10~10:00', '第三節\n10:10~11:00',
-    '第四節\n11:10~12:00', '第五節\n12:40~13:30', '第六節\n13:40~14:30',
-    '第七節\n14:40~15:30', '第八節\n15:40~16:30', '第九節\n16:40~17:30', '第十節\n17:40~18:30',
-  ].map((time, periodIndex) => (
-    <tr key={time}>
-      <td>
-        {time.split('\n').map((line, index) => (
-          <React.Fragment key={index}>
-            {line}
-            <br />
-          </React.Fragment>
-        ))}
-      </td>
-      {['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'].map((day, dayIndex) => {
-        const key = `星期${dayIndex + 1}-第${periodIndex + 1}節`;
-        return (
-          <td key={key}>
-            {schedule[key] ? (
-              <div className="course-item">
-                <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
-                <div>
-                  <span
-                    className="teacher-name"
-                    onClick={() => handleToggleExpand(key)}
-                  >
-                    {expandedTeachers.includes(key)
-                      ? schedule[key].teacher
-                      : schedule[key].teacher?.length > 3
-                        ? `${schedule[key].teacher.slice(0, 3)}...`
-                        : schedule[key].teacher}
-                  </span>
-                </div>
-                {isEditMode && (
-                  <span
-                    className="remove-course"
-                    onClick={() => handleCourseRemove(key)}
-                  >
-                    ×
-                  </span>
-                )}
-              </div>
-            ) : (
-              isEditMode && (
-                <button
-                  className="addcourse-button"
-                  onClick={() => handleAddClick(dayIndex, periodIndex)}
-                >
-                  +
-                </button>
-              )
-            )}
-          </td>
-        );
-      })}
-    </tr>
-  ))}
-</tbody>
+          {[
+            '第一節\n8:10~9:00', '第二節\n9:10~10:00', '第三節\n10:10~11:00',
+            '第四節\n11:10~12:00', '第五節\n12:40~13:30', '第六節\n13:40~14:30',
+            '第七節\n14:40~15:30', '第八節\n15:40~16:30', '第九節\n16:40~17:30', '第十節\n17:40~18:30',
+          ].map((time, periodIndex) => (
+            <tr key={time}>
+              <td>
+                {time.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </td>
+              {['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'].map((day, dayIndex) => {
+                const key = `星期${dayIndex + 1}-第${periodIndex + 1}節`;
+                return (
+                  <td key={key}>
+                    {schedule[key] ? (
+                      <div className="course-item">
+                        <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
+                        <div>
+                          <span
+                            className="teacher-name"
+                            onClick={() => handleToggleExpand(key)}
+                          >
+                            {expandedTeachers.includes(key)
+                              ? schedule[key].teacher
+                              : schedule[key].teacher?.length > 7
+                                ? `${schedule[key].teacher.slice(0, 7)}...`
+                                : schedule[key].teacher}
+                          </span>
+                        </div>
+                        {isEditMode && (
+                          <span
+                            className="remove-course"
+                            onClick={() => handleCourseRemove(key)}
+                          >
+                            ×
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      isEditMode && (
+                        <button
+                          className="addcourse-button"
+                          onClick={() => handleAddClick(dayIndex, periodIndex)}
+                        >
+                          +
+                        </button>
+                      )
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
 
       </table>
 
@@ -354,7 +354,7 @@ const CourseSimulation = () => {
         <div className="popup">
           <div className="popup-content">
             <h2>選擇課程</h2>
-         
+
             <div className="form-group">
               <label htmlFor="keyword-search">關鍵字查詢</label>
               <input

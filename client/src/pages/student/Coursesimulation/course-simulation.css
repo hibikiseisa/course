@@ -2,15 +2,16 @@
   padding: 40px;
   font-family: Arial, sans-serif;
   margin-top: 30px;
-  margin-bottom: 10px;      /* 與課表區域留點間距 */
+  margin-bottom: 10px;
   display: flex;
-  flex-direction: column; /* 確保垂直排列 */
-  align-items: flex-start; /* 左對齊 */
+  flex-direction: column;
+  align-items: center; /* 修改為居中對齊 */
 }
+
 .actions {
   display: flex;
-  justify-content: flex-start; /* 改為靠左對齊 */
-  gap: 10px; /* 按鈕之間的間距 */
+  justify-content: center; /* 修改為居中對齊 */
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -20,12 +21,11 @@
   padding: 8px 12px;
   font-size: 16px;
   cursor: pointer;
-  background-color: #5e5e5e; /* 黑色背景 */
+  background-color: #5e5e5e;
   color: white;
   border: none;
   border-radius: 4px;
   transition: background-color 0.3s;
-  margin-right: 15px;
 }
 
 .editcourse-button:hover,
@@ -34,33 +34,32 @@
   background-color: #3b3b3b;
 }
 
-
 .account-management {
   font-family: Arial, sans-serif;
   background-color: #ffffff;
   border-radius: 8px;
-  width: 100%; /* 使容器占满整个宽度 */
-  max-width: 1200px; /* 设置最大宽度 */
-  margin: 0 auto; /* 居中 */  
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
 }
+
 .title {
   font-size: 40px;
   margin-bottom: 20px;
   color: #2ab162;
-  text-align: left;
-  margin-top: 30px;  
-  
+  text-align: center; /* 修改為居中對齊 */
+  margin-top: 30px;
 }
 
 .schedule-table {
-  width: 100%; /* 表格占據父容器寬度 */
-  max-width: 1200px; /* 設定表格的最大寬度 */
-  table-layout: fixed; /* 固定表格布局 */
-  border-collapse: collapse; /* 合併邊框 */
-  text-align: center; /* 文字置中 */
-  margin: 0 auto; /* 居中對齊 */
+  width: 100%;
+  max-width: 1200px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  text-align: center;
+  margin: 0 auto;
   margin-top: 30px;
 }
 
@@ -68,9 +67,9 @@
 .schedule-table td {
   border: 1px solid #ccc;
   padding: 10px;
-  word-wrap: break-word; /* 單元格內文字換行 */
-  overflow: hidden; /* 避免內容溢出 */
-  text-overflow: ellipsis; /* 超出部分顯示省略號 */
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .addcourse-button {
@@ -83,30 +82,50 @@
   width: 30px;
   height: 30px;
 }
-.addcourse-button:hover{
-  background-color: #000000;
 
+.addcourse-button:hover {
+  background-color: #000000;
 }
+
 .course-item {
   position: relative;
-  padding: 5px;
-  color: #4c6cd4;
-
+  padding: 10px;
+  background-color: #7fb4dc;
+  color: white;
+  text-align: center;
+  font-weight: bold;
   border-radius: 5px;
+  text-shadow: 1px 1px 2px black;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.course-item .teacher-name {
+  cursor: pointer;
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.course-item .teacher-name:hover {
+  background-color: #63a0cf;
+  border-radius: 3px;
+  padding: 2px 5px;
 }
 
 .course-item.required {
-  background-color: #4c6cd4; /* 必修課程顯示藍色底色 */
+  background-color: #4C6CD4;
 }
 
 .remove-course {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 8px; /* 與頂部保持一點距離 */
+  right: 8px; /* 與右側保持一點距離 */
   cursor: pointer;
-  color: white;
-  font-size: 20px;
+  color: rgb(255, 249, 249); /* 紅色刪除按鈕 */
+  font-size: 18px;
+  font-weight: bold;
 }
+
 
 .popup {
   position: fixed;
@@ -124,7 +143,8 @@
   background-color: white;
   padding: 30px;
   border-radius: 10px;
-  width: 400px;
+  width: 600px;
+  height: 600px;
   max-width: 80%;
   text-align: center;
   overflow-y: auto;
@@ -132,21 +152,15 @@
 
 .course-section {
   margin-bottom: 20px;
-  max-height: 150px; /* 垂直區塊的最大高度 */
-  overflow-y: auto; /* 垂直滾動 */
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .course-section label {
   display: block;
   margin-bottom: 10px;
   font-size: 16px;
-    color: #333;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  color: #333;
 }
 
 .confirm-button,
@@ -171,4 +185,20 @@
   background-color: darkred;
 }
 
+.popup table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
 
+.popup table th,
+.popup table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.popup table th {
+  background-color: #4CAF50;
+  color: white;
+}
