@@ -32,10 +32,10 @@ const CourseManagement = () => {
   const [expandedTeachers, setExpandedTeachers] = useState([]);
 
   const terms = ['1132', '1131', '1122'];
-  const departments = ['資訊管理系', '護理系', '幼保系'];
-  const programs = ['四年制', '二年制'];
+  const departments = ['資訊管理系', '護理系', '幼保系','長期照護系','健康事業管理系','護助產及婦女健康系','嬰幼兒保育系','護理教育曁數位學習系','高齡健康照護系','生死與健康心理諮商系','休閒產業與健康促進系旅遊健康','運動保健系','語言治療與聽力學系'];
+  const programs = ['學士後系','四年制','二技','二技(三年)','學士後多元專長','學士後學位學程','碩士班','博士班'];
   const grades = ['一年級', '二年級', '三年級'];
-  const coursesList = ['通識必修', '通識選修', '專業必修', '專業選修'];
+  const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -65,36 +65,45 @@ const CourseManagement = () => {
 
   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
-const handleUpload = async () => {
+  const handleUpload = async () => {
     if (!selectedFile) {
       setUploadMessage('請選擇一個 CSV 檔案');
       return;
     }
+  
     const formData = new FormData();
     formData.append('file', selectedFile);
+  
     try {
       const response = await axios.post('http://localhost:5000/api/upload-csv', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+  
       setUploadMessage(response.data.message || '檔案上傳成功');
+  
+      // 更新課程列表
+      const responseCourses = await axios.get('http://localhost:5000/api/courses');
+      setCourses(responseCourses.data); // 假設後端有 API 來獲取所有課程
+      setFilteredCourses(responseCourses.data);
+  
     } catch (error) {
       console.error('檔案上傳失敗:', error);
       setUploadMessage('檔案上傳失敗，請檢查檔案格式或內容');
     }
   };
-
+  
   const handleDownloadCSV = () => {
     const csvData = courses.map(course => ({
-      id: course.id,
-      name: course.name,
-      credits: course.credits,
-      department: course.department,
-      teacher: course.teacher,
+      科目代碼: course.科目代碼,    
+科目中文名稱: course.科目中文名稱,
+      學分數: course.學分數,
+課別名稱: course.課別名稱,
+授課教師姓名: course.授課教師姓名,
     }));
 
-    const header = 'id,name,credits,department,teacher\n';
-    const rows = csvData.map(course => `${course.id},${course.name},${course.credits},${course.department},${course.teacher}`).join('\n');
-    const csvContent = header + rows;
+    const header = '科目代碼,課程名稱,學分數,課別名稱,授課教師姓名\n';
+    const rows = csvData.map(course => `"${course.科目代碼}","${course.科目中文名稱}","${course.學分數}","${course.課別名稱}","${course.授課教師姓名}"`).join('\n');
+    const csvContent = '\ufeff' + header + rows;  // 加入 BOM 來確保 UTF-8 編碼
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -186,7 +195,7 @@ const handleSaveCourse = async () => {
   };
 
   const handleSelectAll = (e) => {
-    setSelectedCourses(e.target.checked ? courses.map(course => course.id) : []);
+    setSelectedCourses(e.target.checked ? courses.map(course => course._id) : []);
   };
 
   const handleRowSelect = (id) => {
@@ -200,35 +209,40 @@ const handleSaveCourse = async () => {
       alert('請選擇至少一項課程進行刪除');
       return;
     }
-
+  
     try {
+      // 使用 Promise.all 確保並行刪除
       await Promise.all(
-        selectedCourses.map(async courseId => {
+        selectedCourses.map(async (courseId) => {
+          // 假設伺服器使用 _id 作為課程識別
           await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
         })
       );
-
-      const updatedCourses = courses.filter(course => !selectedCourses.includes(course.id));
+  
+      // 更新課程列表，過濾掉已刪除的課程
+      const updatedCourses = courses.filter(course => !selectedCourses.includes(course._id)); // 使用 _id
       setCourses(updatedCourses);
       setFilteredCourses(updatedCourses);
-      setSelectedCourses([]);
+      setSelectedCourses([]);  // 清空選擇的課程
     } catch (error) {
       console.error('刪除課程失敗:', error);
       alert('刪除課程失敗，請稍後再試');
     }
-};
-
+  };
+    
   const handleSearch = () => {
     setFilteredCourses(
       courses.filter(course =>
         (filter.term ? course.學期 === filter.term : true) &&
         (filter.department ? course.系所名稱.includes(filter.department) : true) &&
-        (filter.keyword ? course.科目中文名稱.includes(filter.keyword) || course.授課教師姓名.includes(filter.keyword) : true)
+        (filter.keyword ? 
+           course.科目中文名稱.includes(filter.keyword) || 
+           course.授課教師姓名.includes(filter.keyword)  : true)
       )
     );
   };
 
-  return (
+    return (
     <div className="admin-course-management">
       <h2>課程管理</h2>
 <div className="selected-count">
@@ -325,8 +339,8 @@ const handleSaveCourse = async () => {
       <td>
         <input
           type="checkbox"
-          checked={selectedCourses.includes(course.id)}
-          onChange={() => handleRowSelect(course.id)}
+          checked={selectedCourses.includes(course._id)} 
+          onChange={() => handleRowSelect(course._id)}
         />
       </td>
       <td>{course.科目代碼}</td>
@@ -335,7 +349,7 @@ const handleSaveCourse = async () => {
       <td>
         <span
           className="teacher-name"
-          onClick={() => handleToggleExpand(course._id)}
+          onClick={() => handleToggleExpand(course._id)} 
         >
           {expandedTeachers.includes(course._id)
             ? course.授課教師姓名
@@ -350,11 +364,11 @@ const handleSaveCourse = async () => {
     </tr>
   ))
 ) : (
-  <tr>
-    <td colSpan="6" className="no-results">
-      無課程
-    </td>
-  </tr>
+<tr>
+  <td colSpan="6" className="no-results">
+    無課程
+  </td>
+</tr>
 )}
 </tbody>
 </table>
@@ -396,7 +410,7 @@ const handleSaveCourse = async () => {
                   <option value="1122">1122</option>
                 </select>
               </label>
-              <label>教師: <input type="text" name="主開課教師姓名" value={courseDetails.主開課教師姓名} onChange={handleInputChange} /></label>
+              <label>教師: <input type="text" name="授課教師姓名" value={courseDetails.授課教師姓名} onChange={handleInputChange} /></label>
               <label>學制:
                 <select name="學制" value={courseDetails.學制} onChange={handleInputChange}>
                   <option value="">選擇學制</option>
