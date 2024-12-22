@@ -498,24 +498,24 @@ app.get('/api/schedule/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // 查詢指定 userId 的課表，並將 schedule 陣列中的 courseId 進行 populate
+        // 查詢指定 userId 的課表
         const userSchedule = await Schedule.findOne({ userId }).populate('schedule.courseId');
 
-        if (userSchedule && userSchedule.schedule) {
-            // 將返回資料轉換成前端需要的格式
-            const detailedSchedule = userSchedule.schedule.map((entry) => ({
-                courseId: entry.courseId._id,       // 課程 ID
-                courseName: entry.courseId.科目中文名稱, // 課程名稱
-                teacher: entry.courseId.授課教師姓名,   // 授課教師
-                credits: entry.courseId.學分數,       // 學分數
-                day: entry.day,                     // 星期幾
-                timeSlots: entry.timeSlots          // 節次
-            }));
-
-            res.status(200).json(detailedSchedule); // 返回轉換後的詳細課表
-        } else {
-            res.status(200).json([]); // 若無課表資料，返回空陣列
+        if (!userSchedule || !userSchedule.schedule) {
+            return res.status(200).json([]); // 如果無資料，返回空陣列
         }
+
+        // 將返回資料轉換成前端需要的格式
+        const detailedSchedule = userSchedule.schedule.map((entry) => ({
+            courseId: entry.courseId?._id,       // 課程 ID
+            courseName: entry.courseId?.科目中文名稱 || "無名稱", // 課程名稱
+            teacher: entry.courseId?.授課教師姓名 || "無教師",   // 授課教師
+            credits: entry.courseId?.學分數 || 0,       // 學分數
+            day: entry.day,                     // 星期幾
+            timeSlots: entry.timeSlots          // 節次
+        }));
+
+        res.status(200).json(detailedSchedule); // 返回詳細課表
     } catch (error) {
         console.error('獲取課表失敗:', error);
         res.status(500).json({ message: '無法獲取課表資料' });
@@ -525,20 +525,27 @@ app.get('/api/schedule/:userId', async (req, res) => {
 
 
 
+
 // 課程查詢：根據星期和節次
 app.get('/api/courses/:day/:timeSlot', async (req, res) => {
-    const { day, timeSlot } = req.params; // day = 上課星期, timeSlot = 節次
+    const { day, timeSlot } = req.params;
     try {
         const courses = await Course.find({
             上課星期: day, // 精確匹配星期
             上課節次: { $regex: `(^|,)${timeSlot}(,|$)` } // 模糊匹配節次
         });
+
+        if (!courses || courses.length === 0) {
+            return res.status(200).json([]); // 如果無課程資料，返回空陣列
+        }
+
         res.status(200).json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
         res.status(500).json({ message: '查詢課程時發生錯誤' });
     }
 });
+
 app.get('/api/course/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -557,21 +564,34 @@ app.get('/api/course/:id', async (req, res) => {
 // 收藏課程查詢：根據使用者、星期與節次
 app.get('/api/favorites/:userId/:day/:timeSlot', async (req, res) => {
     const { userId, day, timeSlot } = req.params;
+
     try {
+        console.log(`接收到的參數: userId=${userId}, day=${day}, timeSlot=${timeSlot}`);
         const favoriteCourses = await Favorite.find({ userId }).populate('courseId');
+        console.log('查詢到的收藏課程:', favoriteCourses);
+
+        if (!favoriteCourses || favoriteCourses.length === 0) {
+            return res.status(200).json([]); // 沒有收藏課程
+        }
+
         const filteredCourses = favoriteCourses.filter((favorite) => {
             const course = favorite.courseId;
+            console.log(`正在檢查課程: ${JSON.stringify(course, null, 2)}`);
             return (
-                course.上課星期 === day &&
-                course.上課節次.split(',').includes(timeSlot)
+                course?.上課星期 === day &&
+                course?.上課節次?.split(',')?.includes(timeSlot)
             );
         });
+
+        console.log('篩選後的課程:', filteredCourses);
         res.status(200).json(filteredCourses.map((f) => f.courseId));
     } catch (error) {
-        console.error('Error fetching favorites:', error);
+        console.error('查詢收藏課程失敗:', error);
         res.status(500).json({ message: '查詢收藏課程時發生錯誤' });
     }
 });
+
+
 
 
 app.listen(PORT, () => {
