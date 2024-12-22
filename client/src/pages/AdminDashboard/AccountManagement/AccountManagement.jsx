@@ -4,6 +4,7 @@ import './AccountManagement.css'; // 引入 CSS 文件
 
 const AccountManagement = () => {
   const [accounts, setAccounts] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState('id');
   const [showModal, setShowModal] = useState(false);
@@ -227,16 +228,19 @@ const AccountManagement = () => {
                 </select>
               </label>
               <label>
-  密碼:
-  <input
-    type="password"
-    name="password"
-    value={accountDetails.password}
-    onChange={handleInputChange}
-    placeholder="輸入密碼"
-    required
-  />
-</label>
+    密碼:
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={accountDetails.password}
+      onChange={handleInputChange}
+      placeholder="輸入密碼"
+      required
+    />
+    <button type="button" onClick={() => setShowPassword(!showPassword)}>
+      {showPassword ? '隱藏' : '顯示'}
+    </button>
+  </label>
 
             </div>
             <div className="modal-actions">
@@ -257,7 +261,7 @@ const AccountManagement = () => {
             <h3>確認刪除帳號?</h3>
             <div className="modal-actions">
               <button onClick={handleDeleteAccount} className="confirm-button">
-                確認刪除
+                確認
               </button>
               <button onClick={() => setShowDeleteConfirm(false)} className="cancel-button">
                 取消

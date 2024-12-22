@@ -16,79 +16,92 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     const handleMapToggle = () => {
         setShowMap((prev) => !prev);
     };
+import React, { useState } from 'react'; // 添加 useState
+import './CourseModal.css'; // 確保添加樣式
+
+const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
+    const [isMapOpen, setIsMapOpen] = useState(false);
+    const [mapImage, setMapImage] = useState(''); // 用來存放圖片的 state
+    const [roomLocation, setRoomLocation] = useState(''); // 用來存放教室位置的 state
+    const [isTeacherInfoOpen, setIsTeacherInfoOpen] = useState(false); // 新增狀態控制教師資訊顯示
+
+    const handleOpenMap = async () => {
+        const location = course.上課地點; // 假設教室位置在這裡
+
+        if (!location) {
+            setRoomLocation('無相關位置資訊');
+            return;
+        }
+
+        let mapPath;
+
+        if (location.startsWith('G')) {
+            mapPath = import('../../../assets/mapG.png');  // G區地圖
+        } else if (location.startsWith('S')) {
+            mapPath = import('../../../assets/mapS.png');  // S區地圖
+        } else if (location.startsWith('B')) {
+            mapPath = import('../../../assets/mapB.png');  // B區地圖
+        } else if (location.startsWith('F')) {
+            mapPath = import('../../../assets/mapF.png');  // F區地圖
+        } else {
+            setRoomLocation('無相關位置資訊'); // 無匹配的地圖
+            return;
+        }
+
+        // 使用 import() 加載圖片並設置為狀態
+        mapPath.then(image => {
+            setMapImage(image.default); // 使用 default 屬性獲取圖片 URL
+            setIsMapOpen(true); // 打開地圖視窗
+        });
+    };
+
+    const handleCloseMap = () => {
+        setIsMapOpen(false); // 關閉地圖視窗
+    };
+
+    const toggleTeacherInfo = () => {
+        setIsTeacherInfoOpen(prevState => !prevState); // 切換教師資訊顯示狀態
+    };
+
+    if (!course) return null; // 確保 course 存在
 
     return (
         <div className="modal-overlay">
             <div className="modal-content">
                 <h2>課程詳情</h2>
+                <p><strong>學期：</strong> {course.學期}</p>
+                <p><strong>系所代碼：</strong> {course.系所代碼}</p>
+                <p><strong>課程名稱：</strong> {course.科目中文名稱}</p>
+                <p>
+                    <strong>教師：</strong> 
+                    <button onClick={toggleTeacherInfo} className="teacher-info-button">
+                        {course.授課教師姓名}
+                    </button>
+                </p>
 
-                <table className="course-info-table">
-                    <tbody>
-                        <tr>
-                            <td><strong>學期：</strong></td>
-                            <td>{course.學期}</td>
-                            <td><strong>系所：</strong></td>
-                            <td>{course.系所名稱}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>課別名稱：</strong></td>
-                            <td>{course.課別名稱}</td>
-                            <td><strong>科目代碼：</strong></td>
-                            <td>{course.科目代碼}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>中文科目名稱：</strong></td>
-                            <td>{course.科目中文名稱}</td>
-                            <td><strong>英文科目名稱：</strong></td>
-                            <td>{course.英文科目名稱}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>年級：</strong></td>
-                            <td>{course.年級}</td>
-                            <td><strong>學分：</strong></td>
-                            <td>{course.學分數}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>修課人數：</strong></td>
-                            <td>{course.修課人數}</td>
-                            <td><strong>上課週次：</strong></td>
-                            <td>{course.上課週次}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>上課時間及地點：</strong></td>
-                            <td colSpan="3">
-                                {course.上課時間.map((time, index) => (
-                                    <div key={index}>{time}</div>
-                                ))}
-                                <button className="map-toggle-button" onClick={handleMapToggle}>
-                                    {showMap ? '隱藏地圖' : '顯示地圖'}
-                                </button>
-                                {showMap && <div className="map-container">地圖顯示中...</div>}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>授課教師：</strong></td>
-                            <td colSpan="3">
-                                {course.授課教師.map((teacher, index) => (
-                                    <div key={index}>
-                                        <span
-                                            className="teacher-name"
-                                            onClick={() => handleTeacherClick(teacher)}
-                                        >
-                                            {teacher}
-                                        </span>
-                                    </div>
-                                ))}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                {/* 教師資訊顯示區 */}
+                {isTeacherInfoOpen && (
+                    <div className="teacher-info">
+                        {/* 這裡可以加入更多教師的相關資訊 */}
+                        <p><strong>教師姓名：</strong> 這裡是教師的簡短介紹。</p>
+                        <p><strong>研究領域：</strong> 這裡是教師的研究領域介紹。</p>
+                        
+                    </div>
+                )}
 
-                {showTeacherDetails && selectedTeacher && (
-                    <div className="teacher-details">
-                        <h3>教師介紹</h3>
-                        <p>{selectedTeacher} 的詳細資訊顯示區...</p>
-                        <button onClick={() => setShowTeacherDetails(false)}>關閉</button>
+                <p><strong>學分：</strong> {course.學分數}</p>
+                <p>
+                    <strong>教室：</strong> {course.上課地點 ? course.上課地點 : roomLocation}
+                    <button onClick={handleOpenMap} className="open-map-button">打開地圖</button>
+                </p>
+
+                {/* 地圖模態視窗 */}
+                {isMapOpen && mapImage && (
+                    <div className="map-modal">
+                        <div className="map-content">
+                            <img src={mapImage} alt="教室地圖" />
+                            <button onClick={handleCloseMap} className="close-map-button">×</button> {/* 叉叉符號 */}
+                        </div>
                     </div>
                 )}
 

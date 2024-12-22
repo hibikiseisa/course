@@ -141,23 +141,29 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
   
-  .account-management .modal-form label {
-    display: block;
-    text-align: left;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
-  
-  .account-management .modal-form input,
-  .account-management .modal-form select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-  }
+/* 模态框标签样式 */
+.account-management .modal-form label {
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 16px;  /* 可根据需要调整字体大小 */
+  margin-right: 20px; /* 给标签右边加点间距 */
+}
+
+/* 调整表单输入框的间距 */
+.account-management .modal-form input,
+.account-management .modal-form select {
+  width: 70%;  /* 可以根据需求调整此百分比 */
+  max-width: 400px; /* 设置最大宽度 */
+  padding: 15px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-left: 20px; /* 给输入框加些左边间距，避免挤在一起 */
+}
   
   /* 模态框按钮 */
   .account-management .modal-actions {
