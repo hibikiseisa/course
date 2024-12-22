@@ -41,7 +41,8 @@
   z-index: 1000;
 }
 .modal-form {
-  max-height: 400px; /* 设置最大高度 */
+  max-height: 300px; /* 设置最大高度 */
+  max-width: 700px; /* 设置最大高度 */
   overflow-y: auto;  /* 启用垂直滚动条 */
 }
 
@@ -81,18 +82,13 @@
 }
 
 .modal-actions {
+    justify-content: flex-start; /* 左對齊按鈕 */
+  
   margin-top: 20px;
   display: flex;
-  justify-content: space-between;
   gap: 10px; /* 增加按鈕間的間距 */
 }
 
-.cancel-button,
-.add-button {
-  width: 70px; /* 統一按鈕寬度 */
-  height: 50px;
-  text-align: center;
-}
 .course-management {
   font-family: Arial, sans-serif;
 }
@@ -155,15 +151,26 @@
 
 .edit-button {
   background-color: #3498db;
+  color: white;
   padding: 10px 15px;
-  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px;
+
 }
 
 .delete-button {
   background-color: #e74c3c;
+  color: white;
   padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px;
 
-  color: #fff;
 }
 
 /* 控制按鈕區 */
@@ -237,9 +244,11 @@
 }
 
 /* 按鈕通用樣式 */
-.add-button {
-  /* 套用與 handleUpload/handleDownloadCSV 相同的樣式 */
-  background-color: #4CAF50;  /* 綠色背景 */
+.course-management .cancel-button,
+.add-button{
+  width: 70px; /* 統一按鈕寬度 */
+  height: 50px;
+  text-align: center;
   color: white;
   padding: 10px 15px;
   border: none;
@@ -247,6 +256,13 @@
   cursor: pointer;
   font-size: 14px;
   margin: 5px;
+}
+.add-button {
+  background-color: #4CAF50;  /* 綠色背景 */
+}
+.course-management .cancel-button {
+  margin-left: -10px; 
+  background-color: #af3939;  /* 紅色背景 */
 }
 
 .add-button:hover {
@@ -258,3 +274,8 @@ select {
   margin-bottom: 0px; /* 添加底部间距 */
 }
 
+.teacher-name {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}

@@ -4,48 +4,44 @@ import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
-      const [showButton, setShowButton] = useState(false);
-  
+  const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState({
-    id: '',
-    name: '',
-    credits: '',
-    department: '',
-    teacher: '',
-    term: '',        // 新增学期
-    program: '',     // 新增学制
-    grade: '',//年級
-    course: '',//課別
-    notes: '',       // 新增课程备注
-    file: null,      // 上传课程计划文件
+    科目代碼: '',
+    科目中文名稱: '',
+    學分數: '',
+    系所名稱: '',
+    主開課教師姓名: '',
+    學期: '',
+    學制: '',
+    年級: '',
+    課別名稱: '',
+    課程中文摘要: '',
+    課程英文摘要: '',
+    上課地點: '',
+    授課教師姓名: '',
+    課表備註: '',
   });
-  const [courses, setCourses] = useState(() => {
-    const savedCourses = localStorage.getItem('courses');
-    return savedCourses ? JSON.parse(savedCourses) : [];
-  });
+  const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [filter, setFilter] = useState({ term: '', department: '', keyword: '' });
+  const [expandedTeachers, setExpandedTeachers] = useState([]);
 
   const terms = ['1132', '1131', '1122'];
   const departments = ['資訊管理系', '護理系', '幼保系'];
-  const program = ['四年制', '二年制'];
-  const grade = ['一年級', '二年級', '三年級'];
-  const course = ['通識必修', '通識選修', '專業必修', '專業選修'];
+  const programs = ['四年制', '二年制'];
+  const grades = ['一年級', '二年級', '三年級'];
+  const coursesList = ['通識必修', '通識選修', '專業必修', '專業選修'];
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/courses', {
-          params: {
-            semester: filter.term,
-            keyword: filter.keyword,
-            department: filter.department,
-          },
+          params: filter,
         });
         setCourses(response.data);
         setFilteredCourses(response.data);
@@ -57,19 +53,19 @@ const CourseManagement = () => {
     fetchCourses();
   }, [filter]);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setShowButton(window.scrollY > 200);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowButton(window.scrollY > 200);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
-  const handleUpload = async () => {
+const handleUpload = async () => {
     if (!selectedFile) {
       setUploadMessage('請選擇一個 CSV 檔案');
       return;
@@ -110,126 +106,126 @@ const CourseManagement = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCourseDetails((prev) => ({ ...prev, [name]: value }));
-  };
+  const { name, value } = e.target;
+  setCourseDetails(prev => ({ ...prev, [name]: value }));
+};
 
-  const handleSaveCourse = async () => {
-    if (!courseDetails.科目代碼 || !courseDetails.科目中文名稱 || !courseDetails.學分數) {
-      alert('請填寫完整的課程資訊');
-      return;
-    }
-        
-  
-    const isDuplicateId = courses.some(
-      (course) => course.id === courseDetails.id && course.id !== editingCourse?.id
-    );
-    if (isDuplicateId) {
-      alert('科目代號重複，請重新輸入');
-      return;
-    }
-  
-    try {
-      let updatedCourses;
-      if (editingCourse) {
-        // 編輯課程
-        await axios.put(`http://localhost:5000/api/courses/${editingCourse.id}`, courseDetails); // 更新資料庫
-        updatedCourses = courses.map((course) =>
-          course.id === editingCourse.id ? { ...courseDetails } : course
-        );
-      } else {
-        // 新增課程
-        await axios.post('http://localhost:5000/api/courses', courseDetails); // 新增至資料庫
-        updatedCourses = [...courses, courseDetails];
-      }
-  
-      // 更新 courses 狀態
-      setCourses(updatedCourses);
-      localStorage.setItem('courses', JSON.stringify(updatedCourses));
-  
-      // 更新 filteredCourses 根據過濾條件
-      setFilteredCourses(
-        updatedCourses.filter((course) => {
-          return (
-            (filter.term ? course.term === filter.term : true) &&
-            (filter.department ? course.department.includes(filter.department) : true) &&
-            (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
-          );
-        })
+
+const handleSaveCourse = async () => {
+  if (!courseDetails.科目代碼 || !courseDetails.科目中文名稱 || !courseDetails.學分數) {
+    alert('請填寫完整的課程資訊');
+    return;
+  }
+
+  const isDuplicateId = courses.some(
+    (course) => course.科目代碼 === courseDetails.科目代碼 && course.科目代碼 !== editingCourse?.科目代碼
+  );
+  if (isDuplicateId) {
+    alert('科目代號重複，請重新輸入');
+    return;
+  }
+
+  try {
+    let updatedCourses;
+    if (editingCourse) {
+      // 編輯課程
+      await axios.put(`http://localhost:5000/api/courses/${editingCourse.科目代碼}`, courseDetails);
+      updatedCourses = courses.map(course =>
+        course.科目代碼 === editingCourse.科目代碼 ? { ...courseDetails } : course
       );
-  
-      // 清空 courseDetails 並關閉 modal
-      setCourseDetails({ id: '', name: '', credits: '', department: '', teacher: '', term: '', program: '', notes: '' });
-      setShowModal(false);
-      setEditingCourse(null);
-    } catch (error) {
-      console.error('儲存課程失敗:', error);
-      alert('儲存課程失敗，請稍後再試');
+    } else {
+      // 新增課程
+      const response = await axios.post('http://localhost:5000/api/courses', courseDetails);
+      console.log('課程儲存成功', response.data);  // 顯示伺服器回應的資料
+      updatedCourses = [...courses, response.data]; // 使用伺服器回應資料更新 courses
     }
-  };
-  
+
+    // 更新狀態
+    setCourses(updatedCourses);
+    setFilteredCourses(updatedCourses);
+
+    // 清空表單資料
+    setCourseDetails({
+      科目代碼: '',
+      科目中文名稱: '',
+      學分數: '',
+      系所名稱: '',
+      主開課教師姓名: '',
+      學期: '',
+      學制: '',
+      年級: '',
+      課別名稱: '',
+      課程中文摘要: '',
+      課程英文摘要: '',
+      上課地點: '',
+      授課教師姓名: '',
+      課表備註: '',
+    });
+
+    // 關閉模態視窗
+    setShowModal(false);
+    setEditingCourse(null);
+  } catch (error) {
+    console.error('儲存課程失敗:', error);
+    alert('儲存課程失敗，請稍後再試');
+  }
+};
+
+  const handleToggleExpand = (teacherId) => {
+    setExpandedTeachers((prev) =>
+        prev.includes(teacherId)
+            ? prev.filter((id) => id !== teacherId)
+            : [...prev, teacherId]
+    );
+};
+
   const handleEditCourse = (course) => {
     setEditingCourse(course);
-    setCourseDetails({ ...course }); // 預設填充編輯課程資料
+    setCourseDetails({ ...course });
     setShowModal(true);
   };
-  
+
   const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      // 如果全選框被勾選，選擇所有課程
-      setSelectedCourses(courses.map((course) => course.id));
-    } else {
-      // 如果全選框被取消，取消所有選擇
-      setSelectedCourses([]);
-    }
+    setSelectedCourses(e.target.checked ? courses.map(course => course.id) : []);
   };
-  
+
   const handleRowSelect = (id) => {
-    setSelectedCourses((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+    setSelectedCourses(prev =>
+      prev.includes(id) ? prev.filter(selectedId => selectedId !== id) : [...prev, id]
     );
   };
-    const isAllSelected = selectedCourses.length === courses.length && courses.length > 0;
-    
-    const handleDeleteSelected = async () => {
-      if (selectedCourses.length === 0) {
-        alert('請選擇至少一項課程進行刪除');
-        return;
-      }
-    
-      try {
-        // 向後端發送刪除請求
-        await Promise.all(
-          selectedCourses.map(async (courseId) => {
-            await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
-          })
-        );
-    
-        // 過濾掉選擇的課程
-        const updatedCourses = courses.filter(course => !selectedCourses.includes(course.id));
-    
-        // 更新狀態
-        setCourses(updatedCourses);
-        setFilteredCourses(updatedCourses);
-        localStorage.setItem('courses', JSON.stringify(updatedCourses));  // 更新 localStorage
-    
-        // 清空選擇的課程
-        setSelectedCourses([]);
-      } catch (error) {
-        console.error('刪除課程失敗:', error);
-        alert('刪除課程失敗，請稍後再試');
-      }
-    };
-      
-  const handleSearch = () => {
-    const result = courses.filter((course) => {
-      return (
-        (filter.term ? course.term === filter.term : true) &&
-        (filter.department ? course.department.includes(filter.department) : true) &&
-        (filter.keyword ? course.name.includes(filter.keyword) || course.teacher.includes(filter.keyword) : true)
+
+  const handleDeleteSelected = async () => {
+    if (selectedCourses.length === 0) {
+      alert('請選擇至少一項課程進行刪除');
+      return;
+    }
+
+    try {
+      await Promise.all(
+        selectedCourses.map(async courseId => {
+          await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
+        })
       );
-    });
-    setFilteredCourses(result);
+
+      const updatedCourses = courses.filter(course => !selectedCourses.includes(course.id));
+      setCourses(updatedCourses);
+      setFilteredCourses(updatedCourses);
+      setSelectedCourses([]);
+    } catch (error) {
+      console.error('刪除課程失敗:', error);
+      alert('刪除課程失敗，請稍後再試');
+    }
+};
+
+  const handleSearch = () => {
+    setFilteredCourses(
+      courses.filter(course =>
+        (filter.term ? course.學期 === filter.term : true) &&
+        (filter.department ? course.系所名稱.includes(filter.department) : true) &&
+        (filter.keyword ? course.科目中文名稱.includes(filter.keyword) || course.授課教師姓名.includes(filter.keyword) : true)
+      )
+    );
   };
 
   return (
@@ -243,14 +239,30 @@ const CourseManagement = () => {
         <div className="button-group">
           <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
           <button
-            onClick={() => {
-              setEditingCourse(null); // 确保编辑课程为 null
-              setShowModal(true);
-            }}
-            className="handleUpload" // 使用相同的樣式類名
-          >
-            新增課程
-          </button>
+  onClick={() => {
+    setEditingCourse(null);  // 確保編輯課程為 null，清空先前編輯資料
+    setCourseDetails({
+      科目代碼: '',
+      科目中文名稱: '',
+      學分數: '',
+      系所名稱: '',
+      主開課教師姓名: '',
+      學期: '',
+      學制: '',
+      年級: '',
+      課別名稱: '',
+      課程中文摘要: '',
+      課程英文摘要: '',
+      上課地點: '',
+      授課教師姓名: '',
+      課表備註: '',
+    });
+    setShowModal(true);
+  }}
+  className="handleUpload" // 使用相同的樣式類名
+>
+  新增課程
+</button>
 
           {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
           <button onClick={handleUpload} className="handleUpload">匯入</button>
@@ -308,31 +320,42 @@ const CourseManagement = () => {
   </thead>
   <tbody>
   {filteredCourses.length > 0 ? (
-    filteredCourses.map((course) => (
-      <tr key={course.id}> {/* Added the key prop here */}
-        <td>
-          <input
-            type="checkbox"
-            checked={selectedCourses.includes(course.id)}
-            onChange={() => handleRowSelect(course.id)}
-          />
-        </td>
-        <td>{course.科目代碼}</td>
-        <td>{course.科目中文名稱} ({course.學分數})</td>
-        <td>{course.系所代碼}</td>
-        <td>{course.主開課教師姓名}</td>
-        <td>
-          <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="6" className="no-results">
-        無課程
+  filteredCourses.map((course) => (
+    <tr key={course._id}>
+      <td>
+        <input
+          type="checkbox"
+          checked={selectedCourses.includes(course.id)}
+          onChange={() => handleRowSelect(course.id)}
+        />
+      </td>
+      <td>{course.科目代碼}</td>
+      <td>{course.科目中文名稱} ({course.學分數})</td>
+      <td>{course.系所名稱}</td>
+      <td>
+        <span
+          className="teacher-name"
+          onClick={() => handleToggleExpand(course._id)}
+        >
+          {expandedTeachers.includes(course._id)
+            ? course.授課教師姓名
+            : course.授課教師姓名?.length > 6
+            ? course.授課教師姓名.slice(0, 6) + "..."
+            : course.授課教師姓名 || "未提供"}
+        </span>
+      </td>
+      <td>
+        <button className="edit-button" onClick={() => handleEditCourse(course)}>編輯</button>
       </td>
     </tr>
-  )}
+  ))
+) : (
+  <tr>
+    <td colSpan="6" className="no-results">
+      無課程
+    </td>
+  </tr>
+)}
 </tbody>
 </table>
 
@@ -343,15 +366,15 @@ const CourseManagement = () => {
           <div className="modal-content">
             <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
             <div className="modal-form">
-              <label>科目代號: <input type="text" name="id" value={courseDetails.科目代碼} onChange={handleInputChange} required /></label>
-              <label>課程名稱: <input type="text" name="name" value={courseDetails.科目中文名稱} onChange={handleInputChange} required /></label>
-              <label>學分: <input type="number" name="credits" value={courseDetails.學分數} onChange={handleInputChange} required /></label>
-              <label>系所:
-                <select name="department" value={courseDetails.系所名稱} onChange={handleInputChange}>
-                  <option value="">選擇系所</option>
-                  <option value="資訊管理系">資訊管理系</option>
-                  <option value="護理系">護理系</option>
-                  <option value="幼保系">幼保系</option>
+            <label>科目代號: <input type="text" name="科目代碼" value={courseDetails.科目代碼} onChange={handleInputChange} required /></label>
+<label>課程名稱: <input type="text" name="科目中文名稱" value={courseDetails.科目中文名稱} onChange={handleInputChange} required /></label>
+<label>學分: <input type="number" name="學分數" value={courseDetails.學分數} onChange={handleInputChange} required /></label>
+<label>系所:
+  <select name="系所名稱" value={courseDetails.系所名稱} onChange={handleInputChange}>
+    <option value="">選擇系所</option>
+    <option value="資訊管理系">資訊管理系</option>
+    <option value="護理系">護理系</option>
+    <option value="幼保系">幼保系</option>
                   <option value="長期照護系">長期照護系</option>
                   <option value="健康事業管理系">健康事業管理系</option>
                   <option value="護助產及婦女健康系">護助產及婦女健康系</option>
@@ -366,16 +389,16 @@ const CourseManagement = () => {
                 </select>
               </label>
               <label>學期:
-                <select name="term" value={courseDetails.學期} onChange={handleInputChange}>
+                <select name="學期" value={courseDetails.學期} onChange={handleInputChange}>
                   <option value="">選擇學期</option>
                   <option value="1132">1132</option>
                   <option value="1131">1131</option>
                   <option value="1122">1122</option>
                 </select>
               </label>
-              <label>教師: <input type="text" name="teacher" value={courseDetails.主開課教師姓名} onChange={handleInputChange} /></label>
+              <label>教師: <input type="text" name="主開課教師姓名" value={courseDetails.主開課教師姓名} onChange={handleInputChange} /></label>
               <label>學制:
-                <select name="program" value={courseDetails.學制} onChange={handleInputChange}>
+                <select name="學制" value={courseDetails.學制} onChange={handleInputChange}>
                   <option value="">選擇學制</option>
                   <option value="學士後系">學士後系</option>
                   <option value="四年制">四年制</option>
@@ -390,7 +413,7 @@ const CourseManagement = () => {
               </label>
 
               <label>年級:
-                <select name="grade" value={courseDetails.年級} onChange={handleInputChange}>
+                <select name="年級" value={courseDetails.年級} onChange={handleInputChange}>
                   <option value="">選擇年級</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -404,7 +427,7 @@ const CourseManagement = () => {
               </label>
 
               <label>課別:
-                <select name="course" value={courseDetails.課別名稱} onChange={handleInputChange}>
+                <select name="課別名稱" value={courseDetails.課別名稱} onChange={handleInputChange}>
                   <option value="">選擇課別</option>
                   <option value="通識必修(通識)">通識必修(通識)</option>
                   <option value="通識選修(通識)">通識選修(通識)</option>
@@ -413,7 +436,7 @@ const CourseManagement = () => {
                 </select>
               </label>
 
-              <label>備註: <textarea name="notes" value={courseDetails.課表備註} onChange={handleInputChange} /></label>
+              <label>備註: <textarea name="課表備註" value={courseDetails.課表備註} onChange={handleInputChange} /></label>
 
               <label>課程計畫:
                 <input type="file" name="file" onChange={handleFileChange} />
