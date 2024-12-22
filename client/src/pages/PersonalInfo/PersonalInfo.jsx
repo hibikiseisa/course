@@ -10,10 +10,10 @@ const PersonalInfo = () => {
     const [loading, setLoading] = useState(false); // 加載狀態
     const [passwordVisibility, setPasswordVisibility] = useState({
         oldPassword: false,
-        newPassword: false
+        newPassword: false,
     });
 
-    const userId = localStorage.getItem('id');
+    const userId = localStorage.getItem('id'); // 從 localStorage 取得使用者 ID
 
     useEffect(() => {
         if (!userId) {
@@ -21,25 +21,21 @@ const PersonalInfo = () => {
             window.location.href = '/login';
             return;
         }
-    
-        const storedUserInfo = localStorage.getItem('userInfo');
-        if (storedUserInfo) {
-            setUserInfo(JSON.parse(storedUserInfo));
-        } else {
-            const fetchUserInfo = async () => {
-                try {
-                    const response = await axios.get(`http://localhost:5000/api/user/${userId}`);
-                    setUserInfo(response.data);
-                    localStorage.setItem('userInfo', JSON.stringify(response.data));
-                } catch (error) {
-                    console.error('獲取個人資訊失敗:', error.response || error.message);
-                    alert('無法獲取用戶資料，請稍後重試');
-                }
-            };
-            fetchUserInfo();
-        }
-    }, [userId]);
-    
+
+        const fetchUserInfo = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/user/${userId}`);
+                setUserInfo(response.data);
+            } catch (error) {
+                console.error('獲取個人資訊失敗:', error.response || error.message);
+                alert('無法獲取用戶資料，請稍後重試');
+                window.location.href = '/login'; // 如果資料獲取失敗，強制登出
+            }
+        };
+
+        fetchUserInfo();
+    }, [userId]); // 當 userId 變化時重新拉取資料
+
     const checkPasswordStrength = (password) => {
         return password.length >= 6; // 密碼至少需要6個字元
     };
@@ -65,7 +61,7 @@ const PersonalInfo = () => {
             const response = await axios.put(
                 `http://localhost:5000/api/user/change-password/${userId}`,
                 { oldPassword, newPassword },
-                { headers: { 'Content-Type': 'application/json' } } // 確保是JSON格式
+                { headers: { 'Content-Type': 'application/json' } }
             );
 
             if (response.status === 200) {
@@ -73,12 +69,8 @@ const PersonalInfo = () => {
                     ...prev,
                     passwordLength: newPassword.length,
                 }));
-                localStorage.setItem('userInfo', JSON.stringify({
-                    ...userInfo,
-                    passwordLength: newPassword.length,
-                }));
-            }
-            else {
+                showNotification("密碼修改成功", "您的密碼已成功修改！", true);
+            } else {
                 showNotification("密碼修改失敗", "密碼修改失敗，請重試！", false);
             }
         } catch (error) {
@@ -97,7 +89,6 @@ const PersonalInfo = () => {
         if (Notification.permission === "granted") {
             new Notification(title, { body: message, icon });
         } else {
-            // 请求通知权限
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
                     new Notification(title, { body: message, icon });
