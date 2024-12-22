@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import pdf from "../../assets/pdf.png"; // 确保图片路径正确
@@ -6,8 +8,6 @@ import up from "../../assets/up.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 
 const CourseSearch = () => {
     const [courses, setCourses] = useState([]);
@@ -511,13 +511,12 @@ const CourseSearch = () => {
                                 </tr>
                             </thead>
                            
-                            {currentResults.map((course, index) => (
                               <tbody>
                               {currentResults?.length > 0 ? (
-                                currentResults.map((course, index) => (
-                                  <tr key={course._id}>
-                                    <td>{index + 1}</td>
-                                    <td>{course.學期 || "未提供"}</td>
+    currentResults.map((course, index) => (
+      <tr key={course._id}>
+        {/* 計算編號 */}
+        <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>                                    <td>{course.學期 || "未提供"}</td>
                                     <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
                                     <td>{course.年級 || "未提供"}</td>
                                     <td>{course.科目代碼 || "未提供"}</td>
@@ -552,7 +551,6 @@ const CourseSearch = () => {
                               )}
                             </tbody>
                             
-                                ))}
                             
                         </table>
                     </div>
