@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import ConflictModal from './ConflictModal/ConflictModal';
 import './course-simulation.css';
 
@@ -351,129 +351,121 @@ const CourseSimulation = () => {
 
       {/* 彈出視窗 */}
       {popupVisible && (
-        <div className="popup">
-          <div className="popup-content">
-            <h2>選擇課程</h2>
+<div className="popup">
+  <div className="popup-content">
+    <h2>選擇課程</h2>
 
-            <div className="form-group">
-              <label htmlFor="keyword-search">關鍵字查詢</label>
-              <input
-                id="keyword-search"
-                type="text"
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                placeholder="請輸入課程名稱或教師名稱"
-              />
-            </div>
+    <div className="form-group">
+      <label htmlFor="keyword-search">關鍵字查詢</label>
+      <input
+        id="keyword-search"
+        type="text"
+        value={searchKeyword}
+        onChange={(e) => setSearchKeyword(e.target.value)}
+        placeholder="請輸入課程名稱或教師名稱"
+      />
+    </div>
 
-            <div className="course-section">
-              <h3>我的收藏課程</h3>
-              {filteredMyCourses.length > 0 ? (
-                <table className="favorites-table">
-                  <thead>
-                    <tr>
-                      <th>選擇</th>
-                      <th>課程名稱</th>
-                      <th>授課教師</th>
-                      <th>節次</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMyCourses.map((course, index) => (
-                      <tr key={index}>
-                        <td>
-                          <input
-                            type="radio"
-                            name="selectedFavoriteCourse"
-                            value={course._id}
-                            onChange={() => setSelectedCourse(course)}
-                          />
-                        </td>
-                        <td>{course.科目中文名稱}</td>
-                        <td>
-                          <span
-                            className="teacher-name"
-                            onClick={() => handleToggleExpand(course._id)}
-                          >
-                            {expandedTeachers.includes(course._id)
-                              ? course.授課教師姓名
-                              : course.授課教師姓名?.length > 3
-                                ? course.授課教師姓名.slice(0, 3) + "..."
-                                : course.授課教師姓名}
-                          </span>
-                        </td>
-                        <td>{course.上課節次}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>沒有符合條件的收藏課程</p>
-              )}
-            </div>
+    <div className="course-section">
+      <h3>我的收藏課程</h3>
+      {filteredMyCourses.length > 0 ? (
+        <table className="favorites-table">
+          <thead className="table-header">
+            <tr>
+              <th>選擇</th>
+              <th>課程名稱</th>
+              <th>授課教師</th>
+              <th>節次</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredMyCourses.map((course, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="radio"
+                    name="selectedFavoriteCourse"
+                    value={course._id}
+                    onChange={() => setSelectedCourse(course)}
+                  />
+                </td>
+                <td>{course.科目中文名稱}</td>
+                <td>
+                  <span
+                    className="teacher-name"
+                    onClick={() => handleToggleExpand(course._id)}
+                  >
+                    {expandedTeachers.includes(course._id)
+                      ? course.授課教師姓名
+                      : course.授課教師姓名?.length > 3
+                        ? course.授課教師姓名.slice(0, 3) + "..."
+                        : course.授課教師姓名}
+                  </span>
+                </td>
+                <td>{course.上課節次}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>沒有符合條件的收藏課程</p>
+      )}
+    </div>
 
+    <div className="course-section">
+      <h3>可選課程</h3>
+      <table className="course-selection-table">
+        <thead className="table-header">
+          <tr>
+            <th>選擇</th>
+            <th>課程名稱</th>
+            <th>授課教師</th>
+            <th>節次</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredAvailableCourses?.length > 0 ? (
+            filteredAvailableCourses.map((course, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="radio"
+                    name="selectedCourse"
+                    value={course._id}
+                    onChange={() => setSelectedCourse(course)}
+                  />
+                </td>
+                <td>{course.科目中文名稱}</td>
+                <td>
+                  <span
+                    className="teacher-name"
+                    onClick={() => handleToggleExpand(course._id)}
+                  >
+                    {expandedTeachers.includes(course._id)
+                      ? course.授課教師姓名
+                      : course.授課教師姓名?.length > 3
+                        ? course.授課教師姓名.slice(0, 3) + "..."
+                        : course.授課教師姓名}
+                  </span>
+                </td>
+                <td>{course.上課節次}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4">沒有符合條件的課程</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
 
-            <div className="course-section">
-              <h3>可選課程</h3>
-
-              <table className="course-selection-table">
-                <thead>
-                  <tr>
-                    <th>選擇</th>
-                    <th>課程名稱</th>
-                    <th>授課教師</th>
-                    <th>節次</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAvailableCourses?.length > 0 ? (
-                    filteredAvailableCourses.map((course, index) => (
-                      <tr key={index}>
-                        {/* 選擇欄位 */}
-                        <td>
-                          <input
-                            type="radio" // 使用 radio 來選擇單一課程，也可以改成 checkbox 進行多選
-                            name="selectedCourse"
-                            value={course._id}
-                            onChange={() => setSelectedCourse(course)}
-                          />
-                        </td>
-                        {/* 課程名稱 */}
-                        <td>{course.科目中文名稱}</td>
-                        {/* 授課教師 */}
-                        <td>
-                          <span
-                            className="teacher-name"
-                            onClick={() => handleToggleExpand(course._id)}
-                          >
-                            {expandedTeachers.includes(course._id)
-                              ? course.授課教師姓名
-                              : course.授課教師姓名?.length > 3
-                                ? course.授課教師姓名.slice(0, 3) + "..."
-                                : course.授課教師姓名}
-                          </span>
-                        </td>
-                        {/* 節次 */}
-                        <td>{course.上課節次}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4">沒有符合條件的課程</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-
-            </div>
-
-            <div className="actions">
-              <button onClick={() => handleCourseSelect(selectedCourse)}>確定</button>
-              <button onClick={() => setPopupVisible(false)}>取消</button>
-            </div>
-          </div>
-        </div>
+    <div className="actions">
+      <button onClick={() => handleCourseSelect(selectedCourse)}>確定</button>
+      <button onClick={() => setPopupVisible(false)}>取消</button>
+    </div>
+  </div>
+</div>
       )}
       {/* 衝堂視窗 */}
       {conflictInfo && (
