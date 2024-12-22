@@ -327,7 +327,7 @@ app.get('/api/courses', async (req, res) => {
         //     });
         //     query.$and = periodConditions;
         // }
-        
+
         // 進行查詢
         console.log('Generated Query:', query); // 偵錯用
         const courses = await Course.find(query);
@@ -358,19 +358,17 @@ app.post('/api/favorites', async (req, res) => {
     }
 
     try {
-        // 檢查是否已存在
         const existingFavorite = await Favorite.findOne({ userId, courseId });
         if (existingFavorite) {
             return res.status(400).json({ message: '該課程已收藏' });
         }
 
-        // 保存新收藏
         const favorite = new Favorite({ userId, courseId });
         await favorite.save();
 
         res.status(200).json({ message: '課程已成功收藏' });
     } catch (error) {
-        console.error('收藏課程失敗:', error);
+        console.error('收藏課程失敗:', error.message);
         res.status(500).json({ message: '伺服器錯誤，無法收藏課程' });
     }
 });
@@ -566,27 +564,26 @@ app.get('/api/favorites/:userId/:day/:timeSlot', async (req, res) => {
     const { userId, day, timeSlot } = req.params;
 
     try {
-        console.log(`接收到的參數: userId=${userId}, day=${day}, timeSlot=${timeSlot}`);
         const favoriteCourses = await Favorite.find({ userId }).populate('courseId');
-        console.log('查詢到的收藏課程:', favoriteCourses);
 
         if (!favoriteCourses || favoriteCourses.length === 0) {
-            return res.status(200).json([]); // 沒有收藏課程
+            return res.status(200).json([]); // 返回空陣列
         }
 
-        const filteredCourses = favoriteCourses.filter((favorite) => {
+        // 過濾掉 courseId 為 null 的記錄
+        const validFavorites = favoriteCourses.filter((favorite) => favorite.courseId);
+
+        const filteredCourses = validFavorites.filter((favorite) => {
             const course = favorite.courseId;
-            console.log(`正在檢查課程: ${JSON.stringify(course, null, 2)}`);
             return (
-                course?.上課星期 === day &&
-                course?.上課節次?.split(',')?.includes(timeSlot)
+                course.上課星期 === day &&
+                course.上課節次.split(',').includes(timeSlot)
             );
         });
 
-        console.log('篩選後的課程:', filteredCourses);
         res.status(200).json(filteredCourses.map((f) => f.courseId));
     } catch (error) {
-        console.error('查詢收藏課程失敗:', error);
+        console.error('Error fetching favorites:', error);
         res.status(500).json({ message: '查詢收藏課程時發生錯誤' });
     }
 });

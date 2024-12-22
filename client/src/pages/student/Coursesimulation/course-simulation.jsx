@@ -14,9 +14,11 @@ const CourseSimulation = () => {
   const [selectedPeriod, setSelectedPeriod] = useState(''); // 存放當前選擇的節次
   const [conflictInfo, setConflictInfo] = useState(null); // 正確初始化
   const [originalSchedule, setOriginalSchedule] = useState({});
-
+  const [expandedTeachers, setExpandedTeachers] = useState([]);
+  const [favoriteCourses, setFavoriteCourses] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('');
+
   const userId = localStorage.getItem('id') || 'defaultUserId';
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const CourseSimulation = () => {
             formattedSchedule[key] = {
               courseId: item.courseId, // 課程ID
               courseName: item.courseName, // 課程名稱
-              teacher: item.teacher ,// 授課教師（可選）
+              teacher: item.teacher,// 授課教師（可選）
             };
           });
         });
@@ -106,10 +108,21 @@ const CourseSimulation = () => {
   };
 
   // 動態篩選課程
-  const filteredCourses = availableCourses.filter((course) =>
-    course.科目中文名稱.includes(searchKeyword) ||
-    course.授課教師姓名.includes(searchKeyword)
-  );
+  const filteredCourses = favoriteCourses.filter((favorite) => {
+    const course = favorite.courseId;
+
+    // 檢查 course 是否存在且屬性有效
+    if (!course || !course.上課星期 || !course.上課節次) {
+        console.warn(`跳過無效的課程: ${JSON.stringify(course)}`);
+        return false;
+    }
+
+    return (
+        course.上課星期 === day &&
+        course.上課節次.split(',').includes(timeSlot)
+    );
+});
+
   const handleCourseSelect = (course) => {
     const selected = availableCourses.find((c) => c._id === course._id) || course;
 
@@ -227,16 +240,23 @@ const CourseSimulation = () => {
     setIsEditMode(false);
     alert('更改已取消，恢復到原始課表！');
   };
-  const filteredMyCourses = myCourses.filter(
+  const filteredMyCourses = (myCourses || []).filter(
     (course) =>
-      (course.科目中文名稱.includes(searchKeyword) || course.授課教師姓名.includes(searchKeyword))
+      course.科目中文名稱?.includes(searchKeyword) || course.授課教師姓名?.includes(searchKeyword)
   );
 
-  const filteredAvailableCourses = availableCourses.filter(
+  const filteredAvailableCourses = (availableCourses || []).filter(
     (course) =>
-   
-      (course.科目中文名稱.includes(searchKeyword) || course.授課教師姓名.includes(searchKeyword))
+      course.科目中文名稱?.includes(searchKeyword) || course.授課教師姓名?.includes(searchKeyword)
   );
+
+  const handleToggleExpand = (courseId) => {
+    setExpandedTeachers((prev) =>
+      prev.includes(courseId)
+        ? prev.filter((id) => id !== courseId)
+        : [...prev, courseId]
+    );
+  };
 
   return (
     <div className="course-simulation-container">
@@ -258,7 +278,7 @@ const CourseSimulation = () => {
           </>
         )}
       </div>
-      <table className="schedule-table">
+    <table className="schedule-table">
         <thead>
           <tr>
             <th>時間</th>
@@ -268,48 +288,65 @@ const CourseSimulation = () => {
           </tr>
         </thead>
         <tbody>
-          {[
-            '第一節\n8:10~9:00', '第二節\n9:10~10:00', '第三節\n10:10~11:00',
-            '第四節\n11:10~12:00', '第五節\n12:40~13:30', '第六節\n13:40~14:30',
-            '第七節\n14:40~15:30', '第八節\n15:40~16:30', '第九節\n16:40~17:30', '第十節\n17:40~18:30',
-          ].map((time, periodIndex) => (
-            <tr key={time}>
-              <td>
-                {time.split('\n').map((line, index) => (
-                  <React.Fragment key={index}>
-                    {line}
-                    <br />
-                  </React.Fragment>
-                ))}
-              </td>
-              {['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'].map((day, dayIndex) => {
-                const key = `星期${dayIndex + 1}-第${periodIndex + 1}節`;
-                return (
-                  <td key={key}>
-                    {schedule[key] ? (
-                      <div className="course-item">
-                        <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
-                        <div>{schedule[key].teacher}</div>    {/* 顯示授課教師 */}
-                        {isEditMode && (
-                          <span className="remove-course" onClick={() => handleCourseRemove(key)}>
-                            ×
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      isEditMode && (
-                        <button className="addcourse-button" onClick={() => handleAddClick(dayIndex, periodIndex)}>
-                          +
-                        </button>
-                      )
-                    )}
-                  </td>
+  {[
+    '第一節\n8:10~9:00', '第二節\n9:10~10:00', '第三節\n10:10~11:00',
+    '第四節\n11:10~12:00', '第五節\n12:40~13:30', '第六節\n13:40~14:30',
+    '第七節\n14:40~15:30', '第八節\n15:40~16:30', '第九節\n16:40~17:30', '第十節\n17:40~18:30',
+  ].map((time, periodIndex) => (
+    <tr key={time}>
+      <td>
+        {time.split('\n').map((line, index) => (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+        ))}
+      </td>
+      {['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'].map((day, dayIndex) => {
+        const key = `星期${dayIndex + 1}-第${periodIndex + 1}節`;
+        return (
+          <td key={key}>
+            {schedule[key] ? (
+              <div className="course-item">
+                <div>{schedule[key].courseName}</div> {/* 顯示課程名稱 */}
+                <div>
+                  <span
+                    className="teacher-name"
+                    onClick={() => handleToggleExpand(key)}
+                  >
+                    {expandedTeachers.includes(key)
+                      ? schedule[key].teacher
+                      : schedule[key].teacher?.length > 3
+                        ? `${schedule[key].teacher.slice(0, 3)}...`
+                        : schedule[key].teacher}
+                  </span>
+                </div>
+                {isEditMode && (
+                  <span
+                    className="remove-course"
+                    onClick={() => handleCourseRemove(key)}
+                  >
+                    ×
+                  </span>
+                )}
+              </div>
+            ) : (
+              isEditMode && (
+                <button
+                  className="addcourse-button"
+                  onClick={() => handleAddClick(dayIndex, periodIndex)}
+                >
+                  +
+                </button>
+              )
+            )}
+          </td>
+        );
+      })}
+    </tr>
+  ))}
+</tbody>
 
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
       </table>
 
       {/* 彈出視窗 */}
@@ -317,21 +354,7 @@ const CourseSimulation = () => {
         <div className="popup">
           <div className="popup-content">
             <h2>選擇課程</h2>
-            {/* 學年期選擇 */}
-            {/* <div className="form-group">
-              <label htmlFor="semester-select">學年期</label>
-              <select
-                id="semester-select"
-                value={selectedSemester}
-                onChange={(e) => setSelectedSemester(e.target.value)}
-              >
-                <option value="">所有學年期</option>
-                <option value="1132">1132</option>
-                <option value="1131">1131</option>
-                <option value="1122">1122</option>
-                <option value="1121">1121</option>
-              </select>
-            </div> */}
+         
             <div className="form-group">
               <label htmlFor="keyword-search">關鍵字查詢</label>
               <input
@@ -346,38 +369,103 @@ const CourseSimulation = () => {
             <div className="course-section">
               <h3>我的收藏課程</h3>
               {filteredMyCourses.length > 0 ? (
-                filteredMyCourses.map((course) => (
-                  <label key={course._id}>
-                    <input
-                      type="radio"
-                      name="course"
-                      value={course._id}
-                      onChange={() => setSelectedCourse(course)}
-                    />
-                    {course.科目中文名稱} ({course.授課教師姓名})
-                  </label>
-                ))
+                <table className="favorites-table">
+                  <thead>
+                    <tr>
+                      <th>選擇</th>
+                      <th>課程名稱</th>
+                      <th>授課教師</th>
+                      <th>節次</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredMyCourses.map((course, index) => (
+                      <tr key={index}>
+                        <td>
+                          <input
+                            type="radio"
+                            name="selectedFavoriteCourse"
+                            value={course._id}
+                            onChange={() => setSelectedCourse(course)}
+                          />
+                        </td>
+                        <td>{course.科目中文名稱}</td>
+                        <td>
+                          <span
+                            className="teacher-name"
+                            onClick={() => handleToggleExpand(course._id)}
+                          >
+                            {expandedTeachers.includes(course._id)
+                              ? course.授課教師姓名
+                              : course.授課教師姓名?.length > 3
+                                ? course.授課教師姓名.slice(0, 3) + "..."
+                                : course.授課教師姓名}
+                          </span>
+                        </td>
+                        <td>{course.上課節次}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               ) : (
                 <p>沒有符合條件的收藏課程</p>
               )}
             </div>
+
+
             <div className="course-section">
               <h3>可選課程</h3>
-              {filteredAvailableCourses.length > 0 ? (
-                filteredAvailableCourses.map((course) => (
-                  <label key={course._id}>
-                    <input
-                      type="radio"
-                      name="course"
-                      value={course._id}
-                      onChange={() => setSelectedCourse(course)}
-                    />
-                    {course.科目中文名稱} ({course.授課教師姓名})
-                  </label>
-                ))
-              ) : (
-                <p>沒有符合條件的課程</p>
-              )}
+
+              <table className="course-selection-table">
+                <thead>
+                  <tr>
+                    <th>選擇</th>
+                    <th>課程名稱</th>
+                    <th>授課教師</th>
+                    <th>節次</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAvailableCourses?.length > 0 ? (
+                    filteredAvailableCourses.map((course, index) => (
+                      <tr key={index}>
+                        {/* 選擇欄位 */}
+                        <td>
+                          <input
+                            type="radio" // 使用 radio 來選擇單一課程，也可以改成 checkbox 進行多選
+                            name="selectedCourse"
+                            value={course._id}
+                            onChange={() => setSelectedCourse(course)}
+                          />
+                        </td>
+                        {/* 課程名稱 */}
+                        <td>{course.科目中文名稱}</td>
+                        {/* 授課教師 */}
+                        <td>
+                          <span
+                            className="teacher-name"
+                            onClick={() => handleToggleExpand(course._id)}
+                          >
+                            {expandedTeachers.includes(course._id)
+                              ? course.授課教師姓名
+                              : course.授課教師姓名?.length > 3
+                                ? course.授課教師姓名.slice(0, 3) + "..."
+                                : course.授課教師姓名}
+                          </span>
+                        </td>
+                        {/* 節次 */}
+                        <td>{course.上課節次}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4">沒有符合條件的課程</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+
             </div>
 
             <div className="actions">
