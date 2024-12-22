@@ -98,6 +98,7 @@ const CourseSearch = () => {
             groupedPeriods[day].push(timeIndex);
         });
 
+
         const periodFilter = Object.entries(groupedPeriods)
             .map(([day, periods]) => `${day}-${periods.join(',')}`)
             .join(';');
@@ -118,10 +119,18 @@ const CourseSearch = () => {
 
         try {
             const response = await axios.get('http://localhost:5000/api/courses', { params });
-            if (response.data && Array.isArray(response.data)) {
-                setCourses(response.data);
-                console.log('Fetched Courses:', response.data);
 
+            if (response.data && Array.isArray(response.data)) {
+                // 根據選中的 `selectedPeriods` 篩選回傳的課程
+                const filteredCourses = response.data.filter(course => {
+                    const coursePeriods = course.上課星期 && course.上課節次
+                        ? course.上課節次.split(',').map(period => `${course.上課星期}-${period}`)
+                        : [];
+                    return coursePeriods.some(period => selectedPeriods.includes(period));
+                });
+
+                setCourses(filteredCourses); // 更新狀態
+                console.log('Filtered Courses:', filteredCourses);
             } else {
                 setCourses([]); // 保證狀態正確
                 // console.log('Fetched Courses:', response.data);
@@ -294,9 +303,43 @@ const CourseSearch = () => {
     const handleClassTypeChange = (value) => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
+    
     const handleGradeChange = (value) => {
         setGrade((prevValue) => (prevValue === value ? '' : value));
     };
+    
+    const handleWeekdayChange = (weekday, isChecked) => {
+        if (isChecked) {
+            // 勾選該星期，記錄為單獨的星期
+            setSelectedPeriods((prev) => [...prev, `${weekday}`]);
+        } else {
+            // 取消勾選，移除該星期及其相關的節次
+            setSelectedPeriods((prev) =>
+                prev.filter((period) => !period.startsWith(`${weekday}-`) && period !== `${weekday}`)
+            );
+        }
+    };
+    
+
+    const handlePeriodChange = (period, isChecked) => {
+        const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p)); // 已選的星期
+    
+        if (isChecked) {
+            // 若勾選該節次，將節次加到已選的星期中
+            setSelectedPeriods((prev) => [
+                ...prev,
+                ...selectedWeekdays.map((weekday) => `${weekday}-${period}`),
+            ]);
+        } else {
+            // 若取消勾選，移除相關節次
+            setSelectedPeriods((prev) =>
+                prev.filter((p) => !p.endsWith(`-${period}`))
+            );
+        }
+    };
+    
+
+
     return (
         <div className="course-search-container">
             <h1 className="course-search-title">課程查詢系統</h1>
@@ -385,11 +428,41 @@ const CourseSearch = () => {
                         </div>
 
                         <div className="more-form-group">
-                            <label>節次</label>
-                            <button type="button" onClick={() => setIsPeriodModalOpen(true)} className="period-button">
-                                課表
-                            </button>
+                            <label>上課星期</label>
+                            <div className="weekday-checkbox-group">
+                                {["一", "二", "三", "四", "五", "六", "日"].map((day, index) => (
+                                    <label key={index}>
+                                        <input
+                                            type="checkbox"
+                                            value={index + 1}
+                                            checked={selectedPeriods.some((period) => period.startsWith(`${index + 1}`))}
+                                            onChange={(e) => handleWeekdayChange(index + 1, e.target.checked)}
+                                        />
+                                        星期{day}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
+                        {/* 只有在選擇了星期後才顯示節次選單 */}
+                        {selectedPeriods.some((period) => /^[1-7]$/.test(period)) && (
+                            <div className="more-form-group">
+                                <label>節次</label>
+                                <div className="period-checkbox-group">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((period) => (
+                                        <label key={period}>
+                                            <input
+                                                type="checkbox"
+                                                value={period}
+                                                checked={selectedPeriods.some((p) => p.endsWith(`-${period}`))}
+                                                onChange={(e) => handlePeriodChange(period, e.target.checked)}
+                                            />
+                                            第{period}節
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
 
                         <div className="more-form-group">
                             <label>教師</label>
@@ -435,20 +508,20 @@ const CourseSearch = () => {
             />
             {courses.length > 0 && (
                 <>
-                     <div className="pagination-controls">
+                    <div className="pagination-controls">
                         <div className="results-per-page">
                             <h4>每頁筆數</h4>
                             <select
-                                     value={resultsPerPage}
-                                     onChange={(e) => {
-                                         setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
-                                         setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
-                                     }}
-                                 >
-                                     <option value={5}>5</option>
-                                     <option value={10}>10</option>
-                                     <option value={20}>20</option>
-                                 </select>
+                                value={resultsPerPage}
+                                onChange={(e) => {
+                                    setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
+                                    setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
+                                }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                            </select>
                             <h4>個結果</h4>
                         </div>
                         <div className="pagination-buttons">
@@ -488,7 +561,7 @@ const CourseSearch = () => {
                                     if (page >= 1 && page <= totalPages) setCurrentPage(page);
                                 }}
                             />
-                             <span> / 共 {courses.length} 筆結果</span>
+                            <span> / 共 {courses.length} 筆結果</span>
                         </div>
                     </div>
 
@@ -510,48 +583,45 @@ const CourseSearch = () => {
                                     <th>更多</th>
                                 </tr>
                             </thead>
-                           
-                              <tbody>
-                              {currentResults?.length > 0 ? (
-    currentResults.map((course, index) => (
-      <tr key={course._id}>
-        {/* 計算編號 */}
-        <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>                                    <td>{course.學期 || "未提供"}</td>
-                                    <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
-                                    <td>{course.年級 || "未提供"}</td>
-                                    <td>{course.科目代碼 || "未提供"}</td>
-                                    <td>{course.科目中文名稱 || "未提供"}</td>
-                                    <td>
-                                      <span
-                                        className="teacher-name"
-                                        onClick={() => handleToggleExpand(course._id)}
-                                      >
-                                        {expandedTeachers.includes(course._id)
-                                          ? course.授課教師姓名
-                                          : course.授課教師姓名?.length > 6
-                                          ? course.授課教師姓名.slice(0, 6) + "..."
-                                          : course.授課教師姓名 || "未提供"}
-                                      </span>
-                                    </td>
-                                    <td>{course.上課人數 || "未提供"}</td>
-                                    <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
-                                    <td>{course.學分數 || "未提供"}</td>
-                                    <td>{course.課別名稱 || "未提供"}</td>
-                                    <td>
-                                      <button onClick={() => openMoreInfo(course)} className="more-button">
-                                        更多資訊
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td colSpan="12">暫無資料</td>
-                                </tr>
-                              )}
+                            <tbody>
+                                {currentResults?.length > 0 ? (
+                                    currentResults.map((course, index) => (
+                                        <tr key={course._id}>
+                                            {/* 計算編號 */}
+                                            <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>                                    <td>{course.學期 || "未提供"}</td>
+                                            <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
+                                            <td>{course.年級 || "未提供"}</td>
+                                            <td>{course.科目代碼 || "未提供"}</td>
+                                            <td>{course.科目中文名稱 || "未提供"}</td>
+                                            <td>
+                                                <span
+                                                    className="teacher-name"
+                                                    onClick={() => handleToggleExpand(course._id)}
+                                                >
+                                                    {expandedTeachers.includes(course._id)
+                                                        ? course.授課教師姓名
+                                                        : course.授課教師姓名?.length > 6
+                                                            ? course.授課教師姓名.slice(0, 6) + "..."
+                                                            : course.授課教師姓名 || "無固定教師"}
+                                                </span>
+                                            </td>
+                                            <td>{course.上課人數 || "未提供"}</td>
+                                            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
+                                            <td>{course.學分數 || "未提供"}</td>
+                                            <td>{course.課別名稱 || "未提供"}</td>
+                                            <td>
+                                                <button onClick={() => openMoreInfo(course)} className="more-button">
+                                                    更多資訊
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="12">暫無資料</td>
+                                    </tr>
+                                )}
                             </tbody>
-                            
-                            
                         </table>
                     </div>
                 </>
@@ -564,14 +634,14 @@ const CourseSearch = () => {
                 />
             )}
             {showButton && (
-            <><button
+                <><button
                     className="scroll-to-top"
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 ><img src={up} alt="up" className="up-image" />
-                    
+
                 </button></>
-)}
-        
+            )}
+
         </div>
     );
 };
