@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-const Login = ({ setIsLoggedIn, setUserid }) => {
+const Login = ({ setIsLoggedIn, setUserid ,setViewAsStudent }) => {
   const [id, setId] = useState(''); // 使用者帳號
   const [password, setPassword] = useState('');
   const [showRoleSelection, setShowRoleSelection] = useState(false); // 是否顯示角色選擇
@@ -24,10 +24,12 @@ const Login = ({ setIsLoggedIn, setUserid }) => {
         if (selectedPage === 'admin') {
           setIsLoggedIn(true);
           setUserid(id);
+          setViewAsStudent(false);
           navigate('/AdminDashboard'); // 跳轉到管理者頁面
         } else if (selectedPage === 'student') {
           setIsLoggedIn(true);
           setUserid(id);
+          setViewAsStudent(true);
           navigate('/CourseSearch'); // 跳轉到學生頁面
         } else {
           setError('請選擇角色頁面');
@@ -60,6 +62,7 @@ const Login = ({ setIsLoggedIn, setUserid }) => {
         // 如果是學生，直接跳轉到學生頁面
         setIsLoggedIn(true);
         setUserid(id);
+        setViewAsStudent(false); 
         navigate('/CourseSearch');
       }
     } catch (error) {

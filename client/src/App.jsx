@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
-import './components/Navbar/Navbar.css'; // 引入 CSS
-import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountManagement'; //所有帳號管理
-import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement'; //課程管理
+import './components/Navbar/Navbar.css';
+import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountManagement';
+import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement';
 import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
-import Coursesimulation from "./pages/student/Coursesimulation/course-simulation"; //預選課模擬
-// import CourseSimulator from './pages/CourseSimulator/CourseSimulator';
+import Coursesimulation from "./pages/student/Coursesimulation/course-simulation";
 import FavoritesList from './pages/FavoritesList/FavoritesList';
 import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登錄狀態
   const [Userid, setUserid] = useState(''); // 用户 ID
+  const [viewAsStudent, setViewAsStudent] = useState(() => {
+    // 從 localStorage 獲取初始化值
+    const storedView = localStorage.getItem('viewAsStudent');
+    return storedView ? JSON.parse(storedView) : false; // 預設為 false
+  });
 
-  // 本地存取狀態
+  // 切換 viewAsStudent 並保存到 localStorage
+  const toggleViewAsStudent = () => {
+    const newViewAsStudent = !viewAsStudent;
+    setViewAsStudent(newViewAsStudent);
+    localStorage.setItem('viewAsStudent', JSON.stringify(newViewAsStudent));
+  };
+
+  // 初始化登錄狀態
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUserid = localStorage.getItem('id');
@@ -27,15 +38,33 @@ function App() {
     }
   }, []);
 
+  // 確保每次 viewAsStudent 改變時同步更新 localStorage
+  useEffect(() => {
+    localStorage.setItem('viewAsStudent', JSON.stringify(viewAsStudent));
+  }, [viewAsStudent]);
+
   return (
     <Router>
-      <Navbar isLoggedIn={isLoggedIn} Userid={Userid} setIsLoggedIn={setIsLoggedIn} />
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        Userid={Userid}
+        setIsLoggedIn={setIsLoggedIn}
+        viewAsStudent={viewAsStudent}
+        toggleViewAsStudent={toggleViewAsStudent}
+      />
       <div className="content">
         <Routes>
           <Route path="/" element={<CourseSearch />} />
           <Route
             path="/login"
-            element={<Login setIsLoggedIn={setIsLoggedIn} setUserid={setUserid} />}
+            element={
+              <Login
+                setIsLoggedIn={setIsLoggedIn}
+                setUserid={setUserid}
+                setViewAsStudent={setViewAsStudent}
+                toggleViewAsStudent={toggleViewAsStudent}
+              />
+            }
           />
           <Route path="/register" element={<Register />} />
           <Route path="/CourseSearch" element={<CourseSearch />} />
@@ -45,9 +74,6 @@ function App() {
           <Route path="/Coursesimulation" element={<Coursesimulation />} />
           <Route path="/FavoritesList" element={<FavoritesList />} />
           <Route path="/PersonalInfo" element={<PersonalInfo />} />
-
-          {/* <Route path="/CourseSimulator" element={<CourseSimulator />} /> */}
-
         </Routes>
       </div>
     </Router>

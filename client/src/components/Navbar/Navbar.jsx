@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png"; // 确保图片路径正确
 
-const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
+const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewAsStudent  }) => {
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false); // 控制语言菜单
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -18,6 +18,10 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("viewAsStudent 的值是:", viewAsStudent);
+  }, [viewAsStudent]);
 
   // 登出逻辑
   const handleLogout = () => {
@@ -35,34 +39,22 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
   return (
     <div className="navbar">
       {/* Logo 和标题 */}
-      <div className="navbar-logo" onClick={() => navigate("/CourseSearch")} style={{ cursor: "pointer" }}>
+      <div
+        className="navbar-logo"
+        onClick={() => navigate("/CourseSearch")}
+        style={{ cursor: "pointer" }}
+      >
         <img src={logo} alt="Logo" className="logo-image" />
-        <button onClick={()=> navigate("/CourseSearch")} className="navbar-link">
-        <span className="navbar-title">課程查詢系統</span></button>
+        <button onClick={() => navigate("/CourseSearch")} className="navbar-link">
+          <span className="navbar-title">課程查詢系統</span>
+        </button>
       </div>
 
       {/* 动态右侧菜单 */}
       <div className="navbar-links">
         {isLoggedIn ? (
           <>
-            {localStorage.getItem("role") === "admin" ? (
-              // 管理者菜单
-              <>
-
-                <button onClick={() => navigate("/help")} className="navbar-link">
-                  操作說明
-                </button>
-                <button onClick={() => navigate("/CourseManagement")} className="navbar-link">
-                  課程管理
-                </button>
-                <button onClick={() => navigate("/AccountManagement")} className="navbar-link">
-                  帳號管理
-                </button>
-                <button onClick={handleLogout} className="navbar-link">
-                  登出
-                </button>
-              </>
-            ) : (
+            {viewAsStudent ? (
               // 学生菜单
               <>
                 <button onClick={() => navigate("/help")} className="navbar-link">
@@ -76,6 +68,22 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn }) => {
                 </button>
                 <button onClick={() => navigate("/PersonalInfo")} className="navbar-link">
                   個人帳號管理
+                </button>
+                <button onClick={handleLogout} className="navbar-link">
+                  登出
+                </button>
+              </>
+            ) : (
+              // 管理者菜单
+              <>
+                <button onClick={() => navigate("/help")} className="navbar-link">
+                  操作說明
+                </button>
+                <button onClick={() => navigate("/CourseManagement")} className="navbar-link">
+                  課程管理
+                </button>
+                <button onClick={() => navigate("/AccountManagement")} className="navbar-link">
+                  帳號管理
                 </button>
                 <button onClick={handleLogout} className="navbar-link">
                   登出
