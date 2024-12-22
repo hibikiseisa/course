@@ -119,15 +119,19 @@ const CourseSearch = () => {
 
         try {
             const response = await axios.get('http://localhost:5000/api/courses', { params });
+            console.log('API Response:', response.data);
 
             if (response.data && Array.isArray(response.data)) {
                 // 根據選中的 `selectedPeriods` 篩選回傳的課程
-                const filteredCourses = response.data.filter(course => {
-                    const coursePeriods = course.上課星期 && course.上課節次
-                        ? course.上課節次.split(',').map(period => `${course.上課星期}-${period}`)
-                        : [];
-                    return coursePeriods.some(period => selectedPeriods.includes(period));
-                });
+                const filteredCourses = selectedPeriods.length > 0
+                    ? response.data.filter(course => {
+                        const coursePeriods = course.上課星期 && course.上課節次
+                            ? course.上課節次.split(',').map(period => `${course.上課星期}-${period}`)
+                            : [];
+                        return coursePeriods.some(period => selectedPeriods.includes(period));
+                    })
+                    : response.data;
+
 
                 setCourses(filteredCourses); // 更新狀態
                 console.log('Filtered Courses:', filteredCourses);
@@ -303,11 +307,9 @@ const CourseSearch = () => {
     const handleClassTypeChange = (value) => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
-    
     const handleGradeChange = (value) => {
         setGrade((prevValue) => (prevValue === value ? '' : value));
     };
-    
     const handleWeekdayChange = (weekday, isChecked) => {
         if (isChecked) {
             // 勾選該星期，記錄為單獨的星期
@@ -319,11 +321,11 @@ const CourseSearch = () => {
             );
         }
     };
-    
+
 
     const handlePeriodChange = (period, isChecked) => {
         const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p)); // 已選的星期
-    
+
         if (isChecked) {
             // 若勾選該節次，將節次加到已選的星期中
             setSelectedPeriods((prev) => [
@@ -337,7 +339,7 @@ const CourseSearch = () => {
             );
         }
     };
-    
+
 
 
     return (
@@ -482,7 +484,7 @@ const CourseSearch = () => {
                         <div className="more-form-group">
                             <label>教室</label>
                             <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="教室名稱" />
-                                             </div>
+                        </div>
                         <div className="form-group">
                             <button
                                 type="button"

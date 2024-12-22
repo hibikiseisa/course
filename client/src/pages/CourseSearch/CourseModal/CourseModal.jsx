@@ -16,10 +16,8 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     const handleMapToggle = () => {
         setShowMap((prev) => !prev);
     };
-import React, { useState } from 'react'; // 添加 useState
-import './CourseModal.css'; // 確保添加樣式
 
-const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
+
     const [isMapOpen, setIsMapOpen] = useState(false);
     const [mapImage, setMapImage] = useState(''); // 用來存放圖片的 state
     const [roomLocation, setRoomLocation] = useState(''); // 用來存放教室位置的 state

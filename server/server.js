@@ -97,21 +97,7 @@ app.post('/api/register', async (req, res) => {
 
 
 
-// (async () => {
-//     try {
-//         const hashedPassword = await bcrypt.hash('testpassword', 10);
-//         const user = new User({
-//             username: 'testuser',
-//             password: hashedPassword,
-//             role: 'student', // 測試設置角色
-//         });
-//         await user.save();
-//         console.log('測試用戶插入成功');
-//     } catch (error) {
-//         console.error('測試用戶插入失敗:', error);
-//     }
-// })();
-// 登入
+
 app.post('/api/login', async (req, res) => {
     const { id, password } = req.body;
 
@@ -338,7 +324,74 @@ app.get('/api/courses', async (req, res) => {
     }
 });
 
+app.post('/api/courses', async (req, res) => {
+    try {
+        const {
+            科目代碼,
+            科目中文名稱,
+            學分數,
+            系所名稱,
+            主開課教師姓名,
+            學期,
+            學制,
+            年級,
+            課別名稱,
+            課程中文摘要,
+            課程英文摘要,
+            上課地點,
+            授課教師姓名,
+            課表備註
+        } = req.body;
 
+        // 驗證必填欄位
+        if (!科目代碼 || !科目中文名稱 || !學分數 || !系所名稱 || !主開課教師姓名 || !學期 || !學制 || !年級 || !課別名稱 || !課程中文摘要 || !課程英文摘要 || !上課地點 || !授課教師姓名) {
+            return res.status(400).json({ error: '缺少必要欄位！' });
+        }
+
+        // 建立新課程
+        const newCourse = new Course({
+            科目代碼,
+            科目中文名稱,
+            學分數,
+            系所名稱,
+            主開課教師姓名,
+            學期,
+            學制,
+            年級,
+            課別名稱,
+            課程中文摘要,
+            課程英文摘要,
+            上課地點,
+            授課教師姓名,
+            課表備註
+        });
+
+        // 儲存到資料庫
+        const savedCourse = await newCourse.save();
+        res.status(201).json(savedCourse);
+    } catch (error) {
+        console.error('新增課程錯誤：', error);
+        res.status(500).json({ error: `新增課程失敗！原因：${error.message}` });
+    }
+});
+
+// app.delete('/api/courses/:id', async (req, res) => {
+//     const { id } = req.params;
+
+//     try {
+//         // 嘗試從資料庫刪除課程
+//         const deletedCourse = await Course.findByIdAndDelete(id);
+
+//         if (!deletedCourse) {
+//             return res.status(404).json({ message: '課程不存在，無法刪除' });
+//         }
+
+//         res.status(200).json({ message: '課程刪除成功', deletedCourse });
+//     } catch (error) {
+//         console.error('刪除課程時出現錯誤:', error);
+//         res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
+//     }
+// });
 
 
 const favoriteSchema = new mongoose.Schema({
