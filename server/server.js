@@ -375,23 +375,28 @@ app.post('/api/courses', async (req, res) => {
     }
 });
 
-// app.delete('/api/courses/:id', async (req, res) => {
-//     const { id } = req.params;
+app.put('/api/courses/:id', async (req, res) => {
+    const courseId = req.params.id;
+    const updatedData = req.body;
 
-//     try {
-//         // 嘗試從資料庫刪除課程
-//         const deletedCourse = await Course.findByIdAndDelete(id);
+    try {
+        // 查找並更新課程
+        const updatedCourse = await Course.findByIdAndUpdate(courseId, updatedData, {
+            new: true, // 返回更新後的數據
+            runValidators: true, // 確保更新時執行模型驗證
+        });
 
-//         if (!deletedCourse) {
-//             return res.status(404).json({ message: '課程不存在，無法刪除' });
-//         }
+        if (!updatedCourse) {
+            return res.status(404).json({ message: '找不到對應的課程' });
+        }
 
-//         res.status(200).json({ message: '課程刪除成功', deletedCourse });
-//     } catch (error) {
-//         console.error('刪除課程時出現錯誤:', error);
-//         res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
-//     }
-// });
+        res.status(200).json(updatedCourse);
+    } catch (error) {
+        console.error('更新課程失敗:', error);
+        res.status(500).json({ message: '無法更新課程，請稍後重試。', error: error.message });
+    }
+});
+
 
 
 const favoriteSchema = new mongoose.Schema({

@@ -35,7 +35,7 @@ const CourseManagement = () => {
   const terms = ['1132'];
   const departments = ['資訊管理系', '護理系', '幼保系', '長期照護系', '健康事業管理系', '護助產及婦女健康系', '嬰幼兒保育系', '護理教育曁數位學習系', '高齡健康照護系', '生死與健康心理諮商系', '休閒產業與健康促進系旅遊健康', '運動保健系', '語言治療與聽力學系'];
   const programs = ['學士後系', '四年制', '二技', '二技(三年)', '學士後多元專長', '學士後學位學程', '碩士班', '博士班'];
-  const grades = ['一年級', '二年級', '三年級','四年級'];
+  const grades = ['一年級', '二年級', '三年級', '四年級'];
   const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
 
   useEffect(() => {
@@ -122,14 +122,14 @@ const CourseManagement = () => {
       [name]: name === '學分數' || name === '年級' ? value.toString() : value,
     }));
   };
-  
+
 
   const handleSaveCourse = async () => {
     // 確保所有欄位轉為字串
     const formattedCourseDetails = Object.fromEntries(
       Object.entries(courseDetails).map(([key, value]) => [key, value?.toString() || ''])
     );
-  
+
     // 驗證必填欄位
     const newErrors = {};
     Object.entries(formattedCourseDetails).forEach(([key, value]) => {
@@ -137,23 +137,40 @@ const CourseManagement = () => {
         newErrors[key] = true; // 如果欄位為空，記錄錯誤
       }
     });
-  
+
     setErrors(newErrors); // 更新錯誤狀態
-  
+
     // 如果有錯誤，則中止執行
     if (Object.keys(newErrors).length > 0) {
       alert('請填寫所有必填欄位');
       return;
     }
-  
+
     try {
-      const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
-      console.log('課程儲存成功', response.data);
-  
-      // 更新前端課程列表
-      setCourses([...courses, response.data]);
-      setFilteredCourses([...filteredCourses, response.data]);
-  
+      if (editingCourse) {
+        // 如果是編輯模式，呼叫 PUT API
+        const response = await axios.put(
+          `http://localhost:5000/api/courses/${editingCourse._id}`,
+          formattedCourseDetails
+        );
+        console.log('課程更新成功', response.data);
+
+        // 更新前端課程列表
+        const updatedCourses = courses.map(course =>
+          course._id === editingCourse._id ? response.data : course
+        );
+        setCourses(updatedCourses);
+        setFilteredCourses(updatedCourses);
+      } else {
+        // 如果是新增模式，呼叫 POST API
+        const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
+        console.log('課程儲存成功', response.data);
+
+        // 更新前端課程列表
+        setCourses([...courses, response.data]);
+        setFilteredCourses([...filteredCourses, response.data]);
+      }
+
       // 清空表單與錯誤狀態
       setCourseDetails({
         科目代碼: '',
@@ -179,8 +196,9 @@ const CourseManagement = () => {
       alert('儲存課程失敗，請檢查資料格式或內容。');
     }
   };
-  
-  
+
+
+
 
   const handleToggleExpand = (teacherId) => {
     setExpandedTeachers((prev) =>
@@ -195,6 +213,7 @@ const CourseManagement = () => {
     setCourseDetails({ ...course });
     setShowModal(true);
   };
+
 
   const handleSelectAll = (e) => {
     setSelectedCourses(e.target.checked ? courses.map(course => course._id) : []);
@@ -285,7 +304,6 @@ const CourseManagement = () => {
           <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
         </div>
 
-        {/* 搜尋欄位代碼保持不變 */}
         <div className="search-group">
           <div className="search-item">
             <label>學期:</label>
@@ -378,113 +396,116 @@ const CourseManagement = () => {
       <div className="data-count">總共 {filteredCourses.length} 筆資料</div>
 
       {showModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
-      <div className="modal-form">
-  <label>
-    科目代碼: 
-    <input type="text" name="科目代碼" value={courseDetails.科目代碼} onChange={handleInputChange} required />
-    {errors['科目代碼'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    科目中文名稱: 
-    <input type="text" name="科目中文名稱" value={courseDetails.科目中文名稱} onChange={handleInputChange} required />
-    {errors['科目中文名稱'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    學分數: 
-    <input type="number" name="學分數" value={courseDetails.學分數} onChange={(e) => handleInputChange({ target: { name: e.target.name, value: e.target.value.toString() } })} required />
-    {errors['學分數'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    系所名稱:
-    <select name="系所名稱" value={courseDetails.系所名稱} onChange={handleInputChange}>
-      <option value="">選擇系所</option>
-      {departments.map((dept) => (
-        <option key={dept} value={dept}>{dept}</option>
-      ))}
-    </select>
-    {errors['系所名稱'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    主開課教師姓名: 
-    <input type="text" name="主開課教師姓名" value={courseDetails.主開課教師姓名} onChange={handleInputChange} />
-    {errors['主開課教師姓名'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    學期:
-    <select name="學期" value={courseDetails.學期} onChange={handleInputChange}>
-      <option value="">選擇學期</option>
-      {terms.map((term) => (
-        <option key={term} value={term}>{term}</option>
-      ))}
-    </select>
-    {errors['學期'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    學制:
-    <select name="學制" value={courseDetails.學制} onChange={handleInputChange}>
-      <option value="">選擇學制</option>
-      {programs.map((program) => (
-        <option key={program} value={program}>{program}</option>
-      ))}
-    </select>
-    {errors['學制'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    年級:
-    <select name="年級" value={courseDetails.年級} onChange={(e) => handleInputChange({ target: { name: e.target.name, value: e.target.value.toString() } })}>
-      <option value="">選擇年級</option>
-      {grades.map((grade) => (
-        <option key={grade} value={grade}>{grade}</option>
-      ))}
-    </select>
-    {errors['年級'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    課別名稱:
-    <select name="課別名稱" value={courseDetails.課別名稱} onChange={handleInputChange}>
-      <option value="">選擇課別</option>
-      {coursesList.map((courseType) => (
-        <option key={courseType} value={courseType}>{courseType}</option>
-      ))}
-    </select>
-    {errors['課別名稱'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    課程中文摘要: 
-    <textarea name="課程中文摘要" value={courseDetails.課程中文摘要} onChange={handleInputChange} />
-    {errors['課程中文摘要'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    課程英文摘要: 
-    <textarea name="課程英文摘要" value={courseDetails.課程英文摘要} onChange={handleInputChange} />
-    {errors['課程英文摘要'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    上課地點: 
-    <input type="text" name="上課地點" value={courseDetails.上課地點} onChange={handleInputChange} />
-    {errors['上課地點'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    授課教師姓名: 
-    <input type="text" name="授課教師姓名" value={courseDetails.授課教師姓名} onChange={handleInputChange} />
-    {errors['授課教師姓名'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-  <label>
-    課表備註: 
-    <textarea name="課表備註" value={courseDetails.課表備註} onChange={handleInputChange} />
-    {errors['課表備註'] && <span style={{ color: 'red' }}>*</span>}
-  </label>
-</div>
-      <div className="modal-actions">
-        <button onClick={handleSaveCourse} className="add-button">確定</button>
-        <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
-      </div>
-    </div>
-  </div>
-)}
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>{editingCourse ? '編輯課程' : '新增課程'}</h3>
+            <div className="modal-form">
+              <label>
+                科目代碼:
+                <input type="text" name="科目代碼" value={courseDetails.科目代碼} onChange={handleInputChange} required />
+                {errors['科目代碼'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                科目中文名稱:
+                <input type="text" name="科目中文名稱" value={courseDetails.科目中文名稱} onChange={handleInputChange} required />
+                {errors['科目中文名稱'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                學分數:
+                <input type="number" name="學分數" value={courseDetails.學分數} onChange={(e) => handleInputChange({ target: { name: e.target.name, value: e.target.value.toString() } })} required />
+                {errors['學分數'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                系所名稱:
+                <select name="系所名稱" value={courseDetails.系所名稱} onChange={handleInputChange}>
+                  <option value="">選擇系所</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+                {errors['系所名稱'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                主開課教師姓名:
+                <input type="text" name="主開課教師姓名" value={courseDetails.主開課教師姓名} onChange={handleInputChange} />
+                {errors['主開課教師姓名'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                學期:
+                <select name="學期" value={courseDetails.學期} onChange={handleInputChange}>
+                  <option value="">選擇學期</option>
+                  {terms.map((term) => (
+                    <option key={term} value={term}>{term}</option>
+                  ))}
+                </select>
+                {errors['學期'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                學制:
+                <select name="學制" value={courseDetails.學制} onChange={handleInputChange}>
+                  <option value="">選擇學制</option>
+                  {programs.map((program) => (
+                    <option key={program} value={program}>{program}</option>
+                  ))}
+                </select>
+                {errors['學制'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                年級:
+                <select name="年級" value={courseDetails.年級} onChange={(e) => handleInputChange({ target: { name: e.target.name, value: e.target.value.toString() } })}>
+                  <option value="">選擇年級</option>
+                  {grades.map((grade) => (
+                    <option key={grade} value={grade}>{grade}</option>
+                  ))}
+                </select>
+                {errors['年級'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                課別名稱:
+                <select name="課別名稱" value={courseDetails.課別名稱} onChange={handleInputChange}>
+                  <option value="">選擇課別</option>
+                  {coursesList.map((courseType) => (
+                    <option key={courseType} value={courseType}>{courseType}</option>
+                  ))}
+                </select>
+                {errors['課別名稱'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                課程中文摘要:
+                <textarea name="課程中文摘要" value={courseDetails.課程中文摘要} onChange={handleInputChange} />
+                {errors['課程中文摘要'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                課程英文摘要:
+                <textarea name="課程英文摘要" value={courseDetails.課程英文摘要} onChange={handleInputChange} />
+                {errors['課程英文摘要'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                上課地點:
+                <input type="text" name="上課地點" value={courseDetails.上課地點} onChange={handleInputChange} />
+                {errors['上課地點'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                授課教師姓名:
+                <input type="text" name="授課教師姓名" value={courseDetails.授課教師姓名} onChange={handleInputChange} />
+                {errors['授課教師姓名'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
+                課表備註:
+                <textarea name="課表備註" value={courseDetails.課表備註} onChange={handleInputChange} />
+                {errors['課表備註'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+            </div>
+            <div className="modal-actions">
+              <button onClick={handleSaveCourse} className="add-button">
+                {editingCourse ? '修改' : '新增'}
+              </button>
+              <button onClick={() => setShowModal(false)} className="cancel-button">取消</button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {showButton && (
         <><button
