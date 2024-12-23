@@ -43,3 +43,19 @@
 .remove-button:hover {
     background-color: #e53935;
 }
+
+.favorites-table td .teacher-name {
+    display: inline-block;
+    cursor: pointer;
+    max-width: 100px; 
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
+
+.favorites-table td .teacher-name.expanded {
+    max-width: 300px; 
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word; 
+}

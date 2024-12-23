@@ -50,7 +50,7 @@ const FavoritesList = () => {
         }
     };
     const getWeekday = (dayNumber) => {
-        const weekdays = [ '一', '二', '三', '四', '五', '六','日'];
+        const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
         return `星期${weekdays[dayNumber - 1] || '未提供'}`;
     };
 
@@ -88,16 +88,17 @@ const FavoritesList = () => {
                                 <td>{course.科目中文名稱 || '未提供'}</td>
                                 <td>
                                     <span
-                                        className="teacher-name"
+                                        className={`teacher-name ${expandedTeachers.includes(course._id) ? 'expanded' : ''}`}
                                         onClick={() => handleToggleExpand(course._id)}
                                     >
                                         {expandedTeachers.includes(course._id)
                                             ? course.授課教師姓名 || '未提供'
-                                            : course.授課教師姓名?.length > 3
-                                                ? `${course.授課教師姓名.slice(0, 3)}...`
+                                            : course.授課教師姓名?.length > 6
+                                                ? `${course.授課教師姓名.slice(0, 6)}...`
                                                 : course.授課教師姓名 || '未提供'}
                                     </span>
                                 </td>
+
                                 <td>{course.上課人數 || '未提供'}</td>
                                 <td>{`${getWeekday(course.上課星期)} - ${course.上課節次 || '未提供'}`}</td>
                                 <td>{course.學分數 || '未提供'}</td>
