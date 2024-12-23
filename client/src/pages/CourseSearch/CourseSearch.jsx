@@ -3,8 +3,11 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import odt from "../../assets/odt.png"; // 确保图片路径正确
 import pdf from "../../assets/pdf.png"; // 确保图片路径正确
 import up from "../../assets/up.png"; // 确保图片路径正确
+import xlsx from "../../assets/xlsx.png"; // 确保图片路径正确
+
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
@@ -65,6 +68,22 @@ const CourseSearch = () => {
                 ? prev.filter((id) => id !== teacherId)
                 : [...prev, teacherId]
         );
+    };
+
+    const getBackgroundColor = (courseName) => {
+        // 根據課別名稱設置不同顏色
+        switch(courseName) {
+            case '通識必修(通識)':
+                return 'lightblue';
+            case '通識選修(通識)':
+                return 'lightgreen';
+            case '專業必修(系所)':
+                return 'lightyellow';
+            case '專業選修(系所)':
+                    return 'lightpink';
+            default:
+                return 'lightgray'; // 默認顏色
+        }
     };
 
     const toggleAdvancedSearch = () => {
@@ -184,7 +203,6 @@ const CourseSearch = () => {
 
         } else if (format === 'pdf') {
             const pdf = new jsPDF();
-            pdf.text('課程資料匯出', 20, 20);
             pdf.autoTable({
                 head: [['學期', '系所代碼', '課程名稱', '授課教師']],
                 body: courses.map(course => [
@@ -195,16 +213,17 @@ const CourseSearch = () => {
                 ]),
             });
             pdf.save('courses.pdf');
-        } else if (format === 'odt') {
-            const odtContent = `
-            <?xml version="1.0" encoding="UTF-8"?>
-            <office:document-content
-                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+        
+        }
+        
+         else if (format === 'odt') {
+            const odtContent = `<?xml version="1.0" encoding="UTF-8"?>
+            <office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
                 xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
                 xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
                 <office:body>
-                    <office:spreadsheet>
-                        <table:table table:name="Courses">
+                    <office:text>
+                        <table:table>
                             <table:table-row>
                                 <table:table-cell><text:p>學期</text:p></table:table-cell>
                                 <table:table-cell><text:p>系所代碼</text:p></table:table-cell>
@@ -212,17 +231,17 @@ const CourseSearch = () => {
                                 <table:table-cell><text:p>授課教師</text:p></table:table-cell>
                             </table:table-row>
                             ${courses.map(course => `
-                                <table:table-row>
-                                    <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
-                                    <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
-                                    <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
-                                    <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
-                                </table:table-row>`).join('')}
+                            <table:table-row>
+                                <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
+                                <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
+                                <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
+                                <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
+                            </table:table-row>`).join('')}
                         </table:table>
-                    </office:spreadsheet>
+                    </office:text>
                 </office:body>
-            </office:document-content>
-        `;
+            </office:document-content>`;
+        
             const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -230,6 +249,7 @@ const CourseSearch = () => {
             link.download = 'courses.odt';
             link.click();
         }
+        
     };
     const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
@@ -304,6 +324,7 @@ const CourseSearch = () => {
         setRoomName('');
         setSelectedPeriods([]);
     };
+    
     const handleClassTypeChange = (value) => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
@@ -374,14 +395,15 @@ const CourseSearch = () => {
                 {/* 新增匯出按鈕 */}
                 <div className="form-group export-buttons">
                     <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
-                        匯出 CSV
+                    <img src={xlsx} alt="xlsx" className="xlsx-image" />匯出 xlsx
                     </button>
 
                     <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
-                        <img src={pdf} alt="pdf" className="pdf-image" />
-                    </button>
+    <img src={pdf} alt="pdf" className="pdf-image" /> 匯出 PDF
+</button>
+
                     <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
-                        匯出 ODT
+                    <img src={odt} alt="odt" className="odt-image" />匯出 ODT
                     </button>
                 </div>
                 {advancedSearch && (
@@ -589,35 +611,44 @@ const CourseSearch = () => {
                                 {currentResults?.length > 0 ? (
                                     currentResults.map((course, index) => (
                                         <tr key={course._id}>
-                                            {/* 計算編號 */}
-                                            <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>                                    <td>{course.學期 || "未提供"}</td>
-                                            <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
-                                            <td>{course.年級 || "未提供"}</td>
-                                            <td>{course.科目代碼 || "未提供"}</td>
-                                            <td>{course.科目中文名稱 || "未提供"}</td>
-                                            <td>
-                                                <span
-                                                    className="teacher-name"
-                                                    onClick={() => handleToggleExpand(course._id)}
-                                                >
-                                                    {expandedTeachers.includes(course._id)
-                                                        ? course.授課教師姓名
-                                                        : course.授課教師姓名?.length > 6
-                                                            ? course.授課教師姓名.slice(0, 6) + "..."
-                                                            : course.授課教師姓名 || "無固定教師"}
-                                                </span>
-                                            </td>
-                                            <td>{course.上課人數 || "未提供"}</td>
-                                            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
-                                            <td>{course.學分數 || "未提供"}</td>
-                                            <td>{course.課別名稱 || "未提供"}</td>
-                                            <td>
-                                                <button onClick={() => openMoreInfo(course)} className="more-button">
-                                                    更多資訊
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
+                                        {/* 計算編號 */}
+                                        <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
+                                        <td>{course.學期 || "未提供"}</td>
+                                        <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
+                                        <td>{course.年級 || "未提供"}</td>
+                                        <td>{course.科目代碼 || "未提供"}</td>
+                                        <td>{course.科目中文名稱 || "未提供"}</td>
+                                        <td>
+                                            <span
+                                                className="teacher-name"
+                                                onClick={() => handleToggleExpand(course._id)}
+                                            >
+                                                {expandedTeachers.includes(course._id)
+                                                    ? course.授課教師姓名
+                                                    : course.授課教師姓名?.length > 6
+                                                        ? course.授課教師姓名.slice(0, 6) + "..."
+                                                        : course.授課教師姓名 || "無固定教師"}
+                                            </span>
+                                        </td>
+                                        <td>{course.上課人數 || "未提供"}</td>
+                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
+                                        <td>{course.學分數 || "未提供"}</td>
+                                        
+                                        <td>
+    <div 
+        className='color' 
+        style={{ backgroundColor: getBackgroundColor(course.課別名稱) }} // 設定底色
+    >
+        {course.課別名稱 || "未提供"}
+    </div>
+</td>
+
+                                        <td>
+                                            <button onClick={() => openMoreInfo(course)} className="more-button">
+                                                更多資訊
+                                            </button>
+                                        </td>
+                                    </tr>                                    ))
                                 ) : (
                                     <tr>
                                         <td colSpan="12">暫無資料</td>

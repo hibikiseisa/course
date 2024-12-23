@@ -365,3 +365,66 @@
     color: #0056b3;
 }
 
+.color {
+    padding: 5px 10px; /* 增加左右的填充，讓橢圓形更明顯 */
+    margin: 5px;
+    border-radius: 50px; /* 創建橢圓形 */
+    font-size: 18px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #FFEB3B; /* 可以選擇一個你喜歡的背景顏色 */
+    color: black; /* 設定文字顏色為黑色 */
+    display: inline-block; /* 讓它跟文字一樣顯示，避免擴展到整行 */
+}
+
+/* export-buttons 相關樣式 */
+.export-buttons {
+    display: flex; /* 設置按鈕排成一行 */
+    justify-content: center; /* 水平居中對齊 */
+    gap: 10px; /* 按鈕之間的間距 */
+}
+
+/* 按鈕的共同樣式 */
+.export-buttons button {
+    background-color: transparent; /* 沒有背景 */
+    border: 1px solid #ccc; /* 輕微的邊框 */
+    padding: 6px 14px; /* 調整內邊距，讓按鈕更小 */
+    font-size: 14px; /* 調整文字大小 */
+    cursor: pointer; /* 鼠標變為指標 */
+    border-radius: 4px; /* 圓角 */
+    transition: all 0.3s ease; /* 增加過渡效果 */
+}
+/* 按鈕內部圖片與文字之間的間距 */
+.export-buttons button img {
+    margin-right: 8px; /* 這裡設定圖片與文字之間的間距 */
+    margin-bottom: 4px; /* 這裡設定圖片與文字之間的間距 */
+
+    vertical-align: middle; /* 確保圖片和文字在垂直方向對齊 */
+}
+
+/* 按鈕懸停效果 */
+.export-buttons button:hover {
+    background-color: #f0f0f0; /* 懸停背景色 */
+    border-color: #bbb; /* 邊框顏色變化 */
+}
+
+/* 禁用按鈕的樣式 */
+.export-buttons button:disabled {
+    background-color: #f5f5f5; /* 禁用時背景色 */
+    border-color: #ddd; /* 禁用邊框顏色 */
+    cursor: not-allowed; /* 鼠標顯示為禁止 */
+}
+
+/* PDF 圖示的樣式 */
+.export-buttons .pdf-image {
+    width: 20px; /* 控制 PDF 圖示大小 */
+    height: auto; /* 讓圖片保持比例 */
+}
+
+.export-buttons .xlsx-image {
+    width: 20px; /* 控制 PDF 圖示大小 */
+    height: auto; /* 讓圖片保持比例 */
+}
+.export-buttons .odt-image {
+    width: 20px; /* 控制 PDF 圖示大小 */
+    height: auto; /* 讓圖片保持比例 */
+}
