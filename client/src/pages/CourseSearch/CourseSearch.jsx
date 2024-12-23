@@ -175,33 +175,44 @@ const CourseSearch = () => {
             alert('請先進行查詢後再匯出！');
             return;
         }
-
+    
         if (format === 'csv') {
-            const csvHeader = ['學期', '系所代碼', '年級', '科目代碼', '科目中文名稱', '授課教師姓名', '上課人數', '學分數', '課別名稱', '上課星期/節次'].join(',');
-
-            const csvContent = courses.map(course =>
-                [
-                    course.學期,
-                    course.系所代碼,
-                    course.年級,
-                    course.科目代碼,
-                    course.科目中文名稱,
-                    course.授課教師姓名,
-                    course.上課人數,
-                    course.學分數,
-                    course.課別名稱,
-                    `${course.上課星期} ${course.上課節次}`  // 合併「上課星期」和「節次」
-                ].join(',')
-            ).join('\n');
-
-            const blob = new Blob([`\ufeff${csvHeader}\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+            const csvData = courses.map(course => ({
+                學期: course.學期,
+                系所代碼: course.系所代碼,
+                年級: course.年級,
+                科目代碼: course.科目代碼,
+                科目中文名稱: course.科目中文名稱,
+                // 如果授課教師姓名是陣列，將其用逗號分隔；否則直接使用
+                授課教師姓名: Array.isArray(course.授課教師姓名) 
+                    ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
+                    : course.授課教師姓名,  // 若不是陣列，直接使用原始字符串
+                上課人數: course.上課人數,
+                學分數: course.學分數,
+                課別名稱: course.課別名稱,
+                上課星期: course.上課星期,
+                上課節次: course.上課節次,
+            }));
+        
+            // 定義 CSV 標題
+            const header = '學期,系所代碼,年級,科目代碼,科目中文名稱,授課教師姓名,上課人數,學分數,課別名稱,上課星期,上課節次\n';
+        
+            // 生成 CSV 行數據
+            const rows = csvData.map(course => `"${course.學期}","${course.系所代碼}","${course.年級}","${course.科目代碼}","${course.科目中文名稱}","${course.授課教師姓名}","${course.上課人數}","${course.學分數}","${course.課別名稱}","${course.上課星期} ","${course.上課節次}"`).join('\n');
+        
+            // 合併標題和資料並加入 BOM
+            const csvFileContent = `\ufeff${header}${rows}`;
+        
+            // 創建 Blob 並提供下載
+            const blob = new Blob([csvFileContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = 'courses.csv';
             link.click();
-
-        } else if (format === 'pdf') {
+            URL.revokeObjectURL(url); // 釋放 URL
+        
+                } else if (format === 'pdf') {
             const pdf = new jsPDF();
             pdf.autoTable({
                 head: [['學期', '系所代碼', '課程名稱', '授課教師']],
@@ -213,10 +224,7 @@ const CourseSearch = () => {
                 ]),
             });
             pdf.save('courses.pdf');
-        
-        }
-        
-         else if (format === 'odt') {
+        } else if (format === 'odt') {
             const odtContent = `<?xml version="1.0" encoding="UTF-8"?>
             <office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
                 xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
@@ -241,17 +249,17 @@ const CourseSearch = () => {
                     </office:text>
                 </office:body>
             </office:document-content>`;
-        
+    
             const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = 'courses.odt';
             link.click();
+            URL.revokeObjectURL(url); // 釋放 URL
         }
-        
     };
-    const handlePeriodClick = (day, period) => {
+        const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
             prev.includes(selected)
