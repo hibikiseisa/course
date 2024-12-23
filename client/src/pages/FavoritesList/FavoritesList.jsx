@@ -50,7 +50,7 @@ const FavoritesList = () => {
         }
     };
     const getWeekday = (dayNumber) => {
-        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        const weekdays = [ '一', '二', '三', '四', '五', '六','日'];
         return `星期${weekdays[dayNumber - 1] || '未提供'}`;
     };
 
