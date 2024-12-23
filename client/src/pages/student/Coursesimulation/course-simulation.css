@@ -1,13 +1,15 @@
 .course-simulation-container {
   padding: 40px;
   font-family: Arial, sans-serif;
-  margin-top: 30px;
+  margin-top: 10px;
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   align-items: center; /* 修改為居中對齊 */
+  
 }
 .title{
+  font-size: 45px;
   align-items: left; /* 修改為居中對齊 */
 
 }

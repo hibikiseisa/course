@@ -505,6 +505,7 @@ app.put('/api/user/change-password/:userId', async (req, res) => {
     }
 });
 
+
 const scheduleSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true },
     schedule: [

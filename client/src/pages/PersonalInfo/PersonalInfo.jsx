@@ -1,8 +1,10 @@
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import './PersonalInfo.css';
 
 const PersonalInfo = () => {
+    const { enqueueSnackbar } = useSnackbar(); // 使用 useSnackbar 來顯示通知
     const [userInfo, setUserInfo] = useState({ id: '', username: '', role: '', passwordLength: 0 });
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -42,68 +44,52 @@ const PersonalInfo = () => {
 
     const handleChangePassword = async (e) => {
         e.preventDefault();
-
+    
         if (oldPassword === newPassword) {
-            showNotification("密碼修改失敗", "新密碼不可與舊密碼相同！", false);
+            enqueueSnackbar("新密碼不可與舊密碼相同！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
             return;
         }
-
-        if (!checkPasswordStrength(newPassword)) {
-            showNotification("密碼修改失敗", "新密碼必須至少包含6個字元！", false);
-            return;
-        }
-
+    
         setLoading(true); // 開始加載
-
+    
+        if (!checkPasswordStrength(newPassword)) {
+            enqueueSnackbar("新密碼必須至少包含6個字元！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+            setLoading(false); // 密碼不合格時停止加載
+            return;
+        }
+    
         try {
             console.log('請求資料:', { oldPassword, newPassword });
-
+    
             const response = await axios.put(
                 `http://localhost:5000/api/user/change-password/${userId}`,
                 { oldPassword, newPassword },
                 { headers: { 'Content-Type': 'application/json' } }
             );
-
+    
             if (response.status === 200) {
                 setUserInfo(prev => ({
                     ...prev,
                     passwordLength: newPassword.length,
                 }));
-                showNotification("密碼修改成功", "您的密碼已成功修改！", true);
+                setShowEditPassword(false); // 密碼修改成功後隱藏表單
+                enqueueSnackbar("密碼修改成功！", { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
             } else {
-                showNotification("密碼修改失敗", "密碼修改失敗，請重試！", false);
+                enqueueSnackbar("密碼修改失敗，請重試！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
             }
         } catch (error) {
             console.error('錯誤:', error);
             const errorMessage = error.response?.data?.message || '密碼修改失敗，請重試！';
-            showNotification("密碼修改失敗", errorMessage, false);
+            enqueueSnackbar(errorMessage, { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
         } finally {
-            setLoading(false); // 停止加載
+            setLoading(false); // 不論成功還是失敗都會停止加載
         }
     };
-
-    const showNotification = (title, message, isSuccess) => {
-        const icon = isSuccess ? '/success-icon.png' : '/error-icon.png';
-        console.log('顯示通知:', title, message, isSuccess);
-
-        if (Notification.permission === "granted") {
-            new Notification(title, { body: message, icon });
-        } else {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    new Notification(title, { body: message, icon });
-                } else {
-                    console.warn('通知權限未授予，無法顯示通知');
-                    alert(`${title}: ${message}`);
-                }
-            });
-        }
-    };
-
+    
     return (
         <div className="personal-info-container">
             <h1 className="personaltitle">個人資訊</h1>
-            <div className="user-info">
+            <div className="personalcontent">
                 <p><strong>帳號：</strong> {userInfo.id}</p>
                 <p><strong>姓名：</strong> {userInfo.username}</p>
                 <p><strong>角色：</strong> {userInfo.role}</p>
@@ -131,6 +117,7 @@ const PersonalInfo = () => {
             {showEditPassword && (
                 <form onSubmit={handleChangePassword} className="change-password-form">
                     <div className="form-group">
+                        
                         <label>請輸入舊密碼：</label>
                         <div className="password-input-container">
                             <input
@@ -141,7 +128,7 @@ const PersonalInfo = () => {
                             />
                             <span
                                 className="eye-icon"
-                                onClick={() => setPasswordVisibility(prev => ({ ...prev, oldPassword: !prev.oldPassword }))}
+                                onClick={() => setPasswordVisibility(prev => ({ ...prev, oldPassword: !prev.oldPassword }))} 
                                 style={{ cursor: 'pointer', marginLeft: '5px' }}
                             >
                                 {passwordVisibility.oldPassword ? '👁️' : '👁️‍🗨️'}
@@ -159,7 +146,7 @@ const PersonalInfo = () => {
                             />
                             <span
                                 className="eye-icon"
-                                onClick={() => setPasswordVisibility(prev => ({ ...prev, newPassword: !prev.newPassword }))}
+                                onClick={() => setPasswordVisibility(prev => ({ ...prev, newPassword: !prev.newPassword }))} 
                                 style={{ cursor: 'pointer', marginLeft: '5px' }}
                             >
                                 {passwordVisibility.newPassword ? '👁️' : '👁️‍🗨️'}
@@ -169,9 +156,13 @@ const PersonalInfo = () => {
                     <button type="submit" className="submit-button" disabled={loading}>
                         {loading ? '修改中...' : '確認修改'}
                     </button>
+                    
                 </form>
+                
             )}
+          
         </div>
+        
     );
 };
 

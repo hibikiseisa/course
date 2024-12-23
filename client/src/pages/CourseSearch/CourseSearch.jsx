@@ -412,10 +412,10 @@ const CourseSearch = () => {
                         <div className="more-form-group">
                             <label>課別</label>
                             <div>
-                                <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修'} onChange={() => handleClassTypeChange('通識必修')} /> 通識必修</label>
-                                <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修'} onChange={() => handleClassTypeChange('通識選修')} /> 通識選修</label>
-                                <label><input type="radio" name="classType" value="專業必修(系所)" checked={classType === '專業必修'} onChange={() => handleClassTypeChange('專業必修')} /> 專業必修</label>
-                                <label><input type="radio" name="classType" value="專業選修(系所)" checked={classType === '專業選修'} onChange={() => handleClassTypeChange('專業選修')} /> 專業選修</label>
+                                <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修(通識)'} onChange={() => handleClassTypeChange('通識必修(通識)')} /> 通識必修(通識)</label>
+                                <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修(通識)'} onChange={() => handleClassTypeChange('通識選修(通識)')} /> 通識選修(通識)</label>
+                                <label><input type="radio" name="classType" value="專業必修(系所)" checked={classType === '專業必修(系所)'} onChange={() => handleClassTypeChange('專業必修(系所)')} /> 專業必修(系所)</label>
+                                <label><input type="radio" name="classType" value="專業選修(系所)" checked={classType === '專業選修(系所)'} onChange={() => handleClassTypeChange('專業選修(系所)')} /> 專業選修(系所)</label>
                             </div>
                         </div>
 

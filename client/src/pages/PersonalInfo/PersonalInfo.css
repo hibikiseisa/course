@@ -1,46 +1,62 @@
 .personal-info-container {
-    max-width: 100%;
-    margin: 0 auto;
-    margin-top: 10px;
     padding: 40px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 修改為居中對齊 */
+    margin-top: -40px; /* 減少上方間距，讓標題更接近 */
+
+
 }
-.personaltitle{
-    font-size: 50px;
+.personalcontent {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 10px; /* 可調整來縮小內容之間的間距 */
+    margin: 3px 0;
+    margin-top: -20px; /* 減少上方間距，讓標題更接近 */
+
+    
+}
+.personaltitle {
+    font-size: 40px;
     margin-bottom: 20px;
     color: #2ab162;
-    text-align: left;
-    margin-top: 30px;  
-  
+    text-align: center;
+    margin-top: 80px; /* 減少上方間距，讓標題更接近 */
 }
-h2, h3 {
+h2, h3 {    
     margin-bottom: 10px;
     color: #333;
+    
 }
-.user-info p {
-    font-size: 30px;
+.personalinfo .user-info p {
+    font-size: 20px;
     text-align: left;
-
-    margin: 5px 0;
+    margin: 20px 0; 
 }
 .personalinfo .form-group { /*不能動名稱*/
-    margin-bottom: 20px;
-    width: 500px;
-
+    margin-bottom: 10px;
+    width: 100%; /* 改成100%寬度，避免超過父容器 */
+    max-width: 500px; /* 限制最大寬度 */
+    text-align: center; /* 表單內容居中 */
 }
 
 .form-group label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
+    align-items: center;
+
 }
 
-.form-group input {
-    width: 200px;
+.personalinfo .form-group input {               /*不能動名稱*/
+    width: 100%; /* 使輸入框寬度自動填滿父容器 */
+    max-width: 300px; /* 限制最大寬度 */
     padding: 8px;
     box-sizing: border-box;
+    margin: 0 auto; /* 居中 */
 }
 
 .submit-button {
@@ -50,6 +66,8 @@ h2, h3 {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin: 0 auto; /* 居中 */
+    display: block; /* 改成區塊元素 */
 }
 
 .submit-button:hover {

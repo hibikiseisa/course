@@ -1,3 +1,4 @@
+import { SnackbarProvider } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
@@ -6,11 +7,11 @@ import AccountManagement from './pages/AdminDashboard/AccountManagement/AccountM
 import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseManagement';
 import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
-import Login from './pages/Login/Login';
-import Register from './pages/Register/Register';
-import Coursesimulation from "./pages/student/Coursesimulation/course-simulation";
 import FavoritesList from './pages/FavoritesList/FavoritesList';
+import Login from './pages/Login/Login';
 import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
+import Register from './pages/Register/Register';
+import Coursesimulation from './pages/student/Coursesimulation/course-simulation';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登錄狀態
@@ -44,39 +45,41 @@ function App() {
   }, [viewAsStudent]);
 
   return (
-    <Router>
-      <Navbar
-        isLoggedIn={isLoggedIn}
-        Userid={Userid}
-        setIsLoggedIn={setIsLoggedIn}
-        viewAsStudent={viewAsStudent}
-        toggleViewAsStudent={toggleViewAsStudent}
-      />
-      <div className="content">
-        <Routes>
-          <Route path="/" element={<CourseSearch />} />
-          <Route
-            path="/login"
-            element={
-              <Login
-                setIsLoggedIn={setIsLoggedIn}
-                setUserid={setUserid}
-                setViewAsStudent={setViewAsStudent}
-                toggleViewAsStudent={toggleViewAsStudent}
-              />
-            }
-          />
-          <Route path="/register" element={<Register />} />
-          <Route path="/CourseSearch" element={<CourseSearch />} />
-          <Route path="/AdminDashboard" element={<AdminDashboard />} />
-          <Route path="/CourseManagement" element={<CourseManagement />} />
-          <Route path="/AccountManagement" element={<AccountManagement />} />
-          <Route path="/Coursesimulation" element={<Coursesimulation />} />
-          <Route path="/FavoritesList" element={<FavoritesList />} />
-          <Route path="/PersonalInfo" element={<PersonalInfo />} />
-        </Routes>
-      </div>
-    </Router>
+    <SnackbarProvider maxSnack={3}>
+      <Router>
+        <Navbar
+          isLoggedIn={isLoggedIn}
+          Userid={Userid}
+          setIsLoggedIn={setIsLoggedIn}
+          viewAsStudent={viewAsStudent}
+          toggleViewAsStudent={toggleViewAsStudent}
+        />
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<CourseSearch />} />
+            <Route
+              path="/login"
+              element={
+                <Login
+                  setIsLoggedIn={setIsLoggedIn}
+                  setUserid={setUserid}
+                  setViewAsStudent={setViewAsStudent}
+                  toggleViewAsStudent={toggleViewAsStudent}
+                />
+              }
+            />
+            <Route path="/register" element={<Register />} />
+            <Route path="/CourseSearch" element={<CourseSearch />} />
+            <Route path="/AdminDashboard" element={<AdminDashboard />} />
+            <Route path="/CourseManagement" element={<CourseManagement />} />
+            <Route path="/AccountManagement" element={<AccountManagement />} />
+            <Route path="/Coursesimulation" element={<Coursesimulation />} />
+            <Route path="/FavoritesList" element={<FavoritesList />} />
+            <Route path="/PersonalInfo" element={<PersonalInfo />} />
+          </Routes>
+        </div>
+      </Router>
+    </SnackbarProvider>
   );
 }
 
