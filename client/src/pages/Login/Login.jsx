@@ -62,7 +62,7 @@ const Login = ({ setIsLoggedIn, setUserid ,setViewAsStudent }) => {
         // 如果是學生，直接跳轉到學生頁面
         setIsLoggedIn(true);
         setUserid(id);
-        setViewAsStudent(false); 
+        setViewAsStudent(true); 
         navigate('/CourseSearch');
       }
     } catch (error) {
