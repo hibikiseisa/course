@@ -432,7 +432,7 @@ gap:5px;
     width: 20px; /* 控制 PDF 圖示大小 */
     height: auto; /* 讓圖片保持比例 */
 }
-.export-buttons .odt-image {
+.export-buttons .ods-image {
     width: 20px; /* 控制 PDF 圖示大小 */
     height: auto; /* 讓圖片保持比例 */
 }
