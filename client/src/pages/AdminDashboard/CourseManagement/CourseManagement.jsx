@@ -7,7 +7,9 @@ const CourseManagement = () => {
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [editingCourse, setEditingCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState({
     科目代碼: '',
@@ -64,33 +66,44 @@ const CourseManagement = () => {
     };
   }, []);
 
-  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
 
-const handleUpload = async () => {
-    if (!selectedFile) {
-      setUploadMessage('請選擇一個 CSV 檔案');
+    if (files.length > 5) {
+      alert("一次最多只能上傳 5 個檔案！");
+      return;
+    }
+
+    setSelectedFiles(files);
+    setShowUploadModal(true); // 顯示上傳彈窗
+  };
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) {
+      setUploadMessage("請選擇檔案後再上傳！");
       return;
     }
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    selectedFiles.forEach((file) => {
+      formData.append("files", file);
+    });
 
     try {
-      const response = await axios.post('http://localhost:5000/api/upload-csv', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await axios.post("http://localhost:5000/api/upload-csv", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setUploadMessage(response.data.message || '檔案上傳成功');
-
-      // 更新課程列表
-      const responseCourses = await axios.get('http://localhost:5000/api/courses');
-      setCourses(responseCourses.data); // 假設後端有 API 來獲取所有課程
-      setFilteredCourses(responseCourses.data);
-
+      setUploadMessage(response.data.message || "檔案上傳成功！");
+      setShowUploadModal(false); // 關閉彈窗
+      setSelectedFiles([]); // 清空檔案
     } catch (error) {
-      console.error('檔案上傳失敗:', error);
-      setUploadMessage('檔案上傳失敗，請檢查檔案格式或內容');
+      console.error("檔案上傳失敗：", error.response || error);
+      setUploadMessage("檔案上傳失敗，請檢查檔案格式或內容！");
     }
+  };
+  const handleCancelUpload = () => {
+    setSelectedFiles([]);
+    setShowUploadModal(false); // 關閉彈窗
   };
   const handleDownloadCSV = () => {
     const csvData = courses.map(course => ({
@@ -118,11 +131,11 @@ const handleUpload = async () => {
       課程中文摘要: course.課程中文摘要,
       課程英文摘要: course.課程英文摘要
     }));
-    
+
     const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';
-    
+
     const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');
-           const csvContent = '\ufeff' + header + rows;  // 加入 BOM 來確保 UTF-8 編碼
+    const csvContent = '\ufeff' + header + rows;  // 加入 BOM 來確保 UTF-8 編碼
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -318,7 +331,43 @@ const handleUpload = async () => {
           </button>
 
           {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
-          <button onClick={handleUpload} className="handleUpload">匯入</button>
+          <div className="upload-section">
+        <button
+          onClick={() => document.getElementById("fileInput").click()}
+          className="custom-upload-button"
+        >
+          匯入
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+          accept=".csv"
+          multiple
+        />
+      </div>
+      {showUploadModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>確認匯入檔案</h3>
+            <p>您已選擇以下檔案：</p>
+            <ul>
+              {selectedFiles.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+            <div className="modal-actions">
+              <button onClick={handleUpload} className="confirm-button">
+                確定上傳
+              </button>
+              <button onClick={handleCancelUpload} className="cancel-button">
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
           <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
         </div>
 
@@ -533,6 +582,7 @@ const handleUpload = async () => {
 
         </button></>
       )}
+      
     </div>
   );
 };
