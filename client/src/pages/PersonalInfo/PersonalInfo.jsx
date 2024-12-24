@@ -73,14 +73,14 @@ const PersonalInfo = () => {
                     passwordLength: newPassword.length,
                 }));
                 setShowEditPassword(false); // 密碼修改成功後隱藏表單
-                enqueueSnackbar("密碼修改成功！", { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+                enqueueSnackbar("密碼修改成功！", { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
             } else {
-                enqueueSnackbar("密碼修改失敗，請重試！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+                enqueueSnackbar("密碼修改失敗，請重試！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
             }
         } catch (error) {
             console.error('錯誤:', error);
             const errorMessage = error.response?.data?.message || '密碼修改失敗，請重試！';
-            enqueueSnackbar(errorMessage, { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+            enqueueSnackbar(errorMessage, { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
         } finally {
             setLoading(false); // 不論成功還是失敗都會停止加載
         }

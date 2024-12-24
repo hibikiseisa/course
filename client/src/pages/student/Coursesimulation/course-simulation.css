@@ -33,6 +33,11 @@
   transition: background-color 0.3s;
 }
 
+.editcourse-button{
+  color: rgb(31, 31, 31);
+
+}
+
 .editcourse-button:hover,
 .cancel-edit-button:hover,
 .clear-schedule-button:hover {
@@ -126,7 +131,7 @@
   top: -15px; /* 與頂部保持一點距離 */
   right: -5px; /* 與右邊邊緣保持緊貼 */
   cursor: pointer; 
-  color: #da1313c5;
+  color: #353434c5;
   font-size: 30px;
   font-weight: bold;
 }
@@ -267,7 +272,7 @@
 }
 
 .actions button:last-child {
-  background-color: #f44336; /* 紅色 */
+  background-color: #353535; 
   color: white;
 }
 

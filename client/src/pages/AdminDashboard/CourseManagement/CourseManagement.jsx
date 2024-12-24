@@ -95,16 +95,35 @@ const CourseManagement = () => {
 
   const handleDownloadCSV = () => {
     const csvData = courses.map(course => ({
+      學期: course.學期,
+      主開課教師姓名: course.主開課教師姓名,
+      課程全碼: course.課程全碼,
+      系所代碼: course.系所代碼,
+      系所名稱: course.系所名稱,
+      學制: course.學制,
       科目代碼: course.科目代碼,
+      科目組別: course.科目組別,
+      年級: course.年級,
+      上課班組: course.上課班組,
       科目中文名稱: course.科目中文名稱,
-      學分數: course.學分數,
-      課別名稱: course.課別名稱,
+      科目英文名稱: course.科目英文名稱,
       授課教師姓名: course.授課教師姓名,
+      學分數: course.學分數,
+      上課週次: course.上課週次,
+      課別代碼: course.課別代碼,
+      課別名稱: course.課別名稱,
+      上課地點: course.上課地點,
+      上課星期: course.上課星期,
+      上課節次: course.上課節次,
+      課表備註: course.課表備註,
+      課程中文摘要: course.課程中文摘要,
+      課程英文摘要: course.課程英文摘要
     }));
-
-    const header = '科目代碼,課程名稱,學分數,課別名稱,授課教師姓名\n';
-    const rows = csvData.map(course => `"${course.科目代碼}","${course.科目中文名稱}","${course.學分數}","${course.課別名稱}","${course.授課教師姓名}"`).join('\n');
-    const csvContent = '\ufeff' + header + rows;  // 加入 BOM 來確保 UTF-8 編碼
+    
+    const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';
+    
+    const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');
+           const csvContent = '\ufeff' + header + rows;  // 加入 BOM 來確保 UTF-8 編碼
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);

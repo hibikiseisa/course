@@ -72,7 +72,7 @@ const CourseSearch = () => {
 
     const getBackgroundColor = (courseName) => {
         // 根據課別名稱設置不同顏色
-        switch(courseName) {
+        switch (courseName) {
             case '通識必修(通識)':
                 return 'lightblue';
             case '通識選修(通識)':
@@ -80,7 +80,7 @@ const CourseSearch = () => {
             case '專業必修(系所)':
                 return 'lightyellow';
             case '專業選修(系所)':
-                    return 'lightpink';
+                return 'lightpink';
             default:
                 return 'lightgray'; // 默認顏色
         }
@@ -175,34 +175,44 @@ const CourseSearch = () => {
             alert('請先進行查詢後再匯出！');
             return;
         }
-    
+
         if (format === 'csv') {
             const csvData = courses.map(course => ({
                 學期: course.學期,
+                主開課教師姓名: course.主開課教師姓名,
+                課程全碼: course.課程全碼,
                 系所代碼: course.系所代碼,
-                年級: course.年級,
+                系所名稱: course.系所名稱,
+                學制: course.學制,
                 科目代碼: course.科目代碼,
+                科目組別: course.科目組別,
+                年級: course.年級,
+                上課班組: course.上課班組,
                 科目中文名稱: course.科目中文名稱,
+                科目英文名稱: course.科目英文名稱,
                 // 如果授課教師姓名是陣列，將其用逗號分隔；否則直接使用
-                授課教師姓名: Array.isArray(course.授課教師姓名) 
-                    ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
-                    : course.授課教師姓名,  // 若不是陣列，直接使用原始字符串
-                上課人數: course.上課人數,
+                授課教師姓名: Array.isArray(course.授課教師姓名)
+                  ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
+                  : course.授課教師姓名, // 若不是陣列，直接使用原始字符串
                 學分數: course.學分數,
+                上課週次: course.上課週次,
+                課別代碼: course.課別代碼,
                 課別名稱: course.課別名稱,
+                上課地點: course.上課地點,
                 上課星期: course.上課星期,
                 上課節次: course.上課節次,
-            }));
-        
-            // 定義 CSV 標題
-            const header = '學期,系所代碼,年級,科目代碼,科目中文名稱,授課教師姓名,上課人數,學分數,課別名稱,上課星期,上課節次\n';
-        
-            // 生成 CSV 行數據
-            const rows = csvData.map(course => `"${course.學期}","${course.系所代碼}","${course.年級}","${course.科目代碼}","${course.科目中文名稱}","${course.授課教師姓名}","${course.上課人數}","${course.學分數}","${course.課別名稱}","${course.上課星期} ","${course.上課節次}"`).join('\n');
-        
+                課表備註: course.課表備註,
+                課程中文摘要: course.課程中文摘要,
+                課程英文摘要: course.課程英文摘要
+              }));
+              
+              // 定義 CSV 標題
+              const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';              
+              // 生成 CSV 行數據
+              const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');              
             // 合併標題和資料並加入 BOM
             const csvFileContent = `\ufeff${header}${rows}`;
-        
+
             // 創建 Blob 並提供下載
             const blob = new Blob([csvFileContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -211,8 +221,8 @@ const CourseSearch = () => {
             link.download = 'courses.csv';
             link.click();
             URL.revokeObjectURL(url); // 釋放 URL
-        
-                } else if (format === 'pdf') {
+
+        } else if (format === 'pdf') {
             const pdf = new jsPDF();
             pdf.autoTable({
                 head: [['學期', '系所代碼', '課程名稱', '授課教師']],
@@ -249,7 +259,7 @@ const CourseSearch = () => {
                     </office:text>
                 </office:body>
             </office:document-content>`;
-    
+
             const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -259,7 +269,7 @@ const CourseSearch = () => {
             URL.revokeObjectURL(url); // 釋放 URL
         }
     };
-        const handlePeriodClick = (day, period) => {
+    const handlePeriodClick = (day, period) => {
         const selected = `${day}-${period}`;
         setSelectedPeriods((prev) =>
             prev.includes(selected)
@@ -332,7 +342,7 @@ const CourseSearch = () => {
         setRoomName('');
         setSelectedPeriods([]);
     };
-    
+
     const handleClassTypeChange = (value) => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
@@ -403,21 +413,22 @@ const CourseSearch = () => {
                 {/* 新增匯出按鈕 */}
                 <div className="form-group export-buttons">
                     <button type="button" onClick={() => handleExport('csv')} disabled={courses.length === 0}>
-                    <img src={xlsx} alt="xlsx" className="xlsx-image" />匯出 xlsx
+                        <img src={xlsx} alt="xlsx" className="xlsx-image" />匯出 xlsx
                     </button>
 
                     <button type="button" onClick={() => handleExport('pdf')} disabled={courses.length === 0}>
-    <img src={pdf} alt="pdf" className="pdf-image" /> 匯出 PDF
-</button>
+                        <img src={pdf} alt="pdf" className="pdf-image" /> 匯出 PDF
+                    </button>
 
                     <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
-                    <img src={odt} alt="odt" className="odt-image" />匯出 ODT
+                        <img src={odt} alt="odt" className="odt-image" />匯出 ODT
                     </button>
                 </div>
                 {advancedSearch && (
                     <div className="advanced-search-vertical">
                         <div className="more-form-group">
-                            <label>學制</label>
+
+                            <label><h3>學制</h3></label>
                             <div>
                                 <label><input type="checkbox" value="二年制" onChange={handleCheckboxChange} /> 二年制</label>
                                 <label><input type="checkbox" value="二年制進修部" onChange={handleCheckboxChange} /> 二年制進修部</label>
@@ -430,7 +441,7 @@ const CourseSearch = () => {
                         </div>
 
                         <div className="more-form-group">
-                            <label>系所</label>
+                            <label><h3>系所</h3></label>
                             <select value={department} onChange={(e) => setDepartment(e.target.value)}>
                                 <option value="">請選擇系所</option>
                                 {departments.map((dept) => (
@@ -440,7 +451,7 @@ const CourseSearch = () => {
                         </div>
 
                         <div className="more-form-group">
-                            <label>課別</label>
+                            <label><h3>課別</h3></label>
                             <div>
                                 <label><input type="radio" name="classType" value="通識必修(通識)" checked={classType === '通識必修(通識)'} onChange={() => handleClassTypeChange('通識必修(通識)')} /> 通識必修(通識)</label>
                                 <label><input type="radio" name="classType" value="通識選修(通識)" checked={classType === '通識選修(通識)'} onChange={() => handleClassTypeChange('通識選修(通識)')} /> 通識選修(通識)</label>
@@ -450,7 +461,7 @@ const CourseSearch = () => {
                         </div>
 
                         <div className="more-form-group">
-                            <label>年級</label>
+                            <label><h3>年級</h3></label>
                             <div>
                                 <label><input type="radio" name="grade" value="1" checked={grade === '一年級'} onChange={() => handleGradeChange('一年級')} /> 一年級</label>
                                 <label><input type="radio" name="grade" value="2" checked={grade === '二年級'} onChange={() => handleGradeChange('二年級')} /> 二年級</label>
@@ -460,7 +471,7 @@ const CourseSearch = () => {
                         </div>
 
                         <div className="more-form-group">
-                            <label>上課星期</label>
+                            <label><h3>上課星期</h3></label>
                             <div className="weekday-checkbox-group">
                                 {["一", "二", "三", "四", "五", "六", "日"].map((day, index) => (
                                     <label key={index}>
@@ -478,7 +489,7 @@ const CourseSearch = () => {
                         {/* 只有在選擇了星期後才顯示節次選單 */}
                         {selectedPeriods.some((period) => /^[1-7]$/.test(period)) && (
                             <div className="more-form-group">
-                                <label>節次</label>
+                                <label><h3>節次</h3></label>
                                 <div className="period-checkbox-group">
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((period) => (
                                         <label key={period}>
@@ -497,22 +508,22 @@ const CourseSearch = () => {
 
 
                         <div className="more-form-group">
-                            <label>教師</label>
+                            <label><h3>教師</h3></label>
                             <input type="text" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} placeholder="教師姓名" />
                         </div>
 
                         <div className="more-form-group">
-                            <label>班級</label>
+                            <label><h3>班級</h3></label>
                             <input type="text" value={classCode} onChange={(e) => setClassCode(e.target.value)} placeholder="班級代碼" />
                         </div>
 
                         <div className="more-form-group">
-                            <label>課程</label>
+                            <label><h3>課程</h3></label>
                             <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="課程名稱" />
                         </div>
 
                         <div className="more-form-group">
-                            <label>教室</label>
+                            <label><h3>教室</h3></label>
                             <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="教室名稱" />
                         </div>
                         <div className="form-group">
@@ -619,44 +630,44 @@ const CourseSearch = () => {
                                 {currentResults?.length > 0 ? (
                                     currentResults.map((course, index) => (
                                         <tr key={course._id}>
-                                        {/* 計算編號 */}
-                                        <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
-                                        <td>{course.學期 || "未提供"}</td>
-                                        <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
-                                        <td>{course.年級 || "未提供"}</td>
-                                        <td>{course.科目代碼 || "未提供"}</td>
-                                        <td>{course.科目中文名稱 || "未提供"}</td>
-                                        <td>
-                                            <span
-                                                className="teacher-name"
-                                                onClick={() => handleToggleExpand(course._id)}
-                                            >
-                                                {expandedTeachers.includes(course._id)
-                                                    ? course.授課教師姓名
-                                                    : course.授課教師姓名?.length > 6
-                                                        ? course.授課教師姓名.slice(0, 6) + "..."
-                                                        : course.授課教師姓名 || "無固定教師"}
-                                            </span>
-                                        </td>
-                                        <td>{course.上課人數 || "未提供"}</td>
-                                        <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
-                                        <td>{course.學分數 || "未提供"}</td>
-                                        
-                                        <td>
-    <div 
-        className='color' 
-        style={{ backgroundColor: getBackgroundColor(course.課別名稱) }} // 設定底色
-    >
-        {course.課別名稱 || "未提供"}
-    </div>
-</td>
+                                            {/* 計算編號 */}
+                                            <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
+                                            <td>{course.學期 || "未提供"}</td>
+                                            <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
+                                            <td>{course.年級 || "未提供"}</td>
+                                            <td>{course.科目代碼 || "未提供"}</td>
+                                            <td>{course.科目中文名稱 || "未提供"}</td>
+                                            <td>
+                                                <span
+                                                    className="teacher-name"
+                                                    onClick={() => handleToggleExpand(course._id)}
+                                                >
+                                                    {expandedTeachers.includes(course._id)
+                                                        ? course.授課教師姓名
+                                                        : course.授課教師姓名?.length > 6
+                                                            ? course.授課教師姓名.slice(0, 6) + "..."
+                                                            : course.授課教師姓名 || "無固定教師"}
+                                                </span>
+                                            </td>
+                                            <td>{course.上課人數 || "未提供"}</td>
+                                            <td>{convertWeekdayToChinese(course.上課星期)} {course.上課節次 || "未提供"}</td>
+                                            <td>{course.學分數 || "未提供"}</td>
 
-                                        <td>
-                                            <button onClick={() => openMoreInfo(course)} className="more-button">
-                                                更多資訊
-                                            </button>
-                                        </td>
-                                    </tr>                                    ))
+                                            <td>
+                                                <div
+                                                    className='color'
+                                                    style={{ backgroundColor: getBackgroundColor(course.課別名稱) }} // 設定底色
+                                                >
+                                                    {course.課別名稱 || "未提供"}
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <button onClick={() => openMoreInfo(course)} className="more-button">
+                                                    更多資訊
+                                                </button>
+                                            </td>
+                                        </tr>))
                                 ) : (
                                     <tr>
                                         <td colSpan="12">暫無資料</td>

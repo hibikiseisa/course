@@ -80,6 +80,9 @@
 }
 
 .advanced-search-vertical {
+    margin-left:15%;
+    justify-self:center;
+    width: 70%;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -91,12 +94,18 @@
 .more-form-group {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .more-form-group label {
     font-size: 0.9rem;
     color: #555;
     margin-bottom: 5px;
+    /* align-items: center; */
+}
+.more-form-group label .h3{
+    align-items: left;
+gap:5px;
 }
 
 .more-form-group input[type="checkbox"],
@@ -106,7 +115,7 @@
 
 .more-form-group select,
 .more-form-group input[type="text"] {
-    width: 50%;
+    width: 30%;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -276,13 +285,12 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
 
-.modal-content {
+ .modal-content {
     background-color: #ffffff;
     padding: 30px;
     border-radius: 10px;
@@ -292,7 +300,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.modal-content h2 {
+  .modal-content h2 {
     font-size: 1.5rem;
     color: #333333;
     margin-bottom: 20px;
@@ -427,4 +435,18 @@
 .export-buttons .odt-image {
     width: 20px; /* 控制 PDF 圖示大小 */
     height: auto; /* 讓圖片保持比例 */
+}
+
+.clear-button{
+    width: 100px;
+    padding: 10px;
+    background-color: #878c91;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    margin: 20px auto 0;
+
 }
