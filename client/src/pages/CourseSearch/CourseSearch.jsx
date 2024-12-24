@@ -3,11 +3,10 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import odt from "../../assets/odt.png"; // 确保图片路径正确
+import ods from "../../assets/ods.png"; // 确保图片路径正确
 import pdf from "../../assets/pdf.png"; // 确保图片路径正确
 import up from "../../assets/up.png"; // 确保图片路径正确
 import xlsx from "../../assets/xlsx.png"; // 确保图片路径正确
-
 import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
@@ -192,8 +191,8 @@ const CourseSearch = () => {
                 科目英文名稱: course.科目英文名稱,
                 // 如果授課教師姓名是陣列，將其用逗號分隔；否則直接使用
                 授課教師姓名: Array.isArray(course.授課教師姓名)
-                  ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
-                  : course.授課教師姓名, // 若不是陣列，直接使用原始字符串
+                    ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
+                    : course.授課教師姓名, // 若不是陣列，直接使用原始字符串
                 學分數: course.學分數,
                 上課週次: course.上課週次,
                 課別代碼: course.課別代碼,
@@ -204,12 +203,12 @@ const CourseSearch = () => {
                 課表備註: course.課表備註,
                 課程中文摘要: course.課程中文摘要,
                 課程英文摘要: course.課程英文摘要
-              }));
-              
-              // 定義 CSV 標題
-              const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';              
-              // 生成 CSV 行數據
-              const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');              
+            }));
+
+            // 定義 CSV 標題
+            const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';
+            // 生成 CSV 行數據
+            const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');
             // 合併標題和資料並加入 BOM
             const csvFileContent = `\ufeff${header}${rows}`;
 
@@ -223,50 +222,12 @@ const CourseSearch = () => {
             URL.revokeObjectURL(url); // 釋放 URL
 
         } else if (format === 'pdf') {
-            const pdf = new jsPDF();
-            pdf.autoTable({
-                head: [['學期', '系所代碼', '課程名稱', '授課教師']],
-                body: courses.map(course => [
-                    course.學期,
-                    course.系所代碼,
-                    course.科目中文名稱,
-                    course.授課教師姓名
-                ]),
-            });
-            pdf.save('courses.pdf');
-        } else if (format === 'odt') {
-            const odtContent = `<?xml version="1.0" encoding="UTF-8"?>
-            <office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
-                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
-                xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
-                <office:body>
-                    <office:text>
-                        <table:table>
-                            <table:table-row>
-                                <table:table-cell><text:p>學期</text:p></table:table-cell>
-                                <table:table-cell><text:p>系所代碼</text:p></table:table-cell>
-                                <table:table-cell><text:p>課程名稱</text:p></table:table-cell>
-                                <table:table-cell><text:p>授課教師</text:p></table:table-cell>
-                            </table:table-row>
-                            ${courses.map(course => `
-                            <table:table-row>
-                                <table:table-cell><text:p>${course.學期}</text:p></table:table-cell>
-                                <table:table-cell><text:p>${course.系所代碼}</text:p></table:table-cell>
-                                <table:table-cell><text:p>${course.科目中文名稱}</text:p></table:table-cell>
-                                <table:table-cell><text:p>${course.授課教師姓名}</text:p></table:table-cell>
-                            </table:table-row>`).join('')}
-                        </table:table>
-                    </office:text>
-                </office:body>
-            </office:document-content>`;
-
-            const blob = new Blob([odtContent], { type: 'application/vnd.oasis.opendocument.text' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'courses.odt';
-            link.click();
-            URL.revokeObjectURL(url); // 釋放 URL
+            const pdfURL = '/course.pdf'; // 使用相對於伺服器根目錄的路徑
+            window.open(pdfURL, '_blank'); // 在新標籤頁中打開 PDF
+        }
+        else if (format === 'ods') {
+            const odsURL = '/course.ods'; // 使用相對於伺服器根目錄的路徑
+            window.open(odsURL, '_blank'); // 在新標籤頁中打開 ODS 文件
         }
     };
     const handlePeriodClick = (day, period) => {
@@ -420,8 +381,8 @@ const CourseSearch = () => {
                         <img src={pdf} alt="pdf" className="pdf-image" /> 匯出 PDF
                     </button>
 
-                    <button type="button" onClick={() => handleExport('odt')} disabled={courses.length === 0}>
-                        <img src={odt} alt="odt" className="odt-image" />匯出 ODT
+                    <button type="button" onClick={() => handleExport('ods')} disabled={courses.length === 0}>
+                        <img src={ods} alt="ods" className="ods-image" />匯出 ODS
                     </button>
                 </div>
                 {advancedSearch && (
