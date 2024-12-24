@@ -21,21 +21,27 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     if (!course) return null;
 
     useEffect(() => {
-        // 每次打開視窗時檢查當前課程是否已經收藏
-        const favoriteCourses = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
-        if (favoriteCourses.includes(course._id)) {
-            setLocalIsFavorite(true);
-        } else {
-            setLocalIsFavorite(false);
-        }
-    }, [course._id]); // 依賴課程ID，確保每次課程改變時都重新檢查收藏狀態
-        
+        const fetchAndSyncFavorites = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
+                console.log('已加載收藏資料:', response.data);
+    
+                const isFavoriteNow = response.data.some(fav => fav.courseId === course._id);
+                setLocalIsFavorite(isFavoriteNow);
+            } catch (error) {
+                console.error('獲取收藏資料失敗:', error);
+            }
+        };
+    
+        fetchAndSyncFavorites();
+    }, [isFavorite, course._id, userId]); // 當 isFavorite 或其他依賴改變時重新檢查收藏狀態
+    
     const fetchFavorites = async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
             // 假設 API 返回收藏的課程資料
             console.log('已加載收藏資料:', response.data);
-    
+
             // 更新localIsFavorite狀態
             const isFavorite = response.data.some(fav => fav.courseId === course._id);
             setLocalIsFavorite(isFavorite);
@@ -43,11 +49,50 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
             console.error('獲取收藏資料失敗:', error);
         }
     };
+
+    const handleTeacherClick = async (teacherName) => {
+        // 如果詳細資料已顯示，則關閉
+        if (showTeacherDetails && selectedTeacher?.[0]?.name === teacherName) {
+            console.log(`關閉教師資訊，教師姓名：${teacherName}`);
+            setShowTeacherDetails(false);
+            setSelectedTeacher(null);
+            return;
+        }
     
-    const handleTeacherClick = (teacher) => {
-        setSelectedTeacher(teacher);
-        setShowTeacherDetails(true);
+        // 如果詳細資料未顯示，則獲取資料並顯示
+        try {
+            console.log(`開始獲取教師資訊，教師姓名：${teacherName}`); // 確認點擊事件觸發
+    
+            const response = await axios.get(`http://localhost:5000/api/teacher/${encodeURIComponent(teacherName)}`);
+            console.log('從後端獲取的教師資訊:', response.data); // 檢查從後端收到的資料
+    
+            const teacherData = response.data && response.data.success && response.data.data
+                ? [{
+                    name: response.data.data.name,
+                    position: response.data.data.position,
+                    phone: response.data.data.phone,
+                    email: response.data.data.email,
+                    specialties: response.data.data.expertise || ['未提供'],
+                }]
+                : [{
+                    name: teacherName,
+                    position: '北護教職',
+                    phone: '02-2822-7128',
+                    email: `${teacherName}@ntunhs.edu.tw`,
+                    specialties: ['未提供']
+                }];
+    
+            console.log('處理後的教師資訊:', teacherData); // 確認處理後的教師資訊
+    
+            setSelectedTeacher(teacherData); // 更新教師資訊
+            setShowTeacherDetails(true); // 顯示教師詳細資料
+        } catch (error) {
+            console.error('獲取教師資訊失敗:', error);
+            enqueueSnackbar('獲取教師資訊失敗，請重試。', { variant: 'error' });
+        }
     };
+    
+    
 
     const handleMapToggle = () => {
         setShowMap((prev) => !prev);
@@ -101,24 +146,24 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                 enqueueSnackbar('課程ID或用戶ID缺失，請檢查！', { variant: 'error' });
                 return;
             }
-    
+
             const favoritesResponse = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
             const isAlreadyFavorite = favoritesResponse.data.some(fav => fav.courseId === course._id);
-    
+
             if (isAlreadyFavorite) {
                 enqueueSnackbar('此課程已經收藏過了！', { variant: 'info' });
                 return;
             }
-    
+
             const response = await axios.post('http://localhost:5000/api/favorites', {
                 userId,
                 courseId: course._id
             });
-    
+
             if (response.status === 200) {
                 setLocalIsFavorite(true);
                 localStorage.setItem('favoriteCourses', JSON.stringify([...JSON.parse(localStorage.getItem('favoriteCourses') || '[]'), course._id]));
-                enqueueSnackbar('已成功收藏此課程！', { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+                enqueueSnackbar('已成功收藏此課程！', { variant: 'success', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
             } else {
                 console.error('伺服器返回錯誤：', response);
                 enqueueSnackbar('伺服器錯誤，請稍後重試。', { variant: 'error' });
@@ -128,32 +173,32 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
             enqueueSnackbar('收藏失敗，請重試。', { variant: 'error' });
         }
     };
-    
-const handleRemoveFavoriteClick = async () => {
-    try {
-        if (!course._id || !userId) {
-            console.error("Course ID 或 User ID 缺失！");
-            return;
+
+    const handleRemoveFavoriteClick = async () => {
+        try {
+            if (!course._id || !userId) {
+                console.error("Course ID 或 User ID 缺失！");
+                return;
+            }
+
+            // 向後端請求取消收藏
+            await axios.delete(`http://localhost:5000/api/favorites/${userId}/${course._id}`);
+            setLocalIsFavorite(false);
+
+            // 更新localStorage
+            const favorites = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
+            localStorage.setItem('favoriteCourses', JSON.stringify(favorites.filter(favId => favId !== course._id)));
+
+            // 重新加載收藏資料
+            fetchFavorites();
+
+            enqueueSnackbar('已取消收藏此課程！', { variant: 'info', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+        } catch (error) {
+            console.error('取消收藏失敗:', error);
+            enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' });
         }
+    };
 
-        // 向後端請求取消收藏
-        await axios.delete(`http://localhost:5000/api/favorites/${userId}/${course._id}`);
-        setLocalIsFavorite(false);
-
-        // 更新localStorage
-        const favorites = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
-        localStorage.setItem('favoriteCourses', JSON.stringify(favorites.filter(favId => favId !== course._id)));
-
-        // 重新加載收藏資料
-        fetchFavorites();
-
-        enqueueSnackbar('已取消收藏此課程！', { variant: 'info', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
-    } catch (error) {
-        console.error('取消收藏失敗:', error);
-        enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' });
-    }
-};
-    
     return (
         <div className="modal-overlay">
             <div className="modal-content">
@@ -162,15 +207,36 @@ const handleRemoveFavoriteClick = async () => {
                 <p><strong>主開課教師姓名：</strong> {course.主開課教師姓名}</p>
                 <p>
                     <strong>教師：</strong>
-                    <button onClick={toggleTeacherInfo} className="teacher-info-button">
-                        {course.授課教師姓名}
-                    </button>
+                    {course.授課教師姓名.split(',').map((teacherName, index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleTeacherClick(teacherName.trim())}
+                            className="teacher-name-button"
+                        >
+                            {teacherName.trim()}
+                        </button>
+                    ))}
                 </p>
 
-                {isTeacherInfoOpen && (
-                    <div className="teacher-info">
-                        <p><strong>教師姓名：</strong> {course.授課教師姓名}</p>
-                        <p><strong>研究領域：</strong> 這裡是教師的研究領域介紹。</p>
+                {showTeacherDetails && selectedTeacher && (
+                    <div className="teacher-details">
+                        {selectedTeacher.map((teacher, index) => (
+                            <div key={index}>
+                                <p><strong>姓名：</strong>{teacher.name}</p>
+                                <p><strong>職位：</strong>{teacher.position}</p>
+                                <p><strong>電話：</strong>{teacher.phone}</p>
+                                <p><strong>信箱：</strong>{teacher.email}</p>
+                                <details>
+                                    <summary><strong>專長：</strong></summary>
+                                    <ul>
+                                        {teacher.specialties.map((specialty, idx) => (
+                                            <li key={idx}>{specialty}</li>
+                                        ))}
+                                    </ul>
+                                </details>
+                            </div>
+                        ))}
+                    
                     </div>
                 )}
 

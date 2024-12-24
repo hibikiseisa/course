@@ -267,35 +267,34 @@ const courseSchema = new mongoose.Schema(
 module.exports = mongoose.model('Course', courseSchema);
 
 const Course = mongoose.model('Course', courseSchema);
-// 設置 multer 上傳文件的存儲方式
-// 設置 multer 上傳文件的存儲方式
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');  // 設定上傳文件的目錄
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);  // 設定上傳後的文件名
-    }
-  });
+
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//       cb(null, 'uploads/');  // 設定上傳文件的目錄
+//     },
+//     filename: (req, file, cb) => {
+//       cb(null, Date.now() + '-' + file.originalname);  // 設定上傳後的文件名
+//     }
+//   });
   
-  const upload = multer({ storage: storage });
+//   const upload = multer({ storage: storage });
   
-  // 處理上傳 CSV 的路由
-  app.post('/api/upload-csv', upload.single('file'), (req, res) => {
-    const results = [];
-    const filePath = path.join(__dirname, req.file.path);
+//   // 處理上傳 CSV 的路由
+//   app.post('/api/upload-csv', upload.single('file'), (req, res) => {
+//     const results = [];
+//     const filePath = path.join(__dirname, req.file.path);
   
-    fs.createReadStream(filePath)
-      .pipe(csv())
-      .on('data', (row) => {
-        // 處理 CSV 每行資料並存入資料庫
-        results.push(row);
-      })
-      .on('end', () => {
-        console.log('CSV 檔案解析完成', results);
-        res.json({ message: '檔案上傳並處理成功' });
-      });
-  });
+//     fs.createReadStream(filePath)
+//       .pipe(csv())
+//       .on('data', (row) => {
+//         // 處理 CSV 每行資料並存入資料庫
+//         results.push(row);
+//       })
+//       .on('end', () => {
+//         console.log('CSV 檔案解析完成', results);
+//         res.json({ message: '檔案上傳並處理成功' });
+//       });
+//   });
   
   
 app.get('/api/courses', async (req, res) => {
@@ -693,10 +692,58 @@ app.get('/api/favorites/:userId/:day/:timeSlot', async (req, res) => {
     }
 });
 
+const teacherSchema = new mongoose.Schema({
+    姓名: String, 
+    職位: String, 
+    電話: String, 
+    信箱: String, 
+    專長: [String]
+});
 
+const Teacher = mongoose.model('Teacher', teacherSchema);
 
+app.get('/api/teacher/:name', async (req, res) => {
+    const { name } = req.params;
 
+    try {
+        // 查詢資料庫中是否有該教師資料
+        const teacher = await Teacher.findOne({ 姓名: name }); // 使用正確的字段名稱
+
+        if (teacher) {
+            // 如果找到教師資料，返回該資料
+            res.status(200).json({
+                success: true,
+                data: {
+                    name: teacher.姓名,
+                    position: teacher.職位,
+                    phone: teacher.電話,
+                    email: teacher.信箱,
+                    expertise: teacher.專長,
+                },
+            });
+        } else {
+            // 如果資料庫中無此教師，返回預設資訊
+            res.status(200).json({
+                success: true,
+                data: {
+                    name,
+                    position: '北護教職',
+                    phone: '02-2822-7128',
+                    email: `${name}@ntunhs.edu.tw`,
+                    expertise: ['未提供'],
+                },
+            });
+        }
+    } catch (error) {
+        console.error('查詢教師資訊時發生錯誤：', error);
+        res.status(500).json({
+            success: false,
+            message: '伺服器錯誤，請稍後再試。',
+        });
+    }
+});
 app.listen(PORT, () => {
     console.log(`伺服器正在 http://localhost:${PORT} 上運行`);
 });
+
 

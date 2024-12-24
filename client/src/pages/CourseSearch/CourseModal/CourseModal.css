@@ -152,7 +152,7 @@
     color: red;
 }
 
-/* 模態視窗按鈕（底部） */
+
 .modal-buttons {
     display: flex;
     justify-content: space-between;
@@ -194,7 +194,60 @@
     background-color: #f0f0f0;
     border: 1px solid #ccc;
 }
+.teacher-details {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
+
+.teacher-details p {
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+.teacher-details details {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.teacher-details details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.teacher-details details ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.teacher-details details ul li {
+    list-style-type: disc;
+    margin-bottom: 5px;
+}
+.teacher-name-button {
+    display: inline-block;
+    margin: 5px 0;
+    padding: 5px 10px;
+    font-size: 16px;
+    color: hsl(212, 100%, 64%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.teacher-name-button:hover {
+    text-decoration: none;
+    color: #08417e;
+}
 .more-info-button{
     display: inline-block;
     margin-top: 10px;
