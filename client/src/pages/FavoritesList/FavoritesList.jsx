@@ -1,10 +1,14 @@
 import axios from 'axios';
 import { useSnackbar } from 'notistack'; // 引入 useSnackbar
 import React, { useEffect, useState } from 'react';
+import CourseModal from '../CourseSearch/CourseModal/CourseModal';
+
 import './FavoritesList.css';
 
 const FavoritesList = () => {
     const [favorites, setFavorites] = useState([]); // 收藏的課程列表
+    const [selectedCourse, setSelectedCourse] = useState(null); // 當前選中的課程
+    const [isModalOpen, setIsModalOpen] = useState(false); // 控制模態視窗的開關
     const userId = localStorage.getItem('id'); // 從 localStorage 獲取用戶ID
     const [expandedTeachers, setExpandedTeachers] = useState([]); // 初始化 expandedTeachers
     const { enqueueSnackbar } = useSnackbar(); // 使用 enqueueSnackbar 顯示通知
@@ -53,7 +57,15 @@ const FavoritesList = () => {
             enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
         }
     };
+    const openMoreInfo = (course) => {
+        setSelectedCourse(course);
+        setIsModalOpen(true);
+    };
 
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedCourse(null);
+    };
     const getWeekday = (dayNumber) => {
         const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
         return `星期${weekdays[dayNumber - 1] || '未提供'}`;
@@ -80,7 +92,8 @@ const FavoritesList = () => {
                             <th>上課時間/節次</th>
                             <th>學分</th>
                             <th>課別</th>
-                            <th>更多</th>
+                            <th>更多資訊</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -109,6 +122,11 @@ const FavoritesList = () => {
                                 <td>{course.學分數 || '未提供'}</td>
                                 <td>{course.課別名稱 || "未提供"}</td>
                                 <td>
+                                    <button onClick={() => openMoreInfo(course)} className="more-button">
+                                        更多資訊
+                                    </button>
+                                </td>
+                                <td>
                                     <button
                                         onClick={() => handleRemoveFavorite(course._id)}
                                         className="remove-button"
@@ -121,6 +139,13 @@ const FavoritesList = () => {
                     </tbody>
                 </table>
             )}
+               {isModalOpen && selectedCourse && (
+                <CourseModal
+                    course={selectedCourse}
+                    onClose={closeModal}
+                />
+            )}
+            
         </div>
     );
 };
