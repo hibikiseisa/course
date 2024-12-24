@@ -98,9 +98,11 @@ const CourseManagement = () => {
       setUploadMessage(response.data.message || "檔案上傳成功！");
       setShowUploadModal(false); // 關閉彈窗
       setSelectedFiles([]); // 清空檔案
+      enqueueSnackbar(response.data.message || '檔案匯入成功', { variant: 'success' });
     } catch (error) {
       console.error("檔案上傳失敗：", error.response || error);
       setUploadMessage("檔案上傳失敗，請檢查檔案格式或內容！");
+      enqueueSnackbar(error.response?.data?.message || '處理檔案失敗，請檢查資料格式', { variant: 'error' });
     }
   };
   const handleCancelUpload = () => {
