@@ -8,6 +8,7 @@ import CourseManagement from './pages/AdminDashboard/CourseManagement/CourseMana
 import AdminDashboard from './pages/AdminDashboard/Home';
 import CourseSearch from './pages/CourseSearch/CourseSearch';
 import FavoritesList from './pages/FavoritesList/FavoritesList';
+import Help from './pages/Help/help';
 import Login from './pages/Login/Login';
 import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
 import Register from './pages/Register/Register';
@@ -76,6 +77,8 @@ function App() {
             <Route path="/Coursesimulation" element={<Coursesimulation />} />
             <Route path="/FavoritesList" element={<FavoritesList />} />
             <Route path="/PersonalInfo" element={<PersonalInfo />} />
+            <Route path="/help" element={<Help />} />
+
           </Routes>
         </div>
       </Router>

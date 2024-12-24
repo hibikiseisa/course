@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useSnackbar } from 'notistack'; // 引入 useSnackbar
 import React, { useEffect, useState } from 'react';
 import ConflictModal from './ConflictModal/ConflictModal';
 import './course-simulation.css';
@@ -18,6 +19,7 @@ const CourseSimulation = () => {
   const [favoriteCourses, setFavoriteCourses] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('');
+  const { enqueueSnackbar } = useSnackbar(); // 使用 enqueueSnackbar 顯示通知
 
   const userId = localStorage.getItem('id') || 'defaultUserId';
 
@@ -74,11 +76,11 @@ const CourseSimulation = () => {
         schedule: formattedSchedule,
       });
       if (response.status === 200) {
-        alert('課表已成功儲存！');
+        enqueueSnackbar('課表已成功儲存！',{ variant: 'success' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
       }
     } catch (error) {
       console.error('課表儲存失敗:', error);
-      alert('儲存課表時發生錯誤');
+      enqueueSnackbar('儲存課表時發生錯誤',{ variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
     }
   };
 
@@ -103,7 +105,7 @@ const CourseSimulation = () => {
       setPopupVisible(true);
     } catch (error) {
       console.error('獲取課程失敗:', error);
-      alert('獲取課程失敗，請重試！');
+      enqueueSnackbar('獲取課程失敗，請重試！',{ variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
     }
   };
 
@@ -232,13 +234,13 @@ const CourseSimulation = () => {
   };
   const clearSchedule = () => {
     setSchedule({});
-    alert('課表已清空！');
+    enqueueSnackbar('課表已清空！',{ variant: 'info' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
   };
 
   const cancelEdit = () => {
     setSchedule(originalSchedule); // 恢復到初始狀態
     setIsEditMode(false);
-    alert('更改已取消，恢復到原始課表！');
+    enqueueSnackbar('更改已取消，恢復到原始課表！',{ variant: 'info' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
   };
   const filteredMyCourses = (myCourses || []).filter(
     (course) =>
