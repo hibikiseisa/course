@@ -13,15 +13,13 @@
     z-index: 1000;
 }
 
-/* 模態視窗內容 */
 .modal-content {
     background-color: white;
     padding: 20px;
+    overflow-y: auto;
+    max-width: 80%; /* 調整最大寬度 */
+    width: 90%; /* 設定寬度，根據需求調整 */
     border-radius: 8px;
-    width: 80%;
-    max-width: 800px;
-    z-index: 1001;
-    text-align: left; /* 確保內容文字靠左 */
 }
 
 /* 標題樣式 */
@@ -31,6 +29,7 @@
     font-weight: bold;
     margin-bottom: 20px; /* 與內容保持距離 */
 }
+
 /* 課程資訊內容樣式 */
 .modal-content p,
 .modal-content strong {

@@ -1,9 +1,11 @@
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState('');
@@ -179,6 +181,7 @@ const handleUpload = async () => {
         );
         setCourses(updatedCourses);
         setFilteredCourses(updatedCourses);
+        enqueueSnackbar('課程更新成功！', { variant: 'success' });
       } else {
         // 如果是新增模式，呼叫 POST API
         const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
@@ -187,6 +190,7 @@ const handleUpload = async () => {
         // 更新前端課程列表
         setCourses([...courses, response.data]);
         setFilteredCourses([...filteredCourses, response.data]);
+        enqueueSnackbar('課程新增成功！', { variant: 'success' });
       }
 
       // 清空表單與錯誤狀態
@@ -211,8 +215,7 @@ const handleUpload = async () => {
       setEditingCourse(null);
     } catch (error) {
       console.error('儲存課程失敗:', error.response?.data || error.message);
-      alert('儲存課程失敗，請檢查資料格式或內容。');
-    }
+      enqueueSnackbar('儲存課程失敗，請檢查資料格式或內容。', { variant: 'error' });    }
   };
 
 
@@ -248,24 +251,41 @@ const handleUpload = async () => {
       alert('請選擇至少一項課程進行刪除');
       return;
     }
-
+  
+    // 顯示刪除確認對話框
+    const confirmDelete = window.confirm('確定要刪除選中的課程嗎？此操作無法撤銷。');
+    if (!confirmDelete) {
+      return; // 如果用戶取消刪除，則返回
+    }
+  
     try {
       // 使用 Promise.all 確保並行刪除
-      await Promise.all(
-        selectedCourses.map(async (courseId) => {
+      const deletePromises = selectedCourses.map(async (courseId) => {
+        try {
           // 假設伺服器使用 _id 作為課程識別
-          await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
-        })
-      );
+          const response = await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
+          // 顯示通知
+          enqueueSnackbar(response.data.message || '課程刪除成功', { variant: 'success' });
+        } catch (error) {
+          console.log("刪除課程的 ID:", courseId);
 
+          console.error(`刪除課程 ${courseId} 失敗:`, error);
+          enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
+        }
+      });
+  
+      // 等待所有刪除操作完成
+      await Promise.all(deletePromises);
+  
       // 更新課程列表，過濾掉已刪除的課程
       const updatedCourses = courses.filter(course => !selectedCourses.includes(course._id)); // 使用 _id
       setCourses(updatedCourses);
       setFilteredCourses(updatedCourses);
       setSelectedCourses([]);  // 清空選擇的課程
+  
     } catch (error) {
-      console.error('刪除課程失敗:', error);
-      alert('刪除課程失敗，請稍後再試');
+      console.error('刪除課程時出現錯誤:', error);
+      enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
     }
   };
 

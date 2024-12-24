@@ -405,22 +405,19 @@ app.post('/api/courses', async (req, res) => {
 });
 app.delete('/api/courses/:id', async (req, res) => {
     const { id } = req.params;
-
     try {
-        // 嘗試從資料庫刪除課程
-        const deletedCourse = await Course.findByIdAndDelete(id);
-
-        if (!deletedCourse) {
-            return res.status(404).json({ message: '課程不存在，無法刪除' });
-        }
-
-        res.status(200).json({ message: '課程刪除成功', deletedCourse });
+      const deletedCourse = await Course.findByIdAndDelete(id);
+      if (!deletedCourse) {
+        return res.status(404).json({ message: '課程不存在，無法刪除' });
+      }
+      res.status(200).json({ message: '課程刪除成功', deletedCourse });
     } catch (error) {
-        console.error('刪除課程時出現錯誤:', error);
-        res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
+      console.error('刪除課程時出現錯誤:', error);
+      res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
     }
-});
-app.put('/api/courses/:id', async (req, res) => {
+  });
+  
+  app.put('/api/courses/:id', async (req, res) => {
     const courseId = req.params.id;
     const updatedData = req.body;
 
