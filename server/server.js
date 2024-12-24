@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const router = express.Router();
+const upload = multer({ dest: 'uploads/' });
 dotenv.config();
 
 const app = express();
@@ -267,7 +268,24 @@ const courseSchema = new mongoose.Schema(
 module.exports = mongoose.model('Course', courseSchema);
 
 const Course = mongoose.model('Course', courseSchema);
-
+app.post('/api/upload-csv', upload.single('file'), (req, res) => {
+    const results = [];
+    const filePath = path.join(__dirname, req.file.path);
+  
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('data', (row) => {
+        // 解析 CSV 每一行，將其存入資料庫
+        results.push(row);
+      })
+      .on('end', () => {
+        // 假設結果已經存入資料庫
+        console.log('CSV 檔案解析完成', results);
+        res.json({ message: '檔案上傳並處理成功' });
+      });
+  });
+  
+ 
 app.get('/api/courses', async (req, res) => {
     try {
         const {

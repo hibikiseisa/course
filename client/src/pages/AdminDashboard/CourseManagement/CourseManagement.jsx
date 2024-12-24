@@ -63,8 +63,10 @@ const CourseManagement = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
-  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+ // 處理檔案選擇變化
+ const handleFileChange = (e) => {
+  setSelectedFile(e.target.files[0]);
+};
 
   const handleUpload = async () => {
     if (!selectedFile) {
@@ -319,7 +321,8 @@ const CourseManagement = () => {
           </button>
 
           {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
-          <button onClick={handleUpload} className="handleUpload">匯入</button>
+          <input type="file" accept=".csv" onChange={handleFileChange} />
+          <button onClick={handleUpload}className="handleUpload">匯入</button>
           <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
         </div>
 

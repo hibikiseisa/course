@@ -450,3 +450,23 @@ gap:5px;
     margin: 20px auto 0;
 
 }
+
+.course-results {
+    overflow: auto;  /* 確保父容器支持滾動 */
+  }
+  
+
+  .course-table thead {
+    position: sticky; /* 使標題固定 */
+    top: 0; /* 固定在視窗頂部 */
+    background-color: #fff; /* 設定背景色，防止透明 */
+    z-index: 10; /* 確保標題在其他元素之上 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 可選的陰影效果 */
+  }
+  
+  .course-table th {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+  }
+      
