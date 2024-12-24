@@ -129,26 +129,30 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
         }
     };
     
-    const handleRemoveFavoriteClick = async () => {
-        try {
-            if (!course._id || !userId) {
-                console.error("Course ID 或 User ID 缺失！");
-                return;
-            }
-    
-            await axios.delete(`http://localhost:5000/api/favorites/${userId}/${course._id}`);
-            setLocalIsFavorite(false);
-    
-            // 更新 localStorage
-            const favorites = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
-            localStorage.setItem('favoriteCourses', JSON.stringify(favorites.filter(favId => favId !== course._id)));
-            
-            enqueueSnackbar('已取消收藏此課程！', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
-        } catch (error) {
-            console.error('取消收藏失敗:', error);
-            enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' });
+const handleRemoveFavoriteClick = async () => {
+    try {
+        if (!course._id || !userId) {
+            console.error("Course ID 或 User ID 缺失！");
+            return;
         }
-    };
+
+        // 向後端請求取消收藏
+        await axios.delete(`http://localhost:5000/api/favorites/${userId}/${course._id}`);
+        setLocalIsFavorite(false);
+
+        // 更新localStorage
+        const favorites = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
+        localStorage.setItem('favoriteCourses', JSON.stringify(favorites.filter(favId => favId !== course._id)));
+
+        // 重新加載收藏資料
+        fetchFavorites();
+
+        enqueueSnackbar('已取消收藏此課程！', { variant: 'info', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+    } catch (error) {
+        console.error('取消收藏失敗:', error);
+        enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' });
+    }
+};
     
     return (
         <div className="modal-overlay">

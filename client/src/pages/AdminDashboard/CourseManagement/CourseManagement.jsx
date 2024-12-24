@@ -63,12 +63,10 @@ const CourseManagement = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
- // 處理檔案選擇變化
- const handleFileChange = (e) => {
-  setSelectedFile(e.target.files[0]);
-};
 
-  const handleUpload = async () => {
+  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+
+const handleUpload = async () => {
     if (!selectedFile) {
       setUploadMessage('請選擇一個 CSV 檔案');
       return;
@@ -94,7 +92,6 @@ const CourseManagement = () => {
       setUploadMessage('檔案上傳失敗，請檢查檔案格式或內容');
     }
   };
-
   const handleDownloadCSV = () => {
     const csvData = courses.map(course => ({
       學期: course.學期,
@@ -321,8 +318,7 @@ const CourseManagement = () => {
           </button>
 
           {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
-          <input type="file" accept=".csv" onChange={handleFileChange} />
-          <button onClick={handleUpload}className="handleUpload">匯入</button>
+          <button onClick={handleUpload} className="handleUpload">匯入</button>
           <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
         </div>
 
