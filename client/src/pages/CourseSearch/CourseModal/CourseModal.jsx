@@ -21,15 +21,21 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     if (!course) return null;
 
     useEffect(() => {
-        // 每次打開視窗時檢查當前課程是否已經收藏
-        const favoriteCourses = JSON.parse(localStorage.getItem('favoriteCourses') || '[]');
-        if (favoriteCourses.includes(course._id)) {
-            setLocalIsFavorite(true);
-        } else {
-            setLocalIsFavorite(false);
-        }
-    }, [course._id]); // 依賴課程ID，確保每次課程改變時都重新檢查收藏狀態
-
+        const fetchAndSyncFavorites = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
+                console.log('已加載收藏資料:', response.data);
+    
+                const isFavoriteNow = response.data.some(fav => fav.courseId === course._id);
+                setLocalIsFavorite(isFavoriteNow);
+            } catch (error) {
+                console.error('獲取收藏資料失敗:', error);
+            }
+        };
+    
+        fetchAndSyncFavorites();
+    }, [isFavorite, course._id, userId]); // 當 isFavorite 或其他依賴改變時重新檢查收藏狀態
+    
     const fetchFavorites = async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
