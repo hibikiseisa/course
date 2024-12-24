@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { useSnackbar } from 'notistack'; // 使用通知系統
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import ods from "../../assets/ods.png"; // 确保图片路径正确
@@ -11,16 +11,17 @@ import CourseModal from './CourseModal/CourseModal';
 import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
 
+
 const CourseSearch = () => {
     const [courses, setCourses] = useState([]);
-
+    const [loading, setLoading] = useState(false); // 新增 loading 狀態
     const [showButton, setShowButton] = useState(false);
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
-
+    const { enqueueSnackbar } = useSnackbar(); // 引入通知
     const [educationLevels, setEducationLevels] = useState([]);
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
@@ -116,7 +117,6 @@ const CourseSearch = () => {
             groupedPeriods[day].push(timeIndex);
         });
 
-
         const periodFilter = Object.entries(groupedPeriods)
             .map(([day, periods]) => `${day}-${periods.join(',')}`)
             .join(';');
@@ -135,12 +135,12 @@ const CourseSearch = () => {
             period: selectedPeriods
         };
 
+        setLoading(true); // 設置 loading 為 true
         try {
             const response = await axios.get('http://localhost:5000/api/courses', { params });
             console.log('API Response:', response.data);
 
             if (response.data && Array.isArray(response.data)) {
-                // 根據選中的 `selectedPeriods` 篩選回傳的課程
                 const filteredCourses = selectedPeriods.length > 0
                     ? response.data.filter(course => {
                         const coursePeriods = course.上課星期 && course.上課節次
@@ -150,22 +150,22 @@ const CourseSearch = () => {
                     })
                     : response.data;
 
+                setCourses(filteredCourses); // 更新課程資料
 
-                setCourses(filteredCourses); // 更新狀態
-                console.log('Filtered Courses:', filteredCourses);
+                if (filteredCourses.length === 0) {
+                    enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示通知
+                }
             } else {
-                setCourses([]); // 保證狀態正確
-                // console.log('Fetched Courses:', response.data);
-
+                setCourses([]);
+                enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示通知
             }
-            setCurrentPage(1);
         } catch (error) {
             console.error('Error fetching courses:', error);
-
-            setCourses([]); // 清空課程資料
-            alert('查詢失敗，請檢查伺服器狀態！');
+            setCourses([]);
+            enqueueSnackbar('查詢失敗，請檢查伺服器狀態！', { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示錯誤通知
+        } finally {
+            setLoading(false); // 完成後設置 loading 為 false
         }
-
     };
 
     // 匯出功能處理函式
@@ -503,7 +503,11 @@ const CourseSearch = () => {
 
                 <button type="submit" className="search-button">查詢</button>
             </form>
-
+            {loading && (
+                <div className="loading-overlay">
+                    <p>查詢中，請稍候...</p>
+                </div>
+            )}
             <CourseSchedule
                 isOpen={isPeriodModalOpen}
                 onClose={() => setIsPeriodModalOpen(false)}

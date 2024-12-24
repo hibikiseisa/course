@@ -11,15 +11,13 @@
 
 }
 .personalcontent {
-    font-size: 30px;
-    text-align: center;
-    margin-bottom: 10px; /* 可調整來縮小內容之間的間距 */
-    margin: 3px 0;
-    margin-top: -20px; /* 減少上方間距，讓標題更接近 */
-
-    
-}
-.personaltitle {
+    text-align: left; /* 文字靠左對齊 */
+    margin: 0 auto;
+    width: fit-content; /* 調整寬度以適應內容 */
+    font-size: 25px; /* 調整字體大小 */
+    line-height: 1.5; /* 增加行高讓文字更易讀 */
+  }
+  .personaltitle {
     font-size: 40px;
     margin-bottom: 20px;
     color: #2ab162;
@@ -32,11 +30,14 @@ h2, h3 {
     
 }
 .personalinfo .user-info p {
+    margin-left:15%;
+
     font-size: 20px;
     text-align: left;
     margin: 20px 0; 
 }
 .personalinfo .form-group { /*不能動名稱*/
+    
     margin-bottom: 10px;
     width: 100%; /* 改成100%寬度，避免超過父容器 */
     max-width: 500px; /* 限制最大寬度 */
@@ -96,3 +97,8 @@ h2, h3 {
 .edit-password-button:hover {
     background-color: #0056b3;
 }
+
+.head-image {
+    width: 120px; /* 調整圖片大小 */
+    margin-bottom: 20px; /* 增加圖片與下方文字的距離 */
+  }

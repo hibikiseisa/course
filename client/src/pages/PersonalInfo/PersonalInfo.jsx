@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
+import head from "../../assets/head.png"; // 确保图片路径正确
 import './PersonalInfo.css';
 
 const PersonalInfo = () => {
@@ -73,14 +74,14 @@ const PersonalInfo = () => {
                     passwordLength: newPassword.length,
                 }));
                 setShowEditPassword(false); // 密碼修改成功後隱藏表單
-                enqueueSnackbar("密碼修改成功！", { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+                enqueueSnackbar("密碼修改成功！", { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'right' } });
             } else {
-                enqueueSnackbar("密碼修改失敗，請重試！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+                enqueueSnackbar("密碼修改失敗，請重試！", { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'right' } });
             }
         } catch (error) {
             console.error('錯誤:', error);
             const errorMessage = error.response?.data?.message || '密碼修改失敗，請重試！';
-            enqueueSnackbar(errorMessage, { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+            enqueueSnackbar(errorMessage, { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'right' } });
         } finally {
             setLoading(false); // 不論成功還是失敗都會停止加載
         }
@@ -89,7 +90,10 @@ const PersonalInfo = () => {
     return (
         <div className="personal-info-container">
             <h1 className="personaltitle">個人資訊</h1>
+                                    <img src={head} alt="head" className="head-image" />
+
             <div className="personalcontent">
+
                 <p><strong>帳號：</strong> {userInfo.id}</p>
                 <p><strong>姓名：</strong> {userInfo.username}</p>
                 <p><strong>角色：</strong> {userInfo.role}</p>
