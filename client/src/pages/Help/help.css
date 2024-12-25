@@ -81,3 +81,57 @@
   margin-top: 20px;
   text-align: center;
 }
+@media (max-width: 768px) {
+  .help-container {
+    margin-top: 50px;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.8rem; /* 縮小標題字體 */
+    margin-top: 30px; /* 調整上邊距 */
+  }
+
+  .help-header {
+    flex-direction: column; /* 垂直排列 */
+    gap: 10px; /* 增加間距 */
+  }
+
+  .header-help-button {
+    width: 60%;
+    font-size: 12px; /* 縮小按鈕字體 */
+    padding: 8px 12px; /* 縮小按鈕大小 */
+  }
+
+  .help-buttons {
+    flex-direction: column; /* 垂直排列 */
+    gap: 15px; /* 增加按鈕間距 */
+  }
+
+  .help-button,
+  .back-button {
+    font-size: 14px; /* 縮小按鈕字體 */
+    padding: 10px 15px; /* 縮小按鈕大小 */
+  }
+
+  .help-content {
+    margin-top: 15px;
+    text-align: left;
+  }
+
+  .help-content img {
+    max-width: 100%; /* 圖片自適應螢幕寬度 */
+    height: auto;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .help-video iframe,
+  .help-video video {
+    width: 100%; /* 影片寬度全螢幕 */
+    max-width: 100%; /* 限制影片寬度不超過容器 */
+    height: auto; /* 自動調整高度 */
+    border-radius: 8px; /* 增加圓角 */
+  }
+}
