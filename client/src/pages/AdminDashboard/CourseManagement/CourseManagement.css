@@ -17,15 +17,15 @@
 }
 
 .data-count {
-  position: absolute;
-  bottom: 20px; /* 距離底部 20px */
-  right: 20px; /* 距離右邊 20px */
-  padding: 10px 20px;
-  background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  bottom: 20px; /* 距離視窗底部 20px */
+  right: 20px; /* 距離視窗右側 20px */
+  background-color: rgba(0, 0, 0, 0.6); /* 半透明背景 */
   color: white;
+  padding: 10px 15px;
   border-radius: 5px;
   font-size: 14px;
-  z-index: 1000; /* 確保顯示在其他內容上方 */
+  z-index: 1000; /* 確保在其他元素之上 */
 }
 
 /* 模態框背景 */
@@ -334,3 +334,23 @@ select {
   color: #333;
   z-index: 1000;
 }
+
+.up-image {
+  background-color: transparent; /* 移除背景色 */
+  border: none; /* 去掉圖片周圍的邊框 */
+  display: block;
+  width: 40px; /* 自行調整圖片寬度 */
+  height: 40px; /* 自行調整圖片高度 */
+  object-fit: contain; /* 保持圖片比例 */
+}
+
+.scroll-to-top {
+  background-color: transparent; /* 移除按鈕背景 */
+  border: none; /* 去掉按鈕邊框 */
+  cursor: pointer; /* 鼠標樣式為手形 */
+  position: fixed;
+  bottom: 20px; /* 距離視窗底部 */
+  right: 20px; /* 距離視窗右側 */
+  z-index: 1000; /* 確保位於最上層 */
+}
+

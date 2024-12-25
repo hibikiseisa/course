@@ -549,23 +549,24 @@ gap:5px;
     }
 
     /* 上移按鈕樣式調整 */
-    .scroll-to-top {
-        width: 10%; /* 減小寬度 */
-        height: 5%; /* 減小高度 */
-        bottom: 20px; /* 提高距底部的距離 */
-        right: 20px; /* 提高距右側的距離 */
-        border-radius: 50%; /* 保持圓形 */
-        background-color: transparent; /* 設為透明背景 */
-        box-shadow: none; /* 移除陰影 */
-    }
-
-    .scroll-to-top img {
-        width: 40px; /* 縮小圖片 */
-        height: 40px; /* 縮小圖片 */
-        filter: opacity(0.8); /* 減淡圖片透明度 */
-        border: none; /* 確保圖片沒有邊框 */
-    }
-
+    .up-image {
+        background-color: transparent; /* 移除背景色 */
+        border: none; /* 去掉圖片周圍的邊框 */
+        display: block;
+        width: 40px; /* 自行調整圖片寬度 */
+        height: 40px; /* 自行調整圖片高度 */
+        object-fit: contain; /* 保持圖片比例 */
+      }
+      
+      .scroll-to-top {
+        background-color: transparent; /* 移除按鈕背景 */
+        border: none; /* 去掉按鈕邊框 */
+        cursor: pointer; /* 鼠標樣式為手形 */
+        position: fixed;
+        bottom: 20px; /* 距離視窗底部 */
+        right: 20px; /* 距離視窗右側 */
+        z-index: 1000; /* 確保位於最上層 */
+      }
 
     .more-form-group select,
     .more-form-group input[type="text"] {
