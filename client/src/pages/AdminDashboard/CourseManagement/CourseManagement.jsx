@@ -5,6 +5,7 @@ import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
+  const [isLoading, setIsLoading] = useState(false); // 新增 loading 狀態
   const { enqueueSnackbar } = useSnackbar();
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -43,7 +44,9 @@ const CourseManagement = () => {
   const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
 
   useEffect(() => {
+    
     const fetchCourses = async () => {
+      setIsLoading(true); // 顯示載入畫面
       try {
         const response = await axios.get('http://localhost:5000/api/courses', {
           params: filter,
@@ -52,6 +55,8 @@ const CourseManagement = () => {
         setFilteredCourses(response.data);
       } catch (error) {
         console.error('無法取得課程資料:', error);
+      } finally {
+        setIsLoading(false); // 隱藏載入畫面
       }
     };
 
@@ -278,9 +283,7 @@ const CourseManagement = () => {
       const deletePromises = selectedCourses.map(async (courseId) => {
         try {
           // 假設伺服器使用 _id 作為課程識別
-          const response = await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
-          // 顯示通知
-          enqueueSnackbar(response.data.message || '課程刪除成功', { variant: 'success' });
+          await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
         } catch (error) {
           console.log("刪除課程的 ID:", courseId);
 
@@ -298,6 +301,9 @@ const CourseManagement = () => {
       setFilteredCourses(updatedCourses);
       setSelectedCourses([]);  // 清空選擇的課程
   
+      // 統一顯示刪除成功通知
+    enqueueSnackbar('選中的課程已成功刪除', { variant: 'success' });
+
     } catch (error) {
       console.error('刪除課程時出現錯誤:', error);
       enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
@@ -305,93 +311,73 @@ const CourseManagement = () => {
   };
 
   const handleSearch = () => {
-    setFilteredCourses(
-      courses.filter(course =>
-        (filter.term ? course.學期 === filter.term : true) &&
-        (filter.department ? course.系所名稱.includes(filter.department) : true) &&
-        (filter.keyword ?
-          course.科目中文名稱.includes(filter.keyword) ||
-          course.授課教師姓名.includes(filter.keyword) : true)
-      )
-    );
+    setIsLoading(true); // 顯示載入畫面
+    setTimeout(() => {
+      setFilteredCourses(
+        courses.filter(course =>
+          (filter.term ? course.學期 === filter.term : true) &&
+          (filter.department ? course.系所名稱.includes(filter.department) : true) &&
+          (filter.keyword ?
+            course.科目中文名稱.includes(filter.keyword) ||
+            course.授課教師姓名.includes(filter.keyword) : true)
+        )
+      );
+      setIsLoading(false); // 隱藏載入畫面
+    }, 500); // 模擬延遲
   };
 
   return (
     <div className="admin-course-management">
+     {isLoading && <div className="loading-overlay">載入中...</div>} {/* 載入畫面 */}
       <h2>課程管理</h2>
       <div className="selected-count">
         已選擇 {selectedCourses.length} 筆課程
       </div>
 
       <div className="controls">
-        <div className="button-group">
-          <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
-          <button
-            onClick={() => {
-              setEditingCourse(null);  // 確保編輯課程為 null，清空先前編輯資料
-              setCourseDetails({
-                科目代碼: '',
-                科目中文名稱: '',
-                學分數: '',
-                系所名稱: '',
-                主開課教師姓名: '',
-                學期: '',
-                學制: '',
-                年級: '',
-                課別名稱: '',
-                課程中文摘要: '',
-                課程英文摘要: '',
-                上課地點: '',
-                授課教師姓名: '',
-                課表備註: '',
-              });
-              setShowModal(true);
-            }}
-            className="handleUpload" // 使用相同的樣式類名
-          >
-            新增課程
-          </button>
-
-          {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
-          <div className="upload-section">
-        <button
-          onClick={() => document.getElementById("fileInput").click()}
-          className="custom-upload-button"
-        >
-          匯入
-        </button>
-        <input
-          type="file"
-          id="fileInput"
-          onChange={handleFileChange}
-          style={{ display: "none" }}
-          accept=".csv"
-          multiple
-        />
-      </div>
-      {showUploadModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>確認匯入檔案</h3>
-            <p>您已選擇以下檔案：</p>
-            <ul>
-              {selectedFiles.map((file, index) => (
-                <li key={index}>{file.name}</li>
-              ))}
-            </ul>
-            <div className="modal-actions">
-              <button onClick={handleUpload} className="confirm-button">
-                確定上傳
-              </button>
-              <button onClick={handleCancelUpload} className="cancel-button">
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-          <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
-        </div>
+  <div className="action-buttons">
+    <button onClick={handleDeleteSelected} className="action-button">刪除</button>
+    <button
+      onClick={() => {
+        setEditingCourse(null); // 清空編輯資料
+        setCourseDetails({
+          科目代碼: '',
+          科目中文名稱: '',
+          學分數: '',
+          系所名稱: '',
+          主開課教師姓名: '',
+          學期: '',
+          學制: '',
+          年級: '',
+          課別名稱: '',
+          課程中文摘要: '',
+          課程英文摘要: '',
+          上課地點: '',
+          授課教師姓名: '',
+          課表備註: '',
+        });
+        setShowModal(true);
+      }}
+      className="action-button"
+    >
+      新增課程
+    </button>
+    <button
+      onClick={() => document.getElementById("fileInput").click()}
+      className="action-button"
+    >
+      匯入
+    </button>
+    <input
+      type="file"
+      id="fileInput"
+      onChange={handleFileChange}
+      style={{ display: "none" }}
+      accept=".csv"
+      multiple
+    />
+    <button onClick={handleDownloadCSV} className="action-button">匯出</button>
+  </div>
 
         <div className="search-group">
           <div className="search-item">
