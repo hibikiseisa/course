@@ -5,7 +5,7 @@ import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
-  const [isLoading, setIsLoading] = useState(false); // 新增 loading 狀態
+  const [isLoading, setIsLoading] = useState(false); 
   const { enqueueSnackbar } = useSnackbar();
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,32 +36,33 @@ const CourseManagement = () => {
   const [filter, setFilter] = useState({ term: '', department: '', keyword: '' });
   const [expandedTeachers, setExpandedTeachers] = useState([]);
   const [errors, setErrors] = useState({});
-
+  const [isSearching, setIsSearching] = useState(false);
+  
   const terms = ['1132'];
   const departments = ['資訊管理系', '護理系', '幼保系', '長期照護系', '健康事業管理系', '護助產及婦女健康系', '嬰幼兒保育系', '護理教育曁數位學習系', '高齡健康照護系', '生死與健康心理諮商系', '休閒產業與健康促進系旅遊健康', '運動保健系', '語言治療與聽力學系'];
   const programs = ['學士後系', '四年制', '二技', '二技(三年)', '學士後多元專長', '學士後學位學程', '碩士班', '博士班'];
   const grades = ['一年級', '二年級', '三年級', '四年級'];
   const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
 
-  useEffect(() => {
+  // useEffect(() => {
     
-    const fetchCourses = async () => {
-      setIsLoading(true); // 顯示載入畫面
-      try {
-        const response = await axios.get('http://localhost:5000/api/courses', {
-          params: filter,
-        });
-        setCourses(response.data);
-        setFilteredCourses(response.data);
-      } catch (error) {
-        console.error('無法取得課程資料:', error);
-      } finally {
-        setIsLoading(false); // 隱藏載入畫面
-      }
-    };
+  //   const fetchCourses = async () => {
+  //     setIsLoading(true); // 顯示載入畫面
+  //     try {
+  //       const response = await axios.get('http://localhost:5000/api/courses', {
+  //         params: filter,
+  //       });
+  //       setCourses(response.data);
+  //       setFilteredCourses(response.data);
+  //     } catch (error) {
+  //       console.error('無法取得課程資料:', error);
+  //     } finally {
+  //       setIsLoading(false); // 隱藏載入畫面
+  //     }
+  //   };
 
-    fetchCourses();
-  }, [filter]);
+  //   fetchCourses();
+  // }, [filter]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -310,20 +311,20 @@ const CourseManagement = () => {
     }
   };
 
-  const handleSearch = () => {
-    setIsLoading(true); // 顯示載入畫面
-    setTimeout(() => {
-      setFilteredCourses(
-        courses.filter(course =>
-          (filter.term ? course.學期 === filter.term : true) &&
-          (filter.department ? course.系所名稱.includes(filter.department) : true) &&
-          (filter.keyword ?
-            course.科目中文名稱.includes(filter.keyword) ||
-            course.授課教師姓名.includes(filter.keyword) : true)
-        )
-      );
-      setIsLoading(false); // 隱藏載入畫面
-    }, 500); // 模擬延遲
+  const handleSearch = async () => {
+    setIsLoading(true); 
+    try {
+      const response = await axios.get('http://localhost:5000/api/courses', {
+        params: filter,
+      });
+      setFilteredCourses(response.data); // 更新篩選後的課程列表
+      enqueueSnackbar('查詢成功！', { variant: 'success' });
+    } catch (error) {
+      console.error('查詢課程資料失敗:', error);
+      enqueueSnackbar('查詢失敗，請稍後再試！', { variant: 'error' });
+    } finally {
+      setIsLoading(false); 
+    }
   };
 
   return (
