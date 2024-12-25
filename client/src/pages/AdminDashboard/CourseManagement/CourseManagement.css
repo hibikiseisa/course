@@ -228,7 +228,7 @@
 }
 
 /* 確保匯入和匯出的按鈕樣式與新增課程的按鈕一致 */
-.handleUpload, .handleDownloadCSV {
+.custom-upload-button, .handleUpload, .handleDownloadCSV {
   background-color: #4CAF50;  /* 綠色背景 */
   color: white;
   padding: 10px 15px;
