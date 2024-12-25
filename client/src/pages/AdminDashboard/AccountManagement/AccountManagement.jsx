@@ -19,12 +19,12 @@ const AccountManagement = () => {
   });
     const [isSaving, setIsSaving] = useState(false);
 
-  // 初始化加載使用者列表
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
+    // 初始化加載使用者列表
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
 
-  // 獲取帳號列表
+  
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/accounts');
@@ -34,13 +34,11 @@ const AccountManagement = () => {
     }
   };
 
-  // 處理輸入變化
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAccountDetails({ ...accountDetails, [name]: value });
+    const { username, value } = e.target;
+    setAccountDetails({ ...accountDetails, [username]: value });
   };
 
-  // 處理搜尋
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -152,7 +150,7 @@ const AccountManagement = () => {
             <option value="username">姓名</option>
           </select>
         </div>
-        <button className="add-button" onClick={handleAddAccount}>
+        <button className="add-button" onClick={() => setShowModal(true)}>
           新增帳號
         </button>
       </div>
@@ -173,12 +171,18 @@ const AccountManagement = () => {
               <td>{account.username}</td>
               <td>{account.role === 'admin' ? '✔️' : '❌'}</td>
               <td>
-                <button className="edit-button" onClick={() => handleEditAccount(account)}>
+                <button
+                  className="edit-button"
+                  onClick={() => handleEditAccount(account)}
+                >
                   編輯
                 </button>
               </td>
               <td>
-                <button className="delete-button" onClick={() => handleConfirmDelete(account.id)}>
+                <button
+                  className="delete-button"
+                  onClick={() => handleDeleteAccount(account.id)}
+                >
                   刪除
                 </button>
               </td>
@@ -227,43 +231,15 @@ const AccountManagement = () => {
                   <option value="admin">管理者</option>
                 </select>
               </label>
-              <label>
-    密碼:
-    <input
-      type={showPassword ? "text" : "password"}
-      name="password"
-      value={accountDetails.password}
-      onChange={handleInputChange}
-      placeholder="輸入密碼"
-      required
-    />
-    <button type="button" onClick={() => setShowPassword(!showPassword)}>
-      {showPassword ? '隱藏' : '顯示'}
-    </button>
-  </label>
-
             </div>
             <div className="modal-actions">
-              <button onClick={handleSaveAccount} className="save-button" disabled={isSaving}>
+              <button onClick={handleSaveAccount} className="save-button">
                 保存
               </button>
-              <button onClick={() => setShowModal(false)} className="cancel-button">
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showDeleteConfirm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>確認刪除帳號?</h3>
-            <div className="modal-actions">
-              <button onClick={handleDeleteAccount} className="confirm-button">
-                確認
-              </button>
-              <button onClick={() => setShowDeleteConfirm(false)} className="cancel-button">
+              <button
+                onClick={() => setShowModal(false)}
+                className="cancel-button"
+              >
                 取消
               </button>
             </div>

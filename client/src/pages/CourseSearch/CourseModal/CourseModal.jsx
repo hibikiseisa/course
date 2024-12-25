@@ -141,38 +141,56 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
 
     const handleAddFavoriteClick = async () => {
         try {
-            if (!course._id || !userId) {
+            // 檢查課程ID和用戶ID是否存在
+            if (!course?._id || !userId) {
                 console.error("課程ID或用戶ID缺失！");
                 enqueueSnackbar('課程ID或用戶ID缺失，請檢查！', { variant: 'error' });
                 return;
             }
-
+    
+            // 從後端檢查該課程是否已被收藏
             const favoritesResponse = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
             const isAlreadyFavorite = favoritesResponse.data.some(fav => fav.courseId === course._id);
-
+    
             if (isAlreadyFavorite) {
                 enqueueSnackbar('此課程已經收藏過了！', { variant: 'info' });
                 return;
             }
-
+    
+            // 發送收藏請求
             const response = await axios.post('http://localhost:5000/api/favorites', {
                 userId,
                 courseId: course._id
             });
-
+    
+            // 收藏成功處理
             if (response.status === 200) {
                 setLocalIsFavorite(true);
-                localStorage.setItem('favoriteCourses', JSON.stringify([...JSON.parse(localStorage.getItem('favoriteCourses') || '[]'), course._id]));
-                enqueueSnackbar('已成功收藏此課程！', { variant: 'success', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+                const updatedFavorites = [...JSON.parse(localStorage.getItem('favoriteCourses') || '[]'), course._id];
+                localStorage.setItem('favoriteCourses', JSON.stringify(updatedFavorites));
+    
+                enqueueSnackbar('已成功收藏此課程！', { 
+                    variant: 'success', 
+                    autoHideDuration: 2000, 
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'right' } 
+                });
             } else {
                 console.error('伺服器返回錯誤：', response);
                 enqueueSnackbar('伺服器錯誤，請稍後重試。', { variant: 'error' });
             }
         } catch (error) {
+            // 錯誤處理，包含伺服器錯誤和其他潛在問題
+            if (error.response && error.response.status === 400) {
+                enqueueSnackbar('無法收藏該課程，請檢查伺服器！', { variant: 'warning' });
+            } else if (error.response && error.response.status === 500) {
+                enqueueSnackbar('伺服器錯誤，請稍後重試。', { variant: 'error' });
+            } else {
+                enqueueSnackbar('未知錯誤，請檢查網路連線或重新嘗試。', { variant: 'error' });
+            }
             console.error('收藏失敗:', error.response || error);
-            enqueueSnackbar('收藏失敗，請重試。', { variant: 'error' });
         }
     };
+    
 
     const handleRemoveFavoriteClick = async () => {
         try {

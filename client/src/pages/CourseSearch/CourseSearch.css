@@ -490,6 +490,7 @@ gap:5px;
 @media (max-width: 768px) {
     .course-search-container {
         padding: 20px;
+        margin-top: 40PX;  
     }
 
     .course-search-title {
