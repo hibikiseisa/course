@@ -42,7 +42,7 @@ const FavoritesList = () => {
             }
         } catch (error) {
             console.error('獲取收藏課程失敗:', error);
-            enqueueSnackbar('無法獲取收藏的課程，請稍後重試。', { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+            enqueueSnackbar('無法獲取收藏的課程，請稍後重試。', { variant: 'error', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
         }
     };
     const handleAddFavoriteClick = async () => {
@@ -78,16 +78,16 @@ const FavoritesList = () => {
             console.error('收藏失敗:', error.response || error);
             enqueueSnackbar('收藏失敗，請重試。', { variant: 'error' });
         }
-    };  
+    };
     // 取消收藏
     const handleRemoveFavorite = async (courseId) => {
         try {
             await axios.delete(`http://localhost:5000/api/favorites/${userId}/${courseId}`);
             setFavorites(favorites.filter((course) => course._id !== courseId)); // 移除本地列表中的課程
-            enqueueSnackbar('成功取消收藏！', { variant: 'success', autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+            enqueueSnackbar('成功取消收藏！', { variant: 'success', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
         } catch (error) {
             console.error('取消收藏失敗:', error);
-            enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
+            enqueueSnackbar('取消收藏失敗，請重試。', { variant: 'error', autoHideDuration: 2000, anchorOrigin: { vertical: 'bottom', horizontal: 'right' } });
         }
     };
     const openMoreInfo = (course) => {
@@ -172,13 +172,13 @@ const FavoritesList = () => {
                     </tbody>
                 </table>
             )}
-               {isModalOpen && selectedCourse && (
+            {isModalOpen && selectedCourse && (
                 <CourseModal
                     course={selectedCourse}
                     onClose={closeModal}
                 />
             )}
-            
+
         </div>
     );
 };
