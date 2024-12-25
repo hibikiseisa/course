@@ -5,7 +5,7 @@ import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false); // 新增 loading 狀態
   const { enqueueSnackbar } = useSnackbar();
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,33 +36,32 @@ const CourseManagement = () => {
   const [filter, setFilter] = useState({ term: '', department: '', keyword: '' });
   const [expandedTeachers, setExpandedTeachers] = useState([]);
   const [errors, setErrors] = useState({});
-  const [isSearching, setIsSearching] = useState(false);
-  
+
   const terms = ['1132'];
   const departments = ['資訊管理系', '護理系', '幼保系', '長期照護系', '健康事業管理系', '護助產及婦女健康系', '嬰幼兒保育系', '護理教育曁數位學習系', '高齡健康照護系', '生死與健康心理諮商系', '休閒產業與健康促進系旅遊健康', '運動保健系', '語言治療與聽力學系'];
   const programs = ['學士後系', '四年制', '二技', '二技(三年)', '學士後多元專長', '學士後學位學程', '碩士班', '博士班'];
   const grades = ['一年級', '二年級', '三年級', '四年級'];
   const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
 
-  // useEffect(() => {
+  useEffect(() => {
     
-  //   const fetchCourses = async () => {
-  //     setIsLoading(true); // 顯示載入畫面
-  //     try {
-  //       const response = await axios.get('http://localhost:5000/api/courses', {
-  //         params: filter,
-  //       });
-  //       setCourses(response.data);
-  //       setFilteredCourses(response.data);
-  //     } catch (error) {
-  //       console.error('無法取得課程資料:', error);
-  //     } finally {
-  //       setIsLoading(false); // 隱藏載入畫面
-  //     }
-  //   };
+    const fetchCourses = async () => {
+      setIsLoading(true); // 顯示載入畫面
+      try {
+        const response = await axios.get('http://localhost:5000/api/courses', {
+          params: filter,
+        });
+        setCourses(response.data);
+        setFilteredCourses(response.data);
+      } catch (error) {
+        console.error('無法取得課程資料:', error);
+      } finally {
+        setIsLoading(false); // 隱藏載入畫面
+      }
+    };
 
-  //   fetchCourses();
-  // }, [filter]);
+    fetchCourses();
+  }, [filter]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -210,7 +209,7 @@ const CourseManagement = () => {
 
         // 更新前端課程列表
         setCourses([...courses, response.data]);
-        setFilteredCourses([...filteredCourses, response.data]);
+        // setFilteredCourses([...filteredCourses, response.data]);
         enqueueSnackbar('課程新增成功！', { variant: 'success' });
       }
 
@@ -281,50 +280,58 @@ const CourseManagement = () => {
   
     try {
       // 使用 Promise.all 確保並行刪除
-      const deletePromises = selectedCourses.map(async (courseId) => {
-        try {
-          // 假設伺服器使用 _id 作為課程識別
-          await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
-        } catch (error) {
-          console.log("刪除課程的 ID:", courseId);
-
-          console.error(`刪除課程 ${courseId} 失敗:`, error);
-          enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
-        }
-      });
+      const deleteResults = await Promise.all(
+        selectedCourses.map(async (courseId) => {
+          try {
+            // 假設伺服器使用 _id 作為課程識別
+            await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
+            return { success: true, id: courseId };
+          } catch (error) {
+            console.error(`刪除課程 ${courseId} 失敗:`, error);
+            return { success: false, id: courseId };
+          }
+        })
+      );
   
-      // 等待所有刪除操作完成
-      await Promise.all(deletePromises);
+      // 根據刪除結果更新通知
+      const successCount = deleteResults.filter(result => result.success).length;
+      const failureCount = deleteResults.filter(result => !result.success).length;
+  
+      if (successCount > 0) {
+        enqueueSnackbar(`${successCount} 筆課程刪除成功`, { variant: 'success' });
+      }
+      if (failureCount > 0) {
+        enqueueSnackbar(`${failureCount} 筆課程刪除失敗，請稍後再試`, { variant: 'error' });
+      }
   
       // 更新課程列表，過濾掉已刪除的課程
-      const updatedCourses = courses.filter(course => !selectedCourses.includes(course._id)); // 使用 _id
+      const updatedCourses = courses.filter(course =>
+        !deleteResults.some(result => result.success && result.id === course._id)
+      );
       setCourses(updatedCourses);
       setFilteredCourses(updatedCourses);
-      setSelectedCourses([]);  // 清空選擇的課程
+      setSelectedCourses([]); // 清空選擇的課程
   
-      // 統一顯示刪除成功通知
-    enqueueSnackbar('選中的課程已成功刪除', { variant: 'success' });
-
     } catch (error) {
       console.error('刪除課程時出現錯誤:', error);
       enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
     }
   };
-
-  const handleSearch = async () => {
-    setIsLoading(true); 
-    try {
-      const response = await axios.get('http://localhost:5000/api/courses', {
-        params: filter,
-      });
-      setFilteredCourses(response.data); // 更新篩選後的課程列表
-      enqueueSnackbar('查詢成功！', { variant: 'success' });
-    } catch (error) {
-      console.error('查詢課程資料失敗:', error);
-      enqueueSnackbar('查詢失敗，請稍後再試！', { variant: 'error' });
-    } finally {
-      setIsLoading(false); 
-    }
+  
+  const handleSearch = () => {
+    setIsLoading(true); // 顯示載入畫面
+    setTimeout(() => {
+      setFilteredCourses(
+        courses.filter(course =>
+          (filter.term ? course.學期 === filter.term : true) &&
+          (filter.department ? course.系所名稱.includes(filter.department) : true) &&
+          (filter.keyword ?
+            course.科目中文名稱.includes(filter.keyword) ||
+            course.授課教師姓名.includes(filter.keyword) : true)
+        )
+      );
+      setIsLoading(false); // 隱藏載入畫面
+    }, 500); // 模擬延遲
   };
 
   return (
@@ -336,49 +343,74 @@ const CourseManagement = () => {
       </div>
 
       <div className="controls">
-  <div className="action-buttons">
-    <button onClick={handleDeleteSelected} className="action-button">刪除</button>
-    <button
-      onClick={() => {
-        setEditingCourse(null); // 清空編輯資料
-        setCourseDetails({
-          科目代碼: '',
-          科目中文名稱: '',
-          學分數: '',
-          系所名稱: '',
-          主開課教師姓名: '',
-          學期: '',
-          學制: '',
-          年級: '',
-          課別名稱: '',
-          課程中文摘要: '',
-          課程英文摘要: '',
-          上課地點: '',
-          授課教師姓名: '',
-          課表備註: '',
-        });
-        setShowModal(true);
-      }}
-      className="action-button"
-    >
-      新增課程
-    </button>
-    <button
-      onClick={() => document.getElementById("fileInput").click()}
-      className="action-button"
-    >
-      匯入
-    </button>
-    <input
-      type="file"
-      id="fileInput"
-      onChange={handleFileChange}
-      style={{ display: "none" }}
-      accept=".csv"
-      multiple
-    />
-    <button onClick={handleDownloadCSV} className="action-button">匯出</button>
-  </div>
+        <div className="action-buttons">
+          <button onClick={handleDeleteSelected} className="delete-button">刪除</button>
+          <button
+            onClick={() => {
+              setEditingCourse(null);  // 確保編輯課程為 null，清空先前編輯資料
+              setCourseDetails({
+                科目代碼: '',
+                科目中文名稱: '',
+                學分數: '',
+                系所名稱: '',
+                主開課教師姓名: '',
+                學期: '',
+                學制: '',
+                年級: '',
+                課別名稱: '',
+                課程中文摘要: '',
+                課程英文摘要: '',
+                上課地點: '',
+                授課教師姓名: '',
+                課表備註: '',
+              });
+              setShowModal(true);
+            }}
+            className="handleUpload" // 使用相同的樣式類名
+          >
+            新增課程
+          </button>
+
+          {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
+          <div className="action-buttons">
+        <button
+          onClick={() => document.getElementById("fileInput").click()}
+          className="custom-upload-button"
+        >
+          匯入
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+          accept=".csv"
+          multiple
+        />
+      </div>
+      {showUploadModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>確認匯入檔案</h3>
+            <p>您已選擇以下檔案：</p>
+            <ul>
+              {selectedFiles.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+            <div className="modal-actions">
+              <button onClick={handleUpload} className="confirm-button">
+                確定上傳
+              </button>
+              <button onClick={handleCancelUpload} className="cancel-button">
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+          <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
+        </div>
 
         <div className="search-group">
           <div className="search-item">
