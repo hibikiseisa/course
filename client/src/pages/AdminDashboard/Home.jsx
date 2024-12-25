@@ -8,7 +8,6 @@ import pdf from "../../assets/pdf.png"; // 确保图片路径正确
 import up from "../../assets/up.png"; // 确保图片路径正确
 import xlsx from "../../assets/xlsx.png";
 import CourseModal from '../CourseSearch/CourseModal/CourseModal';
-import CourseSchedule from '../CourseSearch/CourseSchedule/CourseSchedule';
 import '../CourseSearch/CourseSearch.css';
 
 const Home = () => {
@@ -520,12 +519,7 @@ const Home = () => {
                 <button type="submit" className="search-button">查詢</button>
             </form>
 
-            <CourseSchedule
-                isOpen={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
-                selectedPeriods={selectedPeriods}
-                setSelectedPeriods={setSelectedPeriods}
-            />
+
             {courses.length > 0 && (
                 <>
                     <div className="pagination-controls">

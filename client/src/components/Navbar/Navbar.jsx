@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png"; // 确保图片路径正确
+import logo from "../../assets/logo.png"; // 確保圖片路徑正確
 
-const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewAsStudent  }) => {
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false); // 控制语言菜单
+const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleViewAsStudent }) => {
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false); // 控制語言菜單
+  const [menuOpen, setMenuOpen] = useState(false); // 控制導航菜單在手機版的展開/收縮
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -19,11 +20,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewA
     };
   }, []);
 
-  useEffect(() => {
-    console.log("viewAsStudent 的值是:", viewAsStudent);
-  }, [viewAsStudent]);
-
-  // 登出逻辑
+  // 登出邏輯
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -31,31 +28,35 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewA
     navigate("/login");
   };
 
-  // 切换语言菜单
+  // 切換語言菜單
   const toggleLanguageMenu = () => {
     setLanguageMenuOpen((prev) => !prev);
   };
 
+  // 切換導航菜單
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
   return (
     <div className="navbar">
-      {/* Logo 和标题 */}
-      <div
-        className="navbar-logo"
-        onClick={() => navigate("/CourseSearch")}
-        style={{ cursor: "pointer" }}
-      >
+      {/* Logo 和標題 */}
+      <div className="navbar-logo" onClick={() => navigate("/CourseSearch")} style={{ cursor: "pointer" }}>
         <img src={logo} alt="Logo" className="logo-image" />
-        <button onClick={() => navigate("/CourseSearch")} className="navbar-link">
-          <span className="navbar-title">課程查詢系統</span>
-        </button>
+        <span className="navbar-title">課程查詢系統</span>
       </div>
 
-      {/* 动态右侧菜单 */}
-      <div className="navbar-links">
+      {/* 手機版菜單按鈕 */}
+      <button className="menu-toggle" onClick={toggleMenu}>
+        ☰
+      </button>
+
+      {/* 動態右側菜單 */}
+      <div className={`navbar-links ${menuOpen ? "show" : ""}`}>
         {isLoggedIn ? (
           <>
             {viewAsStudent ? (
-              // 学生菜单
+              // 學生菜單
               <>
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
@@ -74,7 +75,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewA
                 </button>
               </>
             ) : (
-              // 管理者菜单
+              // 管理者菜單
               <>
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
@@ -92,7 +93,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewA
             )}
           </>
         ) : (
-          // 未登录的菜单
+          // 未登入的菜單
           <>
             <button onClick={() => navigate("/login")} className="navbar-link">
               登入
@@ -103,13 +104,13 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent,toggleViewA
           </>
         )}
 
-        {/* 语言切换菜单 */}
+        {/* 語言切換菜單 */}
         <div className="navbar-language" ref={dropdownRef}>
           <button onClick={toggleLanguageMenu} className="language-button">
             語言
           </button>
 
-          {/* 下拉菜单 */}
+          {/* 下拉菜單 */}
           {languageMenuOpen && (
             <div className="language-dropdown">
               <li onClick={() => setLanguageMenuOpen(false)} className="dropdown-item">

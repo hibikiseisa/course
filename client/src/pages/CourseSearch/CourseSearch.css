@@ -486,3 +486,121 @@ gap:5px;
     font-size: 1.5rem;
     z-index: 9999;
 }
+
+@media (max-width: 768px) {
+    .course-search-container {
+        padding: 20px;
+    }
+
+    .course-search-title {
+        font-size: 1.5rem;
+    }
+
+    .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-group label {
+        width: auto;
+        margin-bottom: 5px;
+    }
+    .export-buttons {
+        display: grid; /* 使用 grid 佈局 */
+        grid-template-columns: repeat(3, 1fr); /* 每行三個按鈕，平分寬度 */
+        gap: 10px; /* 控制按鈕之間的間距 */
+        justify-content: center; /* 居中對齊 */
+        align-items: center; /* 垂直居中 */
+    }
+    .export-buttons button {
+        width: 40%; /* 按鈕寬度占滿 grid 欄位 */
+        padding: 8px; /* 調整按鈕內邊距 */
+        font-size: 0.9rem; /* 調整字體大小，適合手機螢幕 */
+        text-align: center; /* 按鈕文字居中 */
+    }
+/* 手機版響應式調整 */
+
+    /* 每頁筆數與換頁按鈕置中 */
+    .results-per-page,
+    .pagination-controls {
+        display: flex;
+        align-items: center; /* 水平置中 */
+        justify-content: center; /* 垂直置中 */
+        gap: 10px; /* 增加內部元素間距 */
+    }
+
+    .results-per-page select {
+        width: auto; /* 調整寬度以適應內容 */
+        padding: 8px; /* 增加內邊距，方便觸控 */
+        font-size: 0.9rem; /* 字體大小適中 */
+    }
+
+    .pagination-buttons {
+        display: flex;
+        justify-content: center; /* 水平置中 */
+        gap: 5px; /* 調整按鈕之間的距離 */
+    }
+
+    .pagination-buttons button {
+        padding: 5px 8px; /* 縮小按鈕 */
+        font-size: 0.8rem; /* 減小字體大小 */
+    }
+
+    /* 上移按鈕樣式調整 */
+    .scroll-to-top {
+        width: 10%; /* 減小寬度 */
+        height: 5%; /* 減小高度 */
+        bottom: 20px; /* 提高距底部的距離 */
+        right: 20px; /* 提高距右側的距離 */
+        border-radius: 50%; /* 保持圓形 */
+        background-color: transparent; /* 設為透明背景 */
+        box-shadow: none; /* 移除陰影 */
+    }
+
+    .scroll-to-top img {
+        width: 40px; /* 縮小圖片 */
+        height: 40px; /* 縮小圖片 */
+        filter: opacity(0.8); /* 減淡圖片透明度 */
+        border: none; /* 確保圖片沒有邊框 */
+    }
+
+
+    .more-form-group select,
+    .more-form-group input[type="text"] {
+        width: 100%;
+    }
+
+    .advanced-search-vertical {
+        margin-left: 5%;
+        width: 90%;
+    }
+
+    .course-table th,
+    .course-table td {
+        font-size: 0.8rem;
+        padding: 5px;
+    }
+
+    .toggle-button,
+    .search-button {
+        width: 70%;
+        padding: 10px;
+    }
+
+
+    .more-form-group {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .pagination-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+}

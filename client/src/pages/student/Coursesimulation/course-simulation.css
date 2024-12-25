@@ -55,7 +55,7 @@
   padding: 20px;
 }
 
-.title {
+.CourseSimulation .title {
   font-size: 40px;
   margin-bottom: 20px;
   color: #2ab162;
@@ -278,4 +278,115 @@
 
 .actions button:active {
   transform: scale(0.98);
+}
+
+
+@media (max-width: 768px) {
+  .course-simulation-container {
+    padding: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+
+
+  .editcourse-button,
+  .cancel-edit-button,
+  .clear-schedule-button {
+    font-size: 1rem;
+    padding: 10px;
+    width: 100%;
+  }
+
+  .account-management {
+    padding: 15px;
+    width: 100%;
+  }
+
+  .schedule-table {
+    font-size: 10px; /* 調整字體大小 */
+    width: 90%; /* 縮小表格寬度 */
+    table-layout: auto; /* 自動調整欄寬 */
+    margin: 0 auto;
+    border-collapse: collapse;
+    overflow-x: auto; /* 水平滾動 */
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    padding: 4px; /* 縮小內邊距 */
+    text-align: center;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis
+  }
+
+  .addcourse-button {
+    background-color: #75757557;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.7rem; /* 縮小字體 */
+    width: 20px; /* 減小按鈕寬度 */
+    height: 20px; /* 減小按鈕高度 */
+    line-height: 20px; /* 調整行高讓文字居中 */
+  }
+
+  .course-item {
+    font-size: 0.6rem; /* 縮小字體 */
+    padding: 5px; /* 調整內邊距 */
+    line-height: 1.2; /* 調整行高，讓字體更緊湊 */
+  }
+
+  .course-item .teacher-name {
+    font-size: 0.5rem; /* 教師姓名的字體更小 */
+  }
+  .remove-course {
+    font-size: 15px; /* 移除按鈕字體更小 */
+    top: -8px; /* 調整位置 */
+    right: -8px;
+  }
+  .popup {
+    padding-top: 30px;
+  }
+
+  .popup-content {
+    width: 90%;
+    height: auto;
+    max-height: 80%;
+    padding: 15px;
+  }
+
+  .popup table {
+    font-size: 0.8rem;
+  }
+
+  .confirm-button,
+  .close-button {
+    font-size: 1rem;
+    padding: 10px;
+    width: 100%;
+  }
+
+  .actions button {
+    font-size: 1rem;
+    padding: 8px 15px;
+    width: 100%;
+  }
+
+  .course-section {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .table-header {
+    font-size: 0.9rem;
+  }
 }

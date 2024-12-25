@@ -1,9 +1,9 @@
 /* 模態視窗背景 */
-.modal-overlay {
+.CourseModal .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 80%;
     height: 80%;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
@@ -14,7 +14,7 @@
 }
 
 /* 模態視窗內容 */
-.modal-content {
+.CourseModal .modal-content {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -260,3 +260,91 @@
     font-size: 1em;
 
 }
+
+
+@media screen and (max-width: 768px) {
+    /* 模態視窗背景 */
+    .modal-overlay {
+        height: 80%;
+        width: 60%;
+        padding-left: 5px; 
+        padding-right: 5px;
+        padding-top: 5px; 
+        align-items: center; 
+    }
+
+    /* 模態視窗內容 */
+    .modal-content {
+        width: 90%; /* 更窄的寬度，適合手機 */
+        padding: 15px; /* 減少內距 */
+        font-size: 0.9em; /* 調整字體大小 */
+    }
+
+    /* 模態視窗標題 */
+    .modal-content h2 {
+        font-size: 1.2rem; /* 減小標題字體 */
+    }
+
+    /* 按鈕樣式 */
+    .modal-content .teacher-info-button,
+    .more-info-button {
+        font-size: 0.9em; /* 縮小按鈕字體 */
+        padding: 8px 12px; /* 減少按鈕內距 */
+        margin-top: 5px; /* 減少按鈕之間的距離 */
+    }
+
+    /* 關閉按鈕樣式 */
+    .close-button, 
+    .add-to-favorites {
+        font-size: 0.9em; /* 調整按鈕字體 */
+        padding: 8px 12px; /* 減少內距 */
+    }
+
+    /* 教師資訊區塊 */
+    .teacher-details {
+        padding: 10px; /* 減少內距 */
+        margin-top: 10px; /* 減少與上方距離 */
+        font-size: 0.9em; /* 調整字體大小 */
+    }
+
+    /* 教師名稱按鈕 */
+    .teacher-name-button {
+        font-size: 0.9rem; /* 縮小字體 */
+        padding: 5px; /* 減少內距 */
+    }
+
+    /* 地圖模態視窗 */
+    .map-modal {
+        align-items: center; /* 垂直居中 */
+        justify-content: center; /* 水平居中 */
+    }
+
+    .map-content {
+        max-width: 95%; /* 減少寬度 */
+        max-height: 85%; /* 減少高度 */
+        padding: 10px; /* 減少內距 */
+    }
+
+    /* 地圖關閉按鈕 */
+    .close-map-button {
+        font-size: 30px; /* 縮小按鈕大小 */
+    }
+
+    /* 課程資訊文字 */
+    .modal-content p,
+    .modal-content strong {
+        font-size: 0.9em; /* 縮小文字字體 */
+        line-height: 1.4; /* 減少行高 */
+    }
+
+    /* 彈窗按鈕群組 */
+    .modal-buttons {
+        flex-direction: column; /* 垂直排列 */
+        gap: 10px; /* 增加間距 */
+    }
+
+    .modal-buttons button {
+        width: 100%; /* 滿寬按鈕 */
+    }
+}
+

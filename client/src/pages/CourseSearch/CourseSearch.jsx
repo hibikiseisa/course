@@ -8,7 +8,7 @@ import pdf from "../../assets/pdf.png"; // 确保图片路径正确
 import up from "../../assets/up.png"; // 确保图片路径正确
 import xlsx from "../../assets/xlsx.png"; // 确保图片路径正确
 import CourseModal from './CourseModal/CourseModal';
-import CourseSchedule from './CourseSchedule/CourseSchedule';
+// import CourseSchedule from './CourseSchedule/CourseSchedule';
 import './CourseSearch.css';
 
 
@@ -508,12 +508,7 @@ const CourseSearch = () => {
                     <p>查詢中，請稍候...</p>
                 </div>
             )}
-            <CourseSchedule
-                isOpen={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
-                selectedPeriods={selectedPeriods}
-                setSelectedPeriods={setSelectedPeriods}
-            />
+    
             {courses.length > 0 && (
                 <>
                     <div className="pagination-controls">

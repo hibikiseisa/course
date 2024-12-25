@@ -1,69 +1,61 @@
+/* 主導航樣式 */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: #5EBF88;
-    padding: 0.5rem 1vw; /* 減少上下的 padding 來縮小導航欄高度 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 1vw;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 999;
-    height: 9vh; /* 調整高度 */
+    height: 9vh;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
-    flex-wrap: wrap;
-}
-
-
-.navbar-logo {
+  }
+  
+  /* Logo 和標題 */
+  .navbar-logo {
     display: flex;
-    align-items: flex-start; /* 將 logo 與標題上移 */
-    margin-top: 0px; /* 根據需要調整這個值 */
-}
-
-
-.logo-image {
+    align-items: center;
+  }
+  
+  .logo-image {
     width: 3vw;
     height: auto;
     margin-right: 1vw;
-    
-}
-
-.navbar-title {
+  }
+  
+  .navbar-title {
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
-    margin-top: 0px; /* 向上移動文字 */
-}
-
-
-.navbar-links {
+    white-space: nowrap;
+  }
+  
+  /* 導航連結 */
+  .navbar-links {
     display: flex;
     align-items: center;
-    gap: 1.2vw;
-    flex-wrap: wrap;
-}
-
-/* 通用按鈕樣式，包括移除點擊後的黑框 */
-.navbar-link, .language-button {
+    gap: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .navbar-link,
+  .language-button {
     background: none;
     color: white;
     border: none;
     cursor: pointer;
     font-size: clamp(1rem, 1vw + 0.5rem, 1.2rem);
     position: relative;
-    outline: none; /* 移除黑框 */
-    box-shadow: none; /* 移除黑框 */
-}
-
-.navbar-link:focus, .language-button:focus {
-    outline: none; /* 移除點擊後的默認框線 */
-    box-shadow: none; /* 移除可能的框影 */
-}
-
-/* 動態下劃線效果 */
-.navbar-link::after, .language-button::after {
+    outline: none;
+  }
+  
+  /* 動態下劃線效果 */
+  .navbar-link::after,
+  .language-button::after {
     content: '';
     position: absolute;
     left: 0;
@@ -72,18 +64,48 @@
     height: 2px;
     background-color: white;
     transition: width 0.3s ease, left 0.3s ease;
-}
-
-.navbar-link:hover::after, .language-button:hover::after {
+  }
+  
+  .navbar-link:hover::after,
+  .language-button:hover::after {
     width: 100%;
     left: 0;
-}
-
-/* 語言選單樣式 */
-.language-dropdown {
+  }
+  
+  /* 手機版菜單按鈕 */
+  .menu-toggle {
+    display: none;
+    background: none;
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  /* 手機版菜單展開 */
+  .navbar-links.show {
+    display: flex;
+    flex-direction: column;
+    background-color: #5EBF88;
+    position: absolute;
+    top: 9vh;
+    right: 0;
+    width: 100%;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    z-index: 1000;
+  }
+  
+  /* 語言切換菜單 */
+  .navbar-language {
+    position: relative;
+  }
+  
+  .language-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    right: 10px;
+    right: 0;
     left: auto;
     background-color: white;
     border: 1px solid #ccc;
@@ -92,10 +114,9 @@
     padding: 4px 8px;
     width: 120px;
     z-index: 10;
-}
-
-/* 下拉選單的選項樣式 */
-.dropdown-item {
+  }
+  
+  .dropdown-item {
     padding: 8px 10px;
     cursor: pointer;
     font-size: 1rem;
@@ -103,14 +124,43 @@
     display: flex;
     align-items: center;
     gap: 5px;
-}
-
-.dropdown-item::before {
+  }
+  
+  .dropdown-item::before {
     content: '•';
     font-size: 0.8rem;
     color: black;
-}
-
-.dropdown-item:hover {
+  }
+  
+  .dropdown-item:hover {
     background-color: #f0f0f0;
-}
+  }
+  
+  /* 響應式設計 */
+  @media (max-width: 768px) {
+    .navbar-title {
+      font-size: 1.2rem;
+    }
+  
+    .menu-toggle {
+      display: block;
+    }
+  
+    .navbar-links {
+      display: none;
+    }
+  
+    .navbar-links.show {
+      display: flex;
+    }
+  
+    .logo-image {
+      width: 8vw;
+      margin-right: 1rem;
+    }
+  
+    .navbar-title {
+      font-size: 1.2rem;
+    }
+  }
+  
