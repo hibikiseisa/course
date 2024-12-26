@@ -87,6 +87,7 @@ const AccountManagement = () => {
   const handleDeleteAccount = async () => {
     if (accountToDelete) {
       try {
+        console.log('傳遞的 ID:', id);
         await axios.delete(`http://localhost:5000/api/accounts/${accountToDelete}`);
         fetchAccounts();
         alert('帳號刪除成功');

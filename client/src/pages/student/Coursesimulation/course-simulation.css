@@ -149,7 +149,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start; /* 垂直排列方式，讓內容往下移 */
-  padding-top: 10px; /* 頂部空間，避免蓋住導覽列 */
+  padding-top: 5%; /* 頂部空間，避免蓋住導覽列 */
   padding-bottom: 0px; /* 頂部空間，避免蓋住導覽列 */
 
 }

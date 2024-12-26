@@ -52,7 +52,7 @@
   padding: 10px 20px;
   font-size: 16px;
   color: #fff;
-  background-color: #007bff;
+  background-color: #585858;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -134,4 +134,15 @@
     height: auto; /* 自動調整高度 */
     border-radius: 8px; /* 增加圓角 */
   }
+}
+.expand-button {
+  display: block;
+  margin: 10px 0;
+  padding: 10px 15px;
+  background-color: #585858;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
 }
