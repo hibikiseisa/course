@@ -23,19 +23,26 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     useEffect(() => {
         const fetchAndSyncFavorites = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
-                console.log('已加載收藏資料:', response.data);
+                if (!userId || !course?._id) return; // 確保 userId 和 course._id 存在
     
-                const isFavoriteNow = response.data.some(fav => fav.courseId === course._id);
-                setLocalIsFavorite(isFavoriteNow);
+                // 向後端請求用戶收藏的課程資料
+                const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
+                console.log('後端返回的收藏資料:', response.data);
+    
+                // 判斷當前課程是否已收藏
+                const isFavoriteNow = response.data.some(fav => fav._id === course._id || fav.courseId === course._id);
+                console.log('當前課程收藏狀態:', isFavoriteNow);
+    
+                setLocalIsFavorite(isFavoriteNow); // 更新收藏狀態
             } catch (error) {
                 console.error('獲取收藏資料失敗:', error);
             }
         };
     
         fetchAndSyncFavorites();
-    }, [isFavorite, course._id, userId]); // 當 isFavorite 或其他依賴改變時重新檢查收藏狀態
+    }, [userId, course._id]); // 當 userId 或 course._id 改變時重新檢查
     
+
     const fetchFavorites = async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
@@ -58,14 +65,14 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
             setSelectedTeacher(null);
             return;
         }
-    
+
         // 如果詳細資料未顯示，則獲取資料並顯示
         try {
             console.log(`開始獲取教師資訊，教師姓名：${teacherName}`); // 確認點擊事件觸發
-    
+
             const response = await axios.get(`http://localhost:5000/api/teacher/${encodeURIComponent(teacherName)}`);
             console.log('從後端獲取的教師資訊:', response.data); // 檢查從後端收到的資料
-    
+
             const teacherData = response.data && response.data.success && response.data.data
                 ? [{
                     name: response.data.data.name,
@@ -81,9 +88,9 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                     email: `${teacherName}@ntunhs.edu.tw`,
                     specialties: ['未提供']
                 }];
-    
+
             console.log('處理後的教師資訊:', teacherData); // 確認處理後的教師資訊
-    
+
             setSelectedTeacher(teacherData); // 更新教師資訊
             setShowTeacherDetails(true); // 顯示教師詳細資料
         } catch (error) {
@@ -91,8 +98,8 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
             enqueueSnackbar('獲取教師資訊失敗，請重試。', { variant: 'error' });
         }
     };
-    
-    
+
+
 
     const handleMapToggle = () => {
         setShowMap((prev) => !prev);
@@ -147,32 +154,32 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                 enqueueSnackbar('課程ID或用戶ID缺失，請檢查！', { variant: 'error' });
                 return;
             }
-    
+
             // 從後端檢查該課程是否已被收藏
             const favoritesResponse = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
             const isAlreadyFavorite = favoritesResponse.data.some(fav => fav.courseId === course._id);
-    
+
             if (isAlreadyFavorite) {
                 enqueueSnackbar('此課程已經收藏過了！', { variant: 'info' });
                 return;
             }
-    
+
             // 發送收藏請求
             const response = await axios.post('http://localhost:5000/api/favorites', {
                 userId,
                 courseId: course._id
             });
-    
+
             // 收藏成功處理
             if (response.status === 200) {
                 setLocalIsFavorite(true);
                 const updatedFavorites = [...JSON.parse(localStorage.getItem('favoriteCourses') || '[]'), course._id];
                 localStorage.setItem('favoriteCourses', JSON.stringify(updatedFavorites));
-    
-                enqueueSnackbar('已成功收藏此課程！', { 
-                    variant: 'success', 
-                    autoHideDuration: 2000, 
-                    anchorOrigin: { vertical: 'bottom', horizontal: 'right' } 
+
+                enqueueSnackbar('已成功收藏此課程！', {
+                    variant: 'success',
+                    autoHideDuration: 2000,
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'right' }
                 });
             } else {
                 console.error('伺服器返回錯誤：', response);
@@ -190,7 +197,7 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
             console.error('收藏失敗:', error.response || error);
         }
     };
-    
+
 
     const handleRemoveFavoriteClick = async () => {
         try {
@@ -254,7 +261,7 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                                 </details>
                             </div>
                         ))}
-                    
+
                     </div>
                 )}
 
@@ -304,20 +311,22 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                     </div>
                 )}
 
-                <div className="modal-buttons">
-                    {localIsFavorite ? (
-                        <button onClick={handleRemoveFavoriteClick} className="add-to-favorites">
-                            取消收藏
-                        </button>
-                    ) : (
-                        <button onClick={handleAddFavoriteClick} className="add-to-favorites">
-                            收藏
-                        </button>
-                    )}
-                    <button onClick={onClose} className="close-button">
-                        關閉
-                    </button>
-                </div>
+<div className="modal-buttons">
+    {localIsFavorite ? (
+        <button onClick={handleRemoveFavoriteClick} className="add-to-favorites">
+            取消收藏
+        </button>
+    ) : (
+        <button onClick={handleAddFavoriteClick} className="add-to-favorites">
+            收藏
+        </button>
+    )}
+    <button onClick={onClose} className="close-button">
+        關閉
+    </button>
+</div>
+
+
             </div>
         </div>
     );
