@@ -5,7 +5,7 @@ import './CourseManagement.css';
 import up from "/src/assets/up.png";
 
 const CourseManagement = () => {
-  const [isLoading, setIsLoading] = useState(false); // 新增 loading 狀態
+  // const [isLoading, setIsLoading] = useState(false); // 新增 loading 狀態
   const { enqueueSnackbar } = useSnackbar();
   const [showButton, setShowButton] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -46,7 +46,7 @@ const CourseManagement = () => {
   useEffect(() => {
     
     const fetchCourses = async () => {
-      setIsLoading(true); // 顯示載入畫面
+      // setIsLoading(true); // 顯示載入畫面
       try {
         const response = await axios.get('http://localhost:5000/api/courses', {
           params: filter,
@@ -56,7 +56,7 @@ const CourseManagement = () => {
       } catch (error) {
         console.error('無法取得課程資料:', error);
       } finally {
-        setIsLoading(false); // 隱藏載入畫面
+        // setIsLoading(false); // 隱藏載入畫面
       }
     };
 
@@ -89,28 +89,35 @@ const CourseManagement = () => {
       setUploadMessage("請選擇檔案後再上傳！");
       return;
     }
-
+  
     const formData = new FormData();
     selectedFiles.forEach((file) => {
       formData.append("files", file);
     });
-
+  
     try {
+      // 發送檔案到後端
       const response = await axios.post("http://localhost:5000/api/upload-csv", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
+  
+      // 成功上傳後更新前端顯示
       setUploadMessage(response.data.message || "檔案上傳成功！");
       setShowUploadModal(false); // 關閉彈窗
       setSelectedFiles([]); // 清空檔案
-      enqueueSnackbar(response.data.message || '檔案匯入成功', { variant: 'success' });
+      enqueueSnackbar(response.data.message || "檔案匯入成功", { variant: "success" });
+  
+      // 重新獲取課程資料並更新狀態
+      const responseCourses = await axios.get("http://localhost:5000/api/courses");
+      setCourses(responseCourses.data);
+      setFilteredCourses(responseCourses.data); // 更新右下角總數
     } catch (error) {
       console.error("檔案上傳失敗：", error.response || error);
       setUploadMessage("檔案上傳失敗，請檢查檔案格式或內容！");
-      enqueueSnackbar(error.response?.data?.message || '處理檔案失敗，請檢查資料格式', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || "處理檔案失敗，請檢查資料格式", { variant: "error" });
     }
   };
-  const handleCancelUpload = () => {
+    const handleCancelUpload = () => {
     setSelectedFiles([]);
     setShowUploadModal(false); // 關閉彈窗
   };
@@ -206,7 +213,7 @@ const CourseManagement = () => {
         // 如果是新增模式，呼叫 POST API
         const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
         console.log('課程儲存成功', response.data);
-
+        setFilteredCourses([...filteredCourses, response.data]); // 新增資料後即時更新顯示
         // 更新前端課程列表
         setCourses([...courses, response.data]);
         // setFilteredCourses([...filteredCourses, response.data]);
@@ -319,7 +326,7 @@ const CourseManagement = () => {
   };
   
   const handleSearch = () => {
-    setIsLoading(true); // 顯示載入畫面
+    // setIsLoading(true); // 顯示載入畫面
     setTimeout(() => {
       setFilteredCourses(
         courses.filter(course =>
@@ -330,13 +337,12 @@ const CourseManagement = () => {
             course.授課教師姓名.includes(filter.keyword) : true)
         )
       );
-      setIsLoading(false); // 隱藏載入畫面
-    }, 500); // 模擬延遲
+      // setIsLoading(false); // 隱藏載入畫面
+    }); // 模擬延遲
   };
 
   return (
     <div className="admin-course-management">
-     {isLoading && <div className="loading-overlay">載入中...</div>} {/* 載入畫面 */}
       <h2>課程管理</h2>
       <div className="selected-count">
         已選擇 {selectedCourses.length} 筆課程
