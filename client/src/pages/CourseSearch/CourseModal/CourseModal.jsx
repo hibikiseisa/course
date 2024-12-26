@@ -23,33 +23,26 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
     useEffect(() => {
         const fetchAndSyncFavorites = async () => {
             try {
-                if (!userId || !course?._id) return; // 確保 userId 和 course._id 存在
-    
-                // 向後端請求用戶收藏的課程資料
+                if (!userId || !course?._id) return; 
                 const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
                 console.log('後端返回的收藏資料:', response.data);
     
-                // 判斷當前課程是否已收藏
                 const isFavoriteNow = response.data.some(fav => fav._id === course._id || fav.courseId === course._id);
                 console.log('當前課程收藏狀態:', isFavoriteNow);
     
-                setLocalIsFavorite(isFavoriteNow); // 更新收藏狀態
+                setLocalIsFavorite(isFavoriteNow); 
             } catch (error) {
                 console.error('獲取收藏資料失敗:', error);
             }
         };
     
         fetchAndSyncFavorites();
-    }, [userId, course._id]); // 當 userId 或 course._id 改變時重新檢查
-    
-
+    }, [userId, course._id]); 
     const fetchFavorites = async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
-            // 假設 API 返回收藏的課程資料
             console.log('已加載收藏資料:', response.data);
 
-            // 更新localIsFavorite狀態
             const isFavorite = response.data.some(fav => fav.courseId === course._id);
             setLocalIsFavorite(isFavorite);
         } catch (error) {
