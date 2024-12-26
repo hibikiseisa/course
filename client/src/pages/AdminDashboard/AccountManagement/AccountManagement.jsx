@@ -1,8 +1,10 @@
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import './AccountManagement.css'; // 引入 CSS 文件
 
 const AccountManagement = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [accounts, setAccounts] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,9 +37,9 @@ const AccountManagement = () => {
   };
 
   const handleInputChange = (e) => {
-    const { username, value } = e.target;
-    setAccountDetails({ ...accountDetails, [username]: value });
-  };
+    const { name, value } = e.target;
+    setAccountDetails({ ...accountDetails, [name]: value });
+    };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -46,59 +48,53 @@ const AccountManagement = () => {
   // 保存帳號（新增或編輯）
   const handleSaveAccount = async () => {
     const { id, username, role, password } = accountDetails;
-
-    console.log('Saving account details:', accountDetails);
-
-    // 驗證表單資料
+  
     if (!id.trim() || !username.trim() || !role.trim()) {
-      alert('所有欄位必須填寫完整！');
+      enqueueSnackbar('所有欄位必須填寫完整！', { variant: 'warning' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
       return;
     }
-
-    // 檢查重複 ID（僅在新增時檢查）
+  
     if (!editingAccount && accounts.some((account) => account.id === id)) {
-      alert('此帳號 ID 已存在，請使用其他 ID！');
+      enqueueSnackbar('此帳號 ID 已存在，請使用其他 ID！', { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
       return;
     }
-
+  
     setIsSaving(true);
     try {
       if (editingAccount) {
-        // 編輯帳號
         await axios.put(`http://localhost:5000/api/accounts/${editingAccount.id}`, accountDetails);
+        enqueueSnackbar('帳號更新成功！', { variant: 'success' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
       } else {
-        // 新增帳號
-        const { id, username, role, password } = accountDetails;
         await axios.post('http://localhost:5000/api/accounts', { id, username, role, password });
-              }
-      alert(editingAccount ? '帳號更新成功！' : '帳號新增成功！');
+        enqueueSnackbar('帳號新增成功！', { variant: 'success' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+      }
       fetchAccounts();
       setShowModal(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving account:', error);
-      alert('保存失敗，請稍後再試！');
+      const errorMessage = error.response?.data?.message || '保存失敗，請稍後再試！';
+      enqueueSnackbar(`保存失敗: ${errorMessage}`, { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
     } finally {
       setIsSaving(false);
     }
   };
-
+  
   // 刪除帳號
   const handleDeleteAccount = async () => {
-    if (accountToDelete) {
-      try {
-        await axios.delete(`http://localhost:5000/api/accounts/${accountToDelete}`);
-        fetchAccounts();
-        alert('帳號刪除成功');
-        setShowDeleteConfirm(false);
-        setAccountToDelete(null);
-      } catch (error) {
-        console.error('Error deleting account:', error);
-        alert('刪除失敗，請稍後再試');
-      }
+    if (!accountToDelete) return;
+  
+    try {
+      await axios.delete(`http://localhost:5000/api/accounts/${accountToDelete}`);
+      fetchAccounts();
+      enqueueSnackbar('帳號刪除成功！', { variant: 'success' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+      setShowDeleteConfirm(false);
+      setAccountToDelete(null);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || '刪除失敗，請稍後再試！';
+      enqueueSnackbar(`刪除失敗: ${errorMessage}`, { variant: 'error' , autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
     }
   };
-
+  
   // 確認刪除
   const handleConfirmDelete = (id) => {
     setAccountToDelete(id);
@@ -150,8 +146,8 @@ const AccountManagement = () => {
             <option value="username">姓名</option>
           </select>
         </div>
-        <button className="add-button" onClick={() => setShowModal(true)}>
-          新增帳號
+        <button className="add-button" onClick={handleAddAccount}>
+                    新增帳號
         </button>
       </div>
       <table className="account-table">
@@ -179,13 +175,13 @@ const AccountManagement = () => {
                 </button>
               </td>
               <td>
-                <button
-                  className="delete-button"
-                  onClick={() => handleDeleteAccount(account.id)}
-                >
-                  刪除
-                </button>
-              </td>
+  <button
+    className="delete-button"
+    onClick={() => handleConfirmDelete(account.id)} // 修正為顯示確認框的邏輯
+  >
+    刪除
+  </button>
+</td>
             </tr>
           ))}
         </tbody>
@@ -231,21 +227,52 @@ const AccountManagement = () => {
                   <option value="admin">管理者</option>
                 </select>
               </label>
+              <label>
+    密碼:
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={accountDetails.password}
+      onChange={handleInputChange}
+      placeholder="輸入密碼"
+      required
+    />
+    <button type="button" onClick={() => setShowPassword(!showPassword)}>
+      {showPassword ? '隱藏' : '顯示'}
+    </button>
+  </label>
             </div>
             <div className="modal-actions">
-              <button onClick={handleSaveAccount} className="save-button">
-                保存
+            <button onClick={handleSaveAccount} className="save-button" disabled={isSaving}>
+                              保存
               </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="cancel-button"
-              >
+              
+              <button onClick={() => setShowModal(false)} className="cancel-button">
                 取消
               </button>
             </div>
           </div>
         </div>
       )}
+
+{showDeleteConfirm && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h3>確認刪除帳號?</h3>
+      <div className="modal-actions">
+        <button onClick={handleDeleteAccount} className="confirm-button">
+          確認
+        </button>
+        <button
+          onClick={() => setShowDeleteConfirm(false)} // 關閉確認框
+          className="cancel-button"
+        >
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
