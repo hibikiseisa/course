@@ -1,27 +1,27 @@
 import axios from 'axios';
 import 'jspdf-autotable';
-import { useSnackbar } from 'notistack'; // 使用通知系統
+import { useSnackbar } from 'notistack'; 
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import ods from "../../assets/ods.png"; // 确保图片路径正确
-import pdf from "../../assets/pdf.png"; // 确保图片路径正确
-import up from "../../assets/up.png"; // 确保图片路径正确
-import xlsx from "../../assets/xlsx.png"; // 确保图片路径正确
+import ods from "../../assets/ods.png"; 
+import pdf from "../../assets/pdf.png"; 
+import up from "../../assets/up.png"; 
+import xlsx from "../../assets/xlsx.png";
 import CourseModal from './CourseModal/CourseModal';
-// import CourseSchedule from './CourseSchedule/CourseSchedule';
+
 import './CourseSearch.css';
 
 
 const CourseSearch = () => {
     const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(false); // 新增 loading 狀態
+    const [loading, setLoading] = useState(false); 
     const [showButton, setShowButton] = useState(false);
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
-    const { enqueueSnackbar } = useSnackbar(); // 引入通知
+    const { enqueueSnackbar } = useSnackbar(); 
     const [educationLevels, setEducationLevels] = useState([]);
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
@@ -71,7 +71,7 @@ const CourseSearch = () => {
     };
 
     const getBackgroundColor = (courseName) => {
-        // 根據課別名稱設置不同顏色
+        
         switch (courseName) {
             case '通識必修(通識)':
                 return 'lightblue';
@@ -82,7 +82,7 @@ const CourseSearch = () => {
             case '專業選修(系所)':
                 return 'lightpink';
             default:
-                return 'lightgray'; // 默認顏色
+                return 'lightgray';
         }
     };
 
@@ -135,7 +135,7 @@ const CourseSearch = () => {
             period: selectedPeriods
         };
 
-        setLoading(true); // 設置 loading 為 true
+        setLoading(true);
         try {
             const response = await axios.get('http://localhost:5000/api/courses', { params });
             console.log('API Response:', response.data);
@@ -150,25 +150,24 @@ const CourseSearch = () => {
                     })
                     : response.data;
 
-                setCourses(filteredCourses); // 更新課程資料
+                setCourses(filteredCourses); 
 
                 if (filteredCourses.length === 0) {
-                    enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示通知
+                    enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); 
                 }
             } else {
                 setCourses([]);
-                enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示通知
+                enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
             setCourses([]);
-            enqueueSnackbar('查詢失敗，請檢查伺服器狀態！', { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); // 顯示錯誤通知
+            enqueueSnackbar('查詢失敗，請檢查伺服器狀態！', { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); 
         } finally {
-            setLoading(false); // 完成後設置 loading 為 false
+            setLoading(false); 
         }
     };
 
-    // 匯出功能處理函式
     const handleExport = (format) => {
         if (courses.length === 0) {
             alert('請先進行查詢後再匯出！');
@@ -189,10 +188,9 @@ const CourseSearch = () => {
                 上課班組: course.上課班組,
                 科目中文名稱: course.科目中文名稱,
                 科目英文名稱: course.科目英文名稱,
-                // 如果授課教師姓名是陣列，將其用逗號分隔；否則直接使用
                 授課教師姓名: Array.isArray(course.授課教師姓名)
-                    ? course.授課教師姓名.join(', ') // 若是陣列，將其連接成字符串
-                    : course.授課教師姓名, // 若不是陣列，直接使用原始字符串
+                    ? course.授課教師姓名.join(', ')
+                    : course.授課教師姓名, 
                 學分數: course.學分數,
                 上課週次: course.上課週次,
                 課別代碼: course.課別代碼,
@@ -205,29 +203,27 @@ const CourseSearch = () => {
                 課程英文摘要: course.課程英文摘要
             }));
 
-            // 定義 CSV 標題
             const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';
-            // 生成 CSV 行數據
+
             const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');
-            // 合併標題和資料並加入 BOM
+           
             const csvFileContent = `\ufeff${header}${rows}`;
 
-            // 創建 Blob 並提供下載
+           
             const blob = new Blob([csvFileContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = 'courses.csv';
             link.click();
-            URL.revokeObjectURL(url); // 釋放 URL
-
+            URL.revokeObjectURL(url); 
         } else if (format === 'pdf') {
-            const pdfURL = '/course.pdf'; // 使用相對於伺服器根目錄的路徑
-            window.open(pdfURL, '_blank'); // 在新標籤頁中打開 PDF
+            const pdfURL = '/course.pdf'; 
+            window.open(pdfURL, '_blank'); 
         }
         else if (format === 'ods') {
-            const odsURL = '/course.ods'; // 使用相對於伺服器根目錄的路徑
-            window.open(odsURL, '_blank'); // 在新標籤頁中打開 ODS 文件
+            const odsURL = '/course.ods'; 
+            window.open(odsURL, '_blank');
         }
     };
     const handlePeriodClick = (day, period) => {
@@ -241,9 +237,8 @@ const CourseSearch = () => {
 
     const handlePeriodSubmit = () => {
         const databaseFormat = convertSelectedPeriodsToDatabaseFormat(selectedPeriods);
-        console.log('Database Format:', JSON.stringify(databaseFormat)); // 確認格式是否正確
+        console.log('Database Format:', JSON.stringify(databaseFormat));
         onClose();
-        // 確保上層組件使用 JSON.stringify 傳遞節次數據
         props.onPeriodSelect(JSON.stringify(databaseFormat));
     };
 
@@ -312,10 +307,9 @@ const CourseSearch = () => {
     };
     const handleWeekdayChange = (weekday, isChecked) => {
         if (isChecked) {
-            // 勾選該星期，記錄為單獨的星期
+
             setSelectedPeriods((prev) => [...prev, `${weekday}`]);
         } else {
-            // 取消勾選，移除該星期及其相關的節次
             setSelectedPeriods((prev) =>
                 prev.filter((period) => !period.startsWith(`${weekday}-`) && period !== `${weekday}`)
             );
@@ -324,16 +318,16 @@ const CourseSearch = () => {
 
 
     const handlePeriodChange = (period, isChecked) => {
-        const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p)); // 已選的星期
+        const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p)); 
 
         if (isChecked) {
-            // 若勾選該節次，將節次加到已選的星期中
+
             setSelectedPeriods((prev) => [
                 ...prev,
                 ...selectedWeekdays.map((weekday) => `${weekday}-${period}`),
             ]);
         } else {
-            // 若取消勾選，移除相關節次
+  
             setSelectedPeriods((prev) =>
                 prev.filter((p) => !p.endsWith(`-${period}`))
             );
@@ -350,9 +344,7 @@ const CourseSearch = () => {
                     <label>學年期</label>
                     <select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)}>
                         <option value="1132">1132</option>
-                        {/* <option value="1131">1131</option>
-                        <option value="1122">1122</option>
-                        <option value="1121">1121</option> */}
+                        <option value="1131">1131</option>
                     </select>
                 </div>
 
@@ -447,7 +439,6 @@ const CourseSearch = () => {
                                 ))}
                             </div>
                         </div>
-                        {/* 只有在選擇了星期後才顯示節次選單 */}
                         {selectedPeriods.some((period) => /^[1-7]$/.test(period)) && (
                             <div className="more-form-group">
                                 <label><h3>節次</h3></label>
@@ -517,8 +508,8 @@ const CourseSearch = () => {
                             <select
                                 value={resultsPerPage}
                                 onChange={(e) => {
-                                    setResultsPerPage(Number(e.target.value));  // 設置新的每頁筆數
-                                    setCurrentPage(1);  // 每次更改每頁筆數時，回到第1頁
+                                    setResultsPerPage(Number(e.target.value)); 
+                                    setCurrentPage(1);  
                                 }}
                             >
                                 <option value={5}>5</option>

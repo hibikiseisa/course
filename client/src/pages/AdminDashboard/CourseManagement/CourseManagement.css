@@ -336,21 +336,41 @@ select {
 }
 
 .up-image {
-  background-color: transparent; /* 移除背景色 */
-  border: none; /* 去掉圖片周圍的邊框 */
+  background-color: transparent;
+  border: none; 
   display: block;
-  width: 40px; /* 自行調整圖片寬度 */
-  height: 40px; /* 自行調整圖片高度 */
-  object-fit: contain; /* 保持圖片比例 */
+  width: 40px; 
+  height: 40px; 
+  object-fit: contain; 
 }
 
 .scroll-to-top {
-  background-color: transparent; /* 移除按鈕背景 */
-  border: none; /* 去掉按鈕邊框 */
-  cursor: pointer; /* 鼠標樣式為手形 */
+  background-color: transparent; 
+  border: none; 
+  cursor: pointer; 
   position: fixed;
-  bottom: 20px; /* 距離視窗底部 */
-  right: 20px; /* 距離視窗右側 */
-  z-index: 1000; /* 確保位於最上層 */
+  bottom: 20px; 
+  right: 20px; 
+  z-index: 1000; 
 }
 
+.period-checkbox-group {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 10px; 
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  width: calc(20% - 10px); 
+  margin-bottom: 10px;
+}
+
+.checkbox-item input {
+  margin-right: 5px; 
+}
+
+.checkbox-item span {
+  white-space: nowrap; 
+}

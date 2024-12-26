@@ -29,6 +29,8 @@ const CourseManagement = () => {
     上課地點: '',
     授課教師姓名: '',
     課表備註: '',
+    上課星期: '',
+    上課節次: [],
   });
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -37,14 +39,43 @@ const CourseManagement = () => {
   const [expandedTeachers, setExpandedTeachers] = useState([]);
   const [errors, setErrors] = useState({});
 
-  const terms = ['1132'];
+  const terms = ['1132', '1131'];
   const departments = ['資訊管理系', '護理系', '幼保系', '長期照護系', '健康事業管理系', '護助產及婦女健康系', '嬰幼兒保育系', '護理教育曁數位學習系', '高齡健康照護系', '生死與健康心理諮商系', '休閒產業與健康促進系旅遊健康', '運動保健系', '語言治療與聽力學系'];
   const programs = ['學士後系', '四年制', '二技', '二技(三年)', '學士後多元專長', '學士後學位學程', '碩士班', '博士班'];
-  const grades = ['一年級', '二年級', '三年級', '四年級'];
+  const grades = ['1', '2', '3', '4'];
   const coursesList = ['通識必修(通識)', '通識選修(通識)', '專業必修(系所)', '專業選修(系所)'];
+  const periods = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+  const weekdaysMapping = {
+    "1": "星期一",
+    "2": "星期二",
+    "3": "星期三",
+    "4": "星期四",
+    "5": "星期五",
+    "6": "星期六",
+    "7": "星期日",
+  };
+  const handlePeriodChange = (selectedPeriod) => {
+    let updatedPeriods = courseDetails.上課節次
+      ? courseDetails.上課節次.split(',').map((p) => p.trim())
+      : [];
+
+    if (updatedPeriods.includes(selectedPeriod)) {
+      // 如果已選中，移除該節次
+      updatedPeriods = updatedPeriods.filter((period) => period !== selectedPeriod);
+    } else {
+      // 如果未選中，新增該節次
+      updatedPeriods.push(selectedPeriod);
+    }
+
+    setCourseDetails({
+      ...courseDetails,
+      上課節次: updatedPeriods.join(',').replace(/(^,)|(,$)/g, ''), // 確保字串不包含多餘的逗號
+    });
+  };
+
 
   useEffect(() => {
-    
+
     const fetchCourses = async () => {
       // setIsLoading(true); // 顯示載入畫面
       try {
@@ -89,24 +120,24 @@ const CourseManagement = () => {
       setUploadMessage("請選擇檔案後再上傳！");
       return;
     }
-  
+
     const formData = new FormData();
     selectedFiles.forEach((file) => {
       formData.append("files", file);
     });
-  
+
     try {
       // 發送檔案到後端
       const response = await axios.post("http://localhost:5000/api/upload-csv", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       // 成功上傳後更新前端顯示
       setUploadMessage(response.data.message || "檔案上傳成功！");
       setShowUploadModal(false); // 關閉彈窗
       setSelectedFiles([]); // 清空檔案
       enqueueSnackbar(response.data.message || "檔案匯入成功", { variant: "success" });
-  
+
       // 重新獲取課程資料並更新狀態
       const responseCourses = await axios.get("http://localhost:5000/api/courses");
       setCourses(responseCourses.data);
@@ -117,7 +148,7 @@ const CourseManagement = () => {
       enqueueSnackbar(error.response?.data?.message || "處理檔案失敗，請檢查資料格式", { variant: "error" });
     }
   };
-    const handleCancelUpload = () => {
+  const handleCancelUpload = () => {
     setSelectedFiles([]);
     setShowUploadModal(false); // 關閉彈窗
   };
@@ -172,20 +203,41 @@ const CourseManagement = () => {
 
 
   const handleSaveCourse = async () => {
-    // 確保所有欄位轉為字串
-    const formattedCourseDetails = Object.fromEntries(
-      Object.entries(courseDetails).map(([key, value]) => [key, value?.toString() || ''])
-    );
+    // 確保所有欄位轉為字串，並將 `上課節次` 處理為正確格式
+    const formattedCourseDetails = {
+      ...courseDetails,
+      上課節次: Array.isArray(courseDetails.上課節次)
+        ? courseDetails.上課節次.length > 1
+          ? courseDetails.上課節次.join(',') // 有多個節次時用逗號分隔
+          : courseDetails.上課節次[0] // 單一節次時直接取值
+        : courseDetails.上課節次?.toString() || '',
+      上課星期: courseDetails.上課星期?.toString() || '',
+      上課地點: courseDetails.上課地點 || '', // 非必填欄位預設為空
+    };
 
     // 驗證必填欄位
+    const requiredFields = [
+      '科目代碼',
+      '科目中文名稱',
+      '學分數',
+      '系所名稱',
+      '主開課教師姓名',
+      '學期',
+      '學制',
+      '年級',
+      '課別名稱',
+      '上課星期',
+      '上課節次',
+    ];
+
     const newErrors = {};
-    Object.entries(formattedCourseDetails).forEach(([key, value]) => {
-      if (!value) {
-        newErrors[key] = true; // 如果欄位為空，記錄錯誤
+    requiredFields.forEach((field) => {
+      if (!formattedCourseDetails[field]) {
+        newErrors[field] = true; // 記錄未填寫的欄位
       }
     });
 
-    setErrors(newErrors); // 更新錯誤狀態
+    setErrors(newErrors);
 
     // 如果有錯誤，則中止執行
     if (Object.keys(newErrors).length > 0) {
@@ -203,7 +255,7 @@ const CourseManagement = () => {
         console.log('課程更新成功', response.data);
 
         // 更新前端課程列表
-        const updatedCourses = courses.map(course =>
+        const updatedCourses = courses.map((course) =>
           course._id === editingCourse._id ? response.data : course
         );
         setCourses(updatedCourses);
@@ -213,10 +265,10 @@ const CourseManagement = () => {
         // 如果是新增模式，呼叫 POST API
         const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
         console.log('課程儲存成功', response.data);
-        setFilteredCourses([...filteredCourses, response.data]); // 新增資料後即時更新顯示
-        // 更新前端課程列表
+
+        // 新增資料後即時更新顯示
+        setFilteredCourses([...filteredCourses, response.data]);
         setCourses([...courses, response.data]);
-        // setFilteredCourses([...filteredCourses, response.data]);
         enqueueSnackbar('課程新增成功！', { variant: 'success' });
       }
 
@@ -233,17 +285,22 @@ const CourseManagement = () => {
         課別名稱: '',
         課程中文摘要: '',
         課程英文摘要: '',
-        上課地點: '',
+        上課地點: '', // 非必填欄位預設為空
         授課教師姓名: '',
         課表備註: '',
+        上課星期: '',
+        上課節次: '',
       });
       setErrors({});
       setShowModal(false);
       setEditingCourse(null);
     } catch (error) {
       console.error('儲存課程失敗:', error.response?.data || error.message);
-      enqueueSnackbar('儲存課程失敗，請檢查資料格式或內容。', { variant: 'error' });    }
+      enqueueSnackbar('儲存課程失敗，請檢查資料格式或內容。', { variant: 'error' });
+    }
   };
+
+
 
 
 
@@ -264,7 +321,8 @@ const CourseManagement = () => {
 
 
   const handleSelectAll = (e) => {
-    setSelectedCourses(e.target.checked ? courses.map(course => course._id) : []);
+    const filteredIds = filteredCourses.map((course) => course._id);
+    setSelectedCourses(e.target.checked ? filteredIds : []);
   };
 
   const handleRowSelect = (id) => {
@@ -278,13 +336,13 @@ const CourseManagement = () => {
       alert('請選擇至少一項課程進行刪除');
       return;
     }
-  
+
     // 顯示刪除確認對話框
     const confirmDelete = window.confirm('確定要刪除選中的課程嗎？此操作無法撤銷。');
     if (!confirmDelete) {
       return; // 如果用戶取消刪除，則返回
     }
-  
+
     try {
       // 使用 Promise.all 確保並行刪除
       const deleteResults = await Promise.all(
@@ -299,18 +357,18 @@ const CourseManagement = () => {
           }
         })
       );
-  
+
       // 根據刪除結果更新通知
       const successCount = deleteResults.filter(result => result.success).length;
       const failureCount = deleteResults.filter(result => !result.success).length;
-  
+
       if (successCount > 0) {
         enqueueSnackbar(`${successCount} 筆課程刪除成功`, { variant: 'success' });
       }
       if (failureCount > 0) {
         enqueueSnackbar(`${failureCount} 筆課程刪除失敗，請稍後再試`, { variant: 'error' });
       }
-  
+
       // 更新課程列表，過濾掉已刪除的課程
       const updatedCourses = courses.filter(course =>
         !deleteResults.some(result => result.success && result.id === course._id)
@@ -318,13 +376,13 @@ const CourseManagement = () => {
       setCourses(updatedCourses);
       setFilteredCourses(updatedCourses);
       setSelectedCourses([]); // 清空選擇的課程
-  
+
     } catch (error) {
       console.error('刪除課程時出現錯誤:', error);
       enqueueSnackbar('刪除課程失敗，請稍後再試', { variant: 'error' });
     }
   };
-  
+
   const handleSearch = () => {
     // setIsLoading(true); // 顯示載入畫面
     setTimeout(() => {
@@ -369,6 +427,9 @@ const CourseManagement = () => {
                 上課地點: '',
                 授課教師姓名: '',
                 課表備註: '',
+                上課星期: '',
+                上課節次: [],
+
               });
               setShowModal(true);
             }}
@@ -379,42 +440,42 @@ const CourseManagement = () => {
 
           {/* 修改這裡的按鈕類名為 handleUpload 和 handleDownloadCSV */}
           <div className="action-buttons">
-        <button
-          onClick={() => document.getElementById("fileInput").click()}
-          className="custom-upload-button"
-        >
-          匯入
-        </button>
-        <input
-          type="file"
-          id="fileInput"
-          onChange={handleFileChange}
-          style={{ display: "none" }}
-          accept=".csv"
-          multiple
-        />
-      </div>
-      {showUploadModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>確認匯入檔案</h3>
-            <p>您已選擇以下檔案：</p>
-            <ul>
-              {selectedFiles.map((file, index) => (
-                <li key={index}>{file.name}</li>
-              ))}
-            </ul>
-            <div className="modal-actions">
-              <button onClick={handleUpload} className="confirm-button">
-                確定上傳
-              </button>
-              <button onClick={handleCancelUpload} className="cancel-button">
-                取消
-              </button>
-            </div>
+            <button
+              onClick={() => document.getElementById("fileInput").click()}
+              className="custom-upload-button"
+            >
+              匯入
+            </button>
+            <input
+              type="file"
+              id="fileInput"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+              accept=".csv"
+              multiple
+            />
           </div>
-        </div>
-      )}
+          {showUploadModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3>確認匯入檔案</h3>
+                <p>您已選擇以下檔案：</p>
+                <ul>
+                  {selectedFiles.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))}
+                </ul>
+                <div className="modal-actions">
+                  <button onClick={handleUpload} className="confirm-button">
+                    確定上傳
+                  </button>
+                  <button onClick={handleCancelUpload} className="cancel-button">
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <button onClick={handleDownloadCSV} className="handleDownloadCSV">匯出</button>
         </div>
 
@@ -456,8 +517,12 @@ const CourseManagement = () => {
               <input
                 type="checkbox"
                 onChange={handleSelectAll}
-                checked={selectedCourses.length === courses.length && courses.length > 0}
+                checked={
+                  selectedCourses.length === filteredCourses.length &&
+                  filteredCourses.length > 0
+                }
               />
+
             </th>
             <th>科目代號</th>
             <th>課程名稱 (學分)</th>
@@ -585,6 +650,41 @@ const CourseManagement = () => {
                 {errors['課別名稱'] && <span style={{ color: 'red' }}>*</span>}
               </label>
               <label>
+                上課星期:
+                <select
+                  name="上課星期"
+                  value={courseDetails.上課星期}
+                  onChange={handleInputChange}
+                >
+                  <option value="">選擇星期</option>
+                  {Object.entries(weekdaysMapping).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                {errors['上課星期'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+
+              <label>
+                上課節次:
+                <div className="period-checkbox-group">
+                  {periods.map((period) => (
+                    <label key={period}>
+                      <input
+                        type="checkbox"
+                        value={period}
+                        checked={courseDetails.上課節次.includes(period)} // 使用字串檢查是否選中
+                        onChange={() => handlePeriodChange(period)} // 更新字串
+                      />
+                      第 {period} 節
+                    </label>
+                  ))}
+                </div>
+
+                {errors['上課節次'] && <span style={{ color: 'red' }}>*</span>}
+              </label>
+              <label>
                 課程中文摘要:
                 <textarea name="課程中文摘要" value={courseDetails.課程中文摘要} onChange={handleInputChange} />
                 {errors['課程中文摘要'] && <span style={{ color: 'red' }}>*</span>}
@@ -629,7 +729,7 @@ const CourseManagement = () => {
 
         </button></>
       )}
-      
+
     </div>
   );
 };
