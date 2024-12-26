@@ -165,14 +165,24 @@ app.post('/api/accounts', async (req, res) => {
   
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ id, username, password: hashedPassword, role });
-        await newUser.save();
+         // 新增帳號
+         const newAccount = new User({
+            id: id.toLowerCase(),
+            username,
+            password: hashedPassword,
+            role,
+        });
+
+        await newAccount.save();
+        // const newUser = new User({ id, username, password: hashedPassword, role });
+        // await newUser.save();
         res.status(201).json({ message: '帳號新增成功' });
     } catch (error) {
-        console.error('Error creating account:', error);
+        // console.error('Error creating account:', error);
         if (error.code === 11000) {
             res.status(400).json({ message: '帳號已存在' });
         } else {
+            console.error('新增帳號失敗:', error);
             res.status(500).json({ message: '伺服器錯誤，無法新增帳號' });
         }
     }
