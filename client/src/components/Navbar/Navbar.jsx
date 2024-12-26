@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png"; // 確保圖片路徑正確
+import logo from "../../assets/logo.png"; 
 
 const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleViewAsStudent }) => {
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false); // 控制語言菜單
-  const [menuOpen, setMenuOpen] = useState(false); // 控制導航菜單在手機版的展開/收縮
-  const dropdownRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,9 +27,6 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
   };
 
   // 切換語言菜單
-  const toggleLanguageMenu = () => {
-    setLanguageMenuOpen((prev) => !prev);
-  };
 
   // 切換導航菜單
   const toggleMenu = () => {
@@ -104,24 +99,6 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
           </>
         )}
 
-        {/* 語言切換菜單 */}
-        <div className="navbar-language" ref={dropdownRef}>
-          <button onClick={toggleLanguageMenu} className="language-button">
-            語言
-          </button>
-
-          {/* 下拉菜單 */}
-          {languageMenuOpen && (
-            <div className="language-dropdown">
-              <li onClick={() => setLanguageMenuOpen(false)} className="dropdown-item">
-                中文
-              </li>
-              <li onClick={() => setLanguageMenuOpen(false)} className="dropdown-item">
-                English
-              </li>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
