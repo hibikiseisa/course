@@ -1,11 +1,11 @@
 import axios from 'axios';
 import 'jspdf-autotable';
-import { useSnackbar } from 'notistack'; 
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import ods from "../../assets/ods.png"; 
-import pdf from "../../assets/pdf.png"; 
-import up from "../../assets/up.png"; 
+import ods from "../../assets/ods.png";
+import pdf from "../../assets/pdf.png";
+import up from "../../assets/up.png";
 import xlsx from "../../assets/xlsx.png";
 import CourseModal from './CourseModal/CourseModal';
 
@@ -14,14 +14,14 @@ import './CourseSearch.css';
 
 const CourseSearch = () => {
     const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
     const [showButton, setShowButton] = useState(false);
     const [advancedSearch, setAdvancedSearch] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState('1132');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
-    const { enqueueSnackbar } = useSnackbar(); 
+    const { enqueueSnackbar } = useSnackbar();
     const [educationLevels, setEducationLevels] = useState([]);
     const [department, setDepartment] = useState('');
     const [classType, setClassType] = useState('');
@@ -71,7 +71,7 @@ const CourseSearch = () => {
     };
 
     const getBackgroundColor = (courseName) => {
-        
+
         switch (courseName) {
             case '通識必修(通識)':
                 return 'lightblue';
@@ -127,7 +127,7 @@ const CourseSearch = () => {
             educationLevels: educationLevels.join(','),
             department,
             classType,
-            grade,
+            grade: grade ? reverseGradeMapping[grade] : '',
             teacherName,
             courseCode,
             courseName,
@@ -150,21 +150,21 @@ const CourseSearch = () => {
                     })
                     : response.data;
 
-                setCourses(filteredCourses); 
+                setCourses(filteredCourses);
 
                 if (filteredCourses.length === 0) {
-                    enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); 
+                    enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000, anchorOrigin: { vertical: 'top', horizontal: 'center' } });
                 }
             } else {
                 setCourses([]);
-                enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } });
+                enqueueSnackbar('無符合的查詢結果', { variant: 'info', autoHideDuration: 2000, anchorOrigin: { vertical: 'top', horizontal: 'center' } });
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
             setCourses([]);
-            enqueueSnackbar('查詢失敗，請檢查伺服器狀態！', { variant: 'error', autoHideDuration: 2000,anchorOrigin: { vertical: 'top', horizontal: 'center' } }); 
+            enqueueSnackbar('查詢失敗，請檢查伺服器狀態！', { variant: 'error', autoHideDuration: 2000, anchorOrigin: { vertical: 'top', horizontal: 'center' } });
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -190,7 +190,7 @@ const CourseSearch = () => {
                 科目英文名稱: course.科目英文名稱,
                 授課教師姓名: Array.isArray(course.授課教師姓名)
                     ? course.授課教師姓名.join(', ')
-                    : course.授課教師姓名, 
+                    : course.授課教師姓名,
                 學分數: course.學分數,
                 上課週次: course.上課週次,
                 課別代碼: course.課別代碼,
@@ -206,23 +206,23 @@ const CourseSearch = () => {
             const header = '學期,主開課教師姓名,課程全碼,系所代碼,系所名稱,學制,科目代碼,科目組別,年級,上課班組,科目中文名稱,科目英文名稱,授課教師姓名,學分數,上課週次,課別代碼,課別名稱,上課地點,上課星期,上課節次,備註,課程中文摘要,課程英文摘要\n';
 
             const rows = csvData.map(course => `"${course.學期}","${course.主開課教師姓名}","${course.課程全碼}","${course.系所代碼}","${course.系所名稱}","${course.學制}","${course.科目代碼}","${course.科目組別}","${course.年級}","${course.上課班組}","${course.科目中文名稱}","${course.科目英文名稱}","${course.授課教師姓名}","${course.學分數}","${course.上課週次}","${course.課別代碼}","${course.課別名稱}","${course.上課地點}","${course.上課星期}","${course.上課節次}","${course.課表備註}","${course.課程中文摘要}","${course.課程英文摘要}"`).join('\n');
-           
+
             const csvFileContent = `\ufeff${header}${rows}`;
 
-           
+
             const blob = new Blob([csvFileContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = 'courses.csv';
             link.click();
-            URL.revokeObjectURL(url); 
+            URL.revokeObjectURL(url);
         } else if (format === 'pdf') {
-            const pdfURL = '/course.pdf'; 
-            window.open(pdfURL, '_blank'); 
+            const pdfURL = '/course.pdf';
+            window.open(pdfURL, '_blank');
         }
         else if (format === 'ods') {
-            const odsURL = '/course.ods'; 
+            const odsURL = '/course.ods';
             window.open(odsURL, '_blank');
         }
     };
@@ -257,6 +257,16 @@ const CourseSearch = () => {
         };
         return weekday.split(',').map((day) => mapping[day] || day).join(', ');
     };
+    const gradeMapping = {
+        "1": "一年級",
+        "2": "二年級",
+        "3": "三年級",
+        "4": "四年級",
+    };
+
+    const reverseGradeMapping = Object.fromEntries(
+        Object.entries(gradeMapping).map(([key, value]) => [value, key])
+    );
 
     const openMoreInfo = (course) => {
         setSelectedCourse(course);
@@ -303,8 +313,9 @@ const CourseSearch = () => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
     const handleGradeChange = (value) => {
-        setGrade((prevValue) => (prevValue === value ? '' : value));
+        setGrade((prevValue) => (prevValue === value ? '' : reverseGradeMapping[value]));
     };
+
     const handleWeekdayChange = (weekday, isChecked) => {
         if (isChecked) {
 
@@ -318,7 +329,7 @@ const CourseSearch = () => {
 
 
     const handlePeriodChange = (period, isChecked) => {
-        const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p)); 
+        const selectedWeekdays = selectedPeriods.filter((p) => /^[1-7]$/.test(p));
 
         if (isChecked) {
 
@@ -327,7 +338,7 @@ const CourseSearch = () => {
                 ...selectedWeekdays.map((weekday) => `${weekday}-${period}`),
             ]);
         } else {
-  
+
             setSelectedPeriods((prev) =>
                 prev.filter((p) => !p.endsWith(`-${period}`))
             );
@@ -416,12 +427,21 @@ const CourseSearch = () => {
                         <div className="more-form-group">
                             <label><h3>年級</h3></label>
                             <div>
-                                <label><input type="radio" name="grade" value="1" checked={grade === '一年級'} onChange={() => handleGradeChange('一年級')} /> 一年級</label>
-                                <label><input type="radio" name="grade" value="2" checked={grade === '二年級'} onChange={() => handleGradeChange('二年級')} /> 二年級</label>
-                                <label><input type="radio" name="grade" value="3" checked={grade === '三年級'} onChange={() => handleGradeChange('三年級')} /> 三年級</label>
-                                <label><input type="radio" name="grade" value="4" checked={grade === '四年級'} onChange={() => handleGradeChange('四年級')} /> 四年級</label>
+                                {Object.entries(gradeMapping).map(([key, value]) => (
+                                    <label key={key}>
+                                        <input
+                                            type="radio"
+                                            name="grade"
+                                            value={key}
+                                            checked={grade === key}
+                                            onChange={() => handleGradeChange(value)}
+                                        />
+                                        {value}
+                                    </label>
+                                ))}
                             </div>
                         </div>
+
 
                         <div className="more-form-group">
                             <label><h3>上課星期</h3></label>
@@ -499,7 +519,7 @@ const CourseSearch = () => {
                     <p>查詢中，請稍候...</p>
                 </div>
             )}
-    
+
             {courses.length > 0 && (
                 <>
                     <div className="pagination-controls">
@@ -508,8 +528,8 @@ const CourseSearch = () => {
                             <select
                                 value={resultsPerPage}
                                 onChange={(e) => {
-                                    setResultsPerPage(Number(e.target.value)); 
-                                    setCurrentPage(1);  
+                                    setResultsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
                                 }}
                             >
                                 <option value={5}>5</option>
@@ -585,7 +605,7 @@ const CourseSearch = () => {
                                             <td>{(currentPage - 1) * resultsPerPage + index + 1}</td>
                                             <td>{course.學期 || "未提供"}</td>
                                             <td>{convertWeekdayToChinese(course.學制)}<br /> {course.系所名稱 || "未提供"}</td>
-                                            <td>{course.年級 || "未提供"}</td>
+                                            <td>{gradeMapping[course.年級] || "未提供"}</td>
                                             <td>{course.科目代碼 || "未提供"}</td>
                                             <td>{course.科目中文名稱 || "未提供"}</td>
                                             <td>
