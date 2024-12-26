@@ -127,7 +127,7 @@ const CourseSearch = () => {
             educationLevels: educationLevels.join(','),
             department,
             classType,
-            grade: grade ? reverseGradeMapping[grade] : '',
+            grade: grade || '',
             teacherName,
             courseCode,
             courseName,
@@ -313,8 +313,9 @@ const CourseSearch = () => {
         setClassType((prevValue) => (prevValue === value ? '' : value));
     };
     const handleGradeChange = (value) => {
-        setGrade((prevValue) => (prevValue === value ? '' : reverseGradeMapping[value]));
+        setGrade((prevValue) => (prevValue === reverseGradeMapping[value] ? '' : reverseGradeMapping[value]));
     };
+
 
     const handleWeekdayChange = (weekday, isChecked) => {
         if (isChecked) {
