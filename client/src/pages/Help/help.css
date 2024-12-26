@@ -146,3 +146,18 @@
   cursor: pointer;
   text-align: center;
 }
+
+/* 縮小圖片並置中 */
+.topic-item {
+  display: flex;
+  flex-direction: column; /* 垂直排列圖片與文字 */
+  align-items: center;    /* 水平置中 */
+  margin-bottom: 20px;    /* 與其他項目間距 */
+}
+
+.topic-image {
+  max-width: 80%;         /* 限制寬度為容器的 80% */
+  max-height: 600px;      /* 限制最大高度 */
+  object-fit: contain;    /* 保持圖片比例 */
+  margin-bottom: 10px;    /* 圖片與文字間距 */
+}

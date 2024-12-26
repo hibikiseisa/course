@@ -61,6 +61,31 @@ const Help = () => {
                 </div>
               )}
             </div>
+
+            <div className="expandable-topic">
+              <button className="expand-button" onClick={() => toggleTopic('AccountManagement')}>
+                {expandedTopics['AccountManagement'] ? '縮起帳號管理說明' : '展開帳號管理說明'}
+              </button>
+              {expandedTopics['AccountManagement'] && (
+                <div className="topic-content">
+                  <div className="topic-item">
+                    <img src="/accountmanage.png" alt="帳號管理" className="topic-image" />
+                    <p>1.點選新增帳號。</p>
+                  </div>
+                  <div className="topic-item">
+                    <img src="/accountmanage1.png" alt="新增帳號視窗" className="topic-image" />
+                    <p>2.輸入詳細帳號資訊。</p>
+                  </div>
+                  <div className="topic-item">
+                    <img src="/accountmanage2.png" alt="新增成功" className="topic-image" />
+                    <p>3.新增完成後跳出帳號新增成功通知。</p>
+                    <p>4.此外也可以編輯跟刪除。</p>
+                  </div>
+
+                </div>
+              )}
+            </div>
+
           </div>
         );
       case 'student':
