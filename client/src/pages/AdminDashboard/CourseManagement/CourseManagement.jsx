@@ -55,24 +55,26 @@ const CourseManagement = () => {
     "7": "星期日",
   };
   const handlePeriodChange = (selectedPeriod) => {
-    let updatedPeriods = courseDetails.上課節次
-      ? courseDetails.上課節次.split(',').map((p) => p.trim())
-      : [];
+    let updatedPeriods = courseDetails.上課節次;
 
     if (updatedPeriods.includes(selectedPeriod)) {
       // 如果已選中，移除該節次
-      updatedPeriods = updatedPeriods.filter((period) => period !== selectedPeriod);
+      updatedPeriods = updatedPeriods
+        .split(',')
+        .filter((period) => period !== selectedPeriod)
+        .join(',');
     } else {
       // 如果未選中，新增該節次
-      updatedPeriods.push(selectedPeriod);
+      updatedPeriods = updatedPeriods
+        ? `${updatedPeriods},${selectedPeriod}`
+        : selectedPeriod;
     }
 
     setCourseDetails({
       ...courseDetails,
-      上課節次: updatedPeriods.join(',').replace(/(^,)|(,$)/g, ''), // 確保字串不包含多餘的逗號
+      上課節次: updatedPeriods, // 更新為新的字串
     });
   };
-
 
   useEffect(() => {
 
@@ -214,7 +216,7 @@ const CourseManagement = () => {
       上課星期: courseDetails.上課星期?.toString() || '',
       上課地點: courseDetails.上課地點 || '', // 非必填欄位預設為空
     };
-
+  
     // 驗證必填欄位
     const requiredFields = [
       '科目代碼',
@@ -229,22 +231,22 @@ const CourseManagement = () => {
       '上課星期',
       '上課節次',
     ];
-
+  
     const newErrors = {};
     requiredFields.forEach((field) => {
       if (!formattedCourseDetails[field]) {
         newErrors[field] = true; // 記錄未填寫的欄位
       }
     });
-
+  
     setErrors(newErrors);
-
+  
     // 如果有錯誤，則中止執行
     if (Object.keys(newErrors).length > 0) {
       alert('請填寫所有必填欄位');
       return;
     }
-
+  
     try {
       if (editingCourse) {
         // 如果是編輯模式，呼叫 PUT API
@@ -253,7 +255,7 @@ const CourseManagement = () => {
           formattedCourseDetails
         );
         console.log('課程更新成功', response.data);
-
+  
         // 更新前端課程列表
         const updatedCourses = courses.map((course) =>
           course._id === editingCourse._id ? response.data : course
@@ -265,13 +267,13 @@ const CourseManagement = () => {
         // 如果是新增模式，呼叫 POST API
         const response = await axios.post('http://localhost:5000/api/courses', formattedCourseDetails);
         console.log('課程儲存成功', response.data);
-
+  
         // 新增資料後即時更新顯示
         setFilteredCourses([...filteredCourses, response.data]);
         setCourses([...courses, response.data]);
         enqueueSnackbar('課程新增成功！', { variant: 'success' });
       }
-
+  
       // 清空表單與錯誤狀態
       setCourseDetails({
         科目代碼: '',
@@ -299,7 +301,7 @@ const CourseManagement = () => {
       enqueueSnackbar('儲存課程失敗，請檢查資料格式或內容。', { variant: 'error' });
     }
   };
-
+  
 
 
 
@@ -321,8 +323,7 @@ const CourseManagement = () => {
 
 
   const handleSelectAll = (e) => {
-    const filteredIds = filteredCourses.map((course) => course._id);
-    setSelectedCourses(e.target.checked ? filteredIds : []);
+    setSelectedCourses(e.target.checked ? courses.map(course => course._id) : []);
   };
 
   const handleRowSelect = (id) => {
@@ -517,12 +518,8 @@ const CourseManagement = () => {
               <input
                 type="checkbox"
                 onChange={handleSelectAll}
-                checked={
-                  selectedCourses.length === filteredCourses.length &&
-                  filteredCourses.length > 0
-                }
+                checked={selectedCourses.length === courses.length && courses.length > 0}
               />
-
             </th>
             <th>科目代號</th>
             <th>課程名稱 (學分)</th>

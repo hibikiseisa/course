@@ -162,11 +162,11 @@ app.post('/api/accounts', async (req, res) => {
     if (password.length < 6) {
         return res.status(400).json({ message: '密碼至少需6個字元' });
     }
-  
+
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-         // 新增帳號
-         const newAccount = new User({
+        // 新增帳號
+        const newAccount = new User({
             id: id.toLowerCase(),
             username,
             password: hashedPassword,
@@ -280,14 +280,14 @@ const Course = mongoose.model('Course', courseSchema);
 //       cb(null, Date.now() + '-' + file.originalname);  // 設定上傳後的文件名
 //     }
 //   });
-  
+
 //   const upload = multer({ storage: storage });
-  
+
 //   // 處理上傳 CSV 的路由
 //   app.post('/api/upload-csv', upload.single('file'), (req, res) => {
 //     const results = [];
 //     const filePath = path.join(__dirname, req.file.path);
-  
+
 //     fs.createReadStream(filePath)
 //       .pipe(csv())
 //       .on('data', (row) => {
@@ -299,8 +299,8 @@ const Course = mongoose.model('Course', courseSchema);
 //         res.json({ message: '檔案上傳並處理成功' });
 //       });
 //   });
-  
-  
+
+
 app.get('/api/courses', async (req, res) => {
     try {
         const {
@@ -414,18 +414,30 @@ app.post('/api/courses', async (req, res) => {
 app.delete('/api/courses/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const deletedCourse = await Course.findByIdAndDelete(id);
-      if (!deletedCourse) {
-        return res.status(404).json({ message: '課程不存在，無法刪除' });
-      }
-      res.status(200).json({ message: '課程刪除成功', deletedCourse });
+        // 刪除課程
+        const deletedCourse = await Course.findByIdAndDelete(id);
+        if (!deletedCourse) {
+            return res.status(404).json({ message: '課程不存在，無法刪除' });
+        }
+
+        // 刪除相關收藏資料
+        await Favorite.deleteMany({ courseId: id });
+
+        // 從課表中移除相關課程
+        await Schedule.updateMany(
+            { 'schedule.courseId': id },
+            { $pull: { schedule: { courseId: id } } }
+        );
+
+        res.status(200).json({ message: '課程刪除成功，相關數據已同步移除' });
     } catch (error) {
-      console.error('刪除課程時出現錯誤:', error);
-      res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
+        console.error('刪除課程時出現錯誤:', error);
+        res.status(500).json({ message: '刪除課程失敗，請稍後再試' });
     }
-  });
-  
-  app.put('/api/courses/:id', async (req, res) => {
+});
+
+
+app.put('/api/courses/:id', async (req, res) => {
     const courseId = req.params.id;
     const updatedData = req.body;
 
@@ -698,10 +710,10 @@ app.get('/api/favorites/:userId/:day/:timeSlot', async (req, res) => {
 });
 
 const teacherSchema = new mongoose.Schema({
-    姓名: String, 
-    職位: String, 
-    電話: String, 
-    信箱: String, 
+    姓名: String,
+    職位: String,
+    電話: String,
+    信箱: String,
     專長: [String]
 });
 
@@ -751,74 +763,74 @@ const upload = multer({ dest: 'uploads/' });
 
 app.post('/api/upload-csv', upload.array('files', 5), async (req, res) => {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: '請上傳檔案' });
+        return res.status(400).json({ message: '請上傳檔案' });
     }
-  
+
     try {
-      const fileDetails = [];
-      const courses = [];
-  
-      // 處理每個檔案
-      for (const file of req.files) {
-        const filePath = path.join(__dirname, file.path);
-        fileDetails.push({ fileName: file.originalname, fileSize: file.size });
-  
-        await new Promise((resolve, reject) => {
-          const courseData = [];
-          fs.createReadStream(filePath)
-            .pipe(csvParser())
-            .on('data', (row) => {
-              courseData.push({
-                學期: row['學期'],
-                主開課教師姓名: row['主開課教師姓名'],
-                課程全碼: row['課程全碼'],
-                系所代碼: row['系所代碼'],
-                系所名稱: row['系所名稱'],
-                學制: row['學制'],
-                科目代碼: row['科目代碼'],
-                科目組別: row['科目組別'],
-                年級: row['年級'],
-                上課班組: row['上課班組'],
-                科目中文名稱: row['科目中文名稱'],
-                科目英文名稱: row['科目英文名稱'],
-                授課教師姓名: row['授課教師姓名'],
-                學分數: row['學分數'],
-                上課週次: row['上課週次'],
-                課別代碼: row['課別代碼'],
-                課別名稱: row['課別名稱'],
-                上課地點: row['上課地點'],
-                上課星期: row['上課星期'],
-                上課節次: row['上課節次'],
-                課表備註: row['課表備註'],
-                課程中文摘要: row['課程中文摘要'],
-                課程英文摘要: row['課程英文摘要'],
-              });
-            })
-            .on('end', () => {
-              courses.push(...courseData);
-              fs.unlinkSync(filePath); // 刪除上傳的檔案
-              resolve();
-            })
-            .on('error', (error) => {
-              console.error('讀取檔案錯誤:', error);
-              reject(error);
+        const fileDetails = [];
+        const courses = [];
+
+        // 處理每個檔案
+        for (const file of req.files) {
+            const filePath = path.join(__dirname, file.path);
+            fileDetails.push({ fileName: file.originalname, fileSize: file.size });
+
+            await new Promise((resolve, reject) => {
+                const courseData = [];
+                fs.createReadStream(filePath)
+                    .pipe(csvParser())
+                    .on('data', (row) => {
+                        courseData.push({
+                            學期: row['學期'],
+                            主開課教師姓名: row['主開課教師姓名'],
+                            課程全碼: row['課程全碼'],
+                            系所代碼: row['系所代碼'],
+                            系所名稱: row['系所名稱'],
+                            學制: row['學制'],
+                            科目代碼: row['科目代碼'],
+                            科目組別: row['科目組別'],
+                            年級: row['年級'],
+                            上課班組: row['上課班組'],
+                            科目中文名稱: row['科目中文名稱'],
+                            科目英文名稱: row['科目英文名稱'],
+                            授課教師姓名: row['授課教師姓名'],
+                            學分數: row['學分數'],
+                            上課週次: row['上課週次'],
+                            課別代碼: row['課別代碼'],
+                            課別名稱: row['課別名稱'],
+                            上課地點: row['上課地點'],
+                            上課星期: row['上課星期'],
+                            上課節次: row['上課節次'],
+                            課表備註: row['課表備註'],
+                            課程中文摘要: row['課程中文摘要'],
+                            課程英文摘要: row['課程英文摘要'],
+                        });
+                    })
+                    .on('end', () => {
+                        courses.push(...courseData);
+                        fs.unlinkSync(filePath); // 刪除上傳的檔案
+                        resolve();
+                    })
+                    .on('error', (error) => {
+                        console.error('讀取檔案錯誤:', error);
+                        reject(error);
+                    });
             });
+        }
+
+        // 插入所有檔案的課程資料到 MongoDB
+        await Course.insertMany(courses);
+        res.status(200).json({
+            message: '檔案匯入成功',
+            fileDetails,
+            totalCourses: courses.length,
         });
-      }
-  
-      // 插入所有檔案的課程資料到 MongoDB
-      await Course.insertMany(courses);
-      res.status(200).json({
-        message: '檔案匯入成功',
-        fileDetails,
-        totalCourses: courses.length,
-      });
     } catch (error) {
-      console.error('處理檔案失敗:', error);
-      res.status(500).json({ message: '處理檔案失敗，請檢查資料格式' });
+        console.error('處理檔案失敗:', error);
+        res.status(500).json({ message: '處理檔案失敗，請檢查資料格式' });
     }
-  });
-  
+});
+
 app.listen(PORT, () => {
     console.log(`伺服器正在 http://localhost:${PORT} 上運行`);
 });
