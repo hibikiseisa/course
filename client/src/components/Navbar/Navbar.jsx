@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png"; 
+import logo from "../../assets/logo.png";
 
 const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleViewAsStudent }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,6 +45,9 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
               <>
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
+                </button>                
+                <button onClick={() => navigate("/Statistics")} className="navbar-link">
+                  統計與分析                
                 </button>
                 <button onClick={() => navigate("/FavoritesList")} className="navbar-link">
                   我的追蹤名單
