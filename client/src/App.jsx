@@ -12,6 +12,7 @@ import Help from './pages/Help/help';
 import Login from './pages/Login/Login';
 import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
 import Register from './pages/Register/Register';
+import SemesterStats from './pages/Statistics/SemesterDepartmentStats/SemesterDepartmentStats';
 import Statistics from './pages/Statistics/Statistics';
 import Coursesimulation from './pages/student/Coursesimulation/course-simulation';
 
@@ -80,7 +81,7 @@ function App() {
             <Route path="/PersonalInfo" element={<PersonalInfo />} />
             <Route path="/Statistics" element={<Statistics />} />
             <Route path="/help" element={<Help />} />
-
+<Route path="/Statistics/semester" element={<SemesterStats />} />
           </Routes>
         </div>
       </Router>

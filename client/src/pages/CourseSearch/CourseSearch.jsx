@@ -407,7 +407,6 @@ const CourseSearch = () => {
             <option value="1062">1062</option>
             <option value="1061">1061</option>
             <option value="1052">1052</option>
-
             <option value="1051">1051</option>
           </select>
         </div>
