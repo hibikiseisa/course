@@ -15,7 +15,8 @@ import Register from './pages/Register/Register';
 import SemesterStats from './pages/Statistics/SemesterDepartmentStats/SemesterDepartmentStats';
 import Statistics from './pages/Statistics/Statistics';
 import Coursesimulation from './pages/student/Coursesimulation/course-simulation';
-
+import CourseAnalysis from './pages/CourseAnalysis/CourseAnalysis';
+import Teacher from './pages/CourseAnalysis/Teacher';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 登錄狀態
   const [Userid, setUserid] = useState(''); // 用户 ID
@@ -80,6 +81,8 @@ function App() {
             <Route path="/FavoritesList" element={<FavoritesList />} />
             <Route path="/PersonalInfo" element={<PersonalInfo />} />
             <Route path="/Statistics" element={<Statistics />} />
+            <Route path="/CourseAnalysis" element={<CourseAnalysis />} />
+ <Route path="/teacher/:name" element={<Teacher />} />
             <Route path="/help" element={<Help />} />
 <Route path="/Statistics/semester" element={<SemesterStats />} />
           </Routes>

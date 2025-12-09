@@ -43,6 +43,9 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
             {viewAsStudent ? (
               // 學生菜單
               <>
+               <button onClick={() => navigate("/CourseAnalysis")} className="navbar-link">
+                  課程分析
+                </button>
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>                
@@ -65,6 +68,9 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
             ) : (
               // 管理者菜單
               <>
+                 <button onClick={() => navigate("/CourseAnalysis")} className="navbar-link">
+                  課程分析
+                </button>
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>

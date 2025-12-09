@@ -761,6 +761,280 @@ app.get('/api/teacher/:name', async (req, res) => {
 });
 const upload = multer({ dest: 'uploads/' });
 
+
+
+// 智慧搜尋老師名稱
+app.get('/api/teachers/search', async (req, res) => {
+    const keyword = (req.query.keyword || '').trim();
+
+    if (!keyword) {
+        return res.status(200).json([]);
+    }
+
+    try {
+        const regex = new RegExp(keyword, 'i'); // 不分大小寫模糊搜尋
+
+        // 只抓需要的欄位，減少資料量
+        const courses = await Course.find(
+            {
+                $or: [
+                    { 授課教師姓名: regex },
+                    { 主開課教師姓名: regex },
+                ],
+            },
+            {
+                授課教師姓名: 1,
+                主開課教師姓名: 1,
+                _id: 0,
+            }
+        );
+
+        const teacherSet = new Set();
+
+        courses.forEach((c) => {
+            ['授課教師姓名', '主開課教師姓名'].forEach((field) => {
+                const value = c[field];
+                if (!value) return;
+
+                // 有些課程可能同一欄位有多個老師，用 、 或 逗號分隔
+                String(value)
+                    .split(/[、,，；;／/]/)
+                    .forEach((name) => {
+                        const n = name.trim();
+                        if (!n) return;
+                        // 再做一次關鍵字確認，避免一些奇怪的空白或符號
+                        if (regex.test(n)) {
+                            teacherSet.add(n);
+                        }
+                    });
+            });
+        });
+
+        // 排序（用中文排序）
+        const result = Array.from(teacherSet).sort((a, b) =>
+            a.localeCompare(b, 'zh-Hant')
+        );
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('搜尋老師失敗:', error);
+        res.status(500).json({ message: '搜尋老師失敗，請稍後再試' });
+    }
+});
+
+// 教師統計資訊 API
+app.get('/api/teacher-stats', async (req, res) => {
+    const teacher = (req.query.teacher || '').trim();
+    const thisSem = (req.query.sem || '1142').trim(); // 預設 1142
+
+    if (!teacher) {
+        return res.status(400).json({ message: '請提供 teacher 參數' });
+    }
+
+    try {
+        const db = mongoose.connection.db;
+
+        const COURSE_COLLECTION_PREFIX = 'courses_';
+
+        // courses_per_semester
+        const coursesPerSem = {}; // { sem_no: count }
+        const departments = new Set();
+        const semCourses = [];
+
+        // courseYearMap[(course_no, course_name)][year] = [total_count...]
+        const courseYearMap = new Map();
+
+        // 先把 teacher 名稱 escape 掉，避免正則出問題
+        const escapeRegExp = (s) =>
+            s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const teacherRegex = new RegExp(escapeRegExp(teacher), 'i');
+
+        // 取得所有 collection
+        const collections = await db.listCollections().toArray();
+
+        for (const info of collections) {
+            const collName = info.name;
+
+            // ✅ 1) courses_1051, courses_1061 ... 這些
+            // ✅ 2) 如果你未來想一起算 'courses' 也可以加進來
+            if (
+                !collName.startsWith(COURSE_COLLECTION_PREFIX) &&
+                collName !== 'courses'
+            ) {
+                continue;
+            }
+
+            const coll = db.collection(collName);
+
+            // 這裡同時支援：
+            // - teacher_name（英文欄位）
+            // - 授課教師姓名（中文欄位，array 或 string）
+            // - 主開課教師姓名
+            const docs = await coll
+                .find({
+                    $or: [
+                        { teacher_name: teacherRegex },
+                        { 授課教師姓名: teacherRegex },
+                        { 主開課教師姓名: teacherRegex },
+                    ],
+                })
+                .toArray();
+
+            for (const doc of docs) {
+                // ---- 統一欄位名稱 ----
+                const sem_no =
+                    doc.sem_no ||
+                    doc['學期'] ||
+                    doc['學'] || // 1051 這種
+                    doc.semester;
+
+                const group_name =
+                    doc.group_name ||
+                    doc['系所名稱'] ||
+                    doc.department ||
+                    doc['系別名稱'];
+
+                const course_no =
+                    doc.course_no ||
+                    doc['科目代碼'] ||
+                    doc['課程全碼'];
+
+                const course_name =
+                    doc.course_name ||
+                    doc['科目中文名稱'] ||
+                    doc['課程名稱'];
+
+                const total_count =
+                    doc.total_count ??
+                    doc['上課人數'] ??
+                    doc['人數'] ??
+                    0;
+
+                if (!sem_no) continue; // 沒有學期就跳過
+
+                // -------------------------
+                // 功能 1：每學期授課堂數
+                // -------------------------
+                if (!coursesPerSem[sem_no]) coursesPerSem[sem_no] = 0;
+                coursesPerSem[sem_no] += 1;
+
+                // -------------------------
+                // 功能 2：歷年授課系所
+                // -------------------------
+                if (group_name) {
+                    departments.add(group_name);
+                }
+
+                // -------------------------
+                // 功能 3：指定學期授課資料
+                // -------------------------
+                if (sem_no === thisSem) {
+                    // 清掉 _id、index（如果有的話）
+                    const { _id, index, ...cleanDoc } = doc;
+                    semCourses.push(cleanDoc);
+                }
+
+                // -------------------------
+                // 功能 5：累積跨學期課程資料
+                // -------------------------
+                if (course_no && course_name) {
+                    const year = String(sem_no).slice(0, 3); // "1051" -> "105"
+                    const key = `${course_no}||${course_name}`;
+
+                    if (!courseYearMap.has(key)) {
+                        courseYearMap.set(key, new Map());
+                    }
+                    const yearMap = courseYearMap.get(key);
+
+                    if (!yearMap.has(year)) {
+                        yearMap.set(year, []);
+                    }
+                    yearMap.get(year).push(Number(total_count) || 0);
+                }
+            }
+        }
+
+        // 學期排序
+        const sortedCoursesPerSem = Object.fromEntries(
+            Object.entries(coursesPerSem).sort(([a], [b]) =>
+                String(a).localeCompare(String(b))
+            )
+        );
+
+        // 功能 3：指定學期資訊
+        let semInfo;
+        if (semCourses.length === 0) {
+            semInfo = {
+                sem_no: thisSem,
+                course_count: 0,
+                courses: [],
+                note: '該學期無課程',
+            };
+        } else {
+            semInfo = {
+                sem_no: thisSem,
+                course_count: semCourses.length,
+                courses: semCourses,
+            };
+        }
+
+        // -------------------------
+        // 功能 5：計算 Top 3 課程
+        // -------------------------
+        const courseStatsOutput = [];
+
+        for (const [key, yearMap] of courseYearMap.entries()) {
+            const [course_no, course_name] = key.split('||');
+
+            const yearAvg = {};
+            for (const [year, counts] of yearMap.entries()) {
+                const avg =
+                    counts.reduce((a, b) => a + b, 0) / counts.length;
+                yearAvg[year] = Math.round(avg);
+            }
+
+            const yearValues = Object.values(yearAvg);
+            const overallAvg = Math.round(
+                yearValues.reduce((a, b) => a + b, 0) / yearValues.length
+            );
+
+            let totalStudents = 0;
+            for (const counts of yearMap.values()) {
+                totalStudents += counts.reduce((a, b) => a + b, 0);
+            }
+
+            courseStatsOutput.push({
+                course_no,
+                course_name,
+                total_students: totalStudents,
+                year_avg: yearAvg,
+                overall_avg: overallAvg,
+            });
+        }
+
+        const top3Courses = courseStatsOutput
+            .sort((a, b) => b.total_students - a.total_students)
+            .slice(0, 3);
+
+        return res.status(200).json({
+            teacher,
+            courses_per_semester: sortedCoursesPerSem,
+            department_count: departments.size,
+            departments: Array.from(departments).sort(),
+            this_semester: semInfo,
+            top3_courses: top3Courses,
+        });
+    } catch (error) {
+        console.error('計算教師統計失敗:', error);
+        return res.status(500).json({
+            message: '計算教師統計失敗，請稍後再試',
+            error: error.message,
+        });
+    }
+});
+
+
+
 app.post('/api/upload-csv', upload.array('files', 5), async (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: '請上傳檔案' });
@@ -834,5 +1108,3 @@ app.post('/api/upload-csv', upload.array('files', 5), async (req, res) => {
 app.listen(PORT, () => {
     console.log(`伺服器正在 http://localhost:${PORT} 上運行`);
 });
-
-
