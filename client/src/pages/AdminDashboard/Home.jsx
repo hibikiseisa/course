@@ -1,7 +1,7 @@
 import axios from 'axios';
 import 'jspdf-autotable';
 import { useSnackbar } from 'notistack'; // 使用通知系統
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import ods from "../../assets/ods.png"; // 确保图片路径正确
 import pdf from "../../assets/pdf.png"; // 确保图片路径正确

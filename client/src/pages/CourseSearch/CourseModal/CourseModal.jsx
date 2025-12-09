@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useSnackbar } from 'notistack'; // 引入 useSnackbar
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import map from "../../../assets/map.png";
 import './CourseModal.css';
 
@@ -223,18 +223,19 @@ const CourseModal = ({ course, onClose, isFavorite, onAddToFavorites }) => {
                 <h2>課程詳情</h2>
                 <p><strong>學期：</strong> {course.學期}</p>
                 <p><strong>主開課教師姓名：</strong> {course.主開課教師姓名}</p>
-                <p>
-                    <strong>教師：</strong>
-                    {course.授課教師姓名.split(',').map((teacherName, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handleTeacherClick(teacherName.trim())}
-                            className="teacher-name-button"
-                        >
-                            {teacherName.trim()}
-                        </button>
-                    ))}
-                </p>
+               <p>
+    <strong>教師：</strong>
+    {(course?.授課教師姓名 ? course.授課教師姓名.split(',') : []).map((teacherName, index) => (
+        <button
+            key={index}
+            onClick={() => handleTeacherClick(teacherName.trim())}
+            className="teacher-name-button"
+        >
+            {teacherName.trim()}
+        </button>
+    ))}
+</p>
+
 
                 {showTeacherDetails && selectedTeacher && (
                     <div className="teacher-details">

@@ -1,5 +1,5 @@
 import { SnackbarProvider } from 'notistack';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './components/Navbar/Navbar.css';
@@ -12,6 +12,7 @@ import Help from './pages/Help/help';
 import Login from './pages/Login/Login';
 import PersonalInfo from './pages/PersonalInfo/PersonalInfo';
 import Register from './pages/Register/Register';
+import Statistics from './pages/Statistics/Statistics';
 import Coursesimulation from './pages/student/Coursesimulation/course-simulation';
 import CourseAnalysis from './pages/CourseAnalysis/CourseAnalysis';
 import Teacher from './pages/CourseAnalysis/Teacher';
@@ -78,6 +79,7 @@ function App() {
             <Route path="/Coursesimulation" element={<Coursesimulation />} />
             <Route path="/FavoritesList" element={<FavoritesList />} />
             <Route path="/PersonalInfo" element={<PersonalInfo />} />
+            <Route path="/Statistics" element={<Statistics />} />
             <Route path="/CourseAnalysis" element={<CourseAnalysis />} />
  <Route path="/teacher/:name" element={<Teacher />} />
             <Route path="/help" element={<Help />} />
