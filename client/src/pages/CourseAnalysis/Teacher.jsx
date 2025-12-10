@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./Teacher.css";
 
 const Teacher = () => {
@@ -272,74 +272,101 @@ const Teacher = () => {
                                 <>
                                     {/* 折線圖 */}
                                     {chartType === "line" && (
-                                        <div className="teacher-chart-line-wrapper">
-                                            <svg
-                                                className="teacher-chart-line-svg"
-                                                viewBox={`0 0 ${lineSvgWidth} 150`}
-                                                preserveAspectRatio="none"
-                                            >
-                                                {/* 底線 */}
-                                                <line
-                                                    x1="0"
-                                                    y1="140"
-                                                    x2={lineSvgWidth}
-                                                    y2="140"
-                                                    stroke="#e5e7eb"
-                                                    strokeWidth="1"
-                                                />
-                                                {/* 折線 */}
-                                                <polyline
-                                                    fill="none"
-                                                    stroke="#3b82f6"
-                                                    strokeWidth="2"
-                                                    points={linePoints}
-                                                />
-                                                {/* 節點 */}
-                                                {semEntries.map(([sem, count], idx) => {
-                                                    const width = lineSvgWidth;
-                                                    const paddingX = 20;
-                                                    const paddingY = 10;
-                                                    const innerW = width - paddingX * 2;
-                                                    const innerH = 150 - paddingY * 2;
-                                                    const x =
-                                                        semEntries.length === 1
-                                                            ? width / 2
-                                                            : paddingX +
-                                                            (innerW * idx) / (semEntries.length - 1);
-                                                    const ratio =
-                                                        maxSemCount > 0 ? Number(count) / maxSemCount : 0;
-                                                    const y = paddingY + innerH * (1 - ratio);
+<div className="teacher-chart-line-wrapper">
+<svg
+  className="teacher-chart-line-svg"
+  width={lineSvgWidth}
+  height="170"
+>
+  {/* 底線 */}
+  <line
+    x1="0"
+    y1="140"
+    x2={lineSvgWidth}
+    y2="140"
+    stroke="#e5e7eb"
+    strokeWidth="1"
+  />
 
-                                                    return (
-                                                        <g key={sem}>
-                                                            <circle
-                                                                cx={x}
-                                                                cy={y}
-                                                                r="3"
-                                                                fill="#3b82f6"
-                                                                stroke="#ffffff"
-                                                                strokeWidth="1"
-                                                            />
-                                                        </g>
-                                                    );
-                                                })}
-                                            </svg>
-                                            <div className="teacher-chart-line-labels">
-                                                {semEntries.map(([sem, count]) => (
-                                                    <div
-                                                        key={sem}
-                                                        className="teacher-chart-line-label-item"
-                                                    >
-                                                        <div className="teacher-chart-line-sem">
-                                                            {sem}
-                                                        </div>
-                                                        <div className="teacher-chart-line-count">
-                                                            {count}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+  {/* 折線 */}
+  <polyline
+    fill="none"
+    stroke="#3b82f6"
+    strokeWidth="2"
+    points={linePoints}
+  />
+
+  {semEntries.map(([sem, count], idx) => {
+    const paddingX = 20;
+    const paddingY = 10;
+    const innerW = lineSvgWidth - paddingX * 2;
+    const innerH = 150 - paddingY * 2;
+
+    const x =
+      semEntries.length === 1
+        ? lineSvgWidth / 2
+        : paddingX + (innerW * idx) / (semEntries.length - 1);
+
+    const ratio = maxSemCount > 0 ? Number(count) / maxSemCount : 0;
+    const y = paddingY + innerH * (1 - ratio);
+
+    return (
+      <g key={sem}>
+        {/* 圓點 */}
+        <circle
+          cx={x}
+          cy={y}
+          r="3"
+          fill="#3b82f6"
+          stroke="#ffffff"
+          strokeWidth="1"
+        />
+
+        
+
+      </g>
+    );
+  })}
+</svg>
+
+  {/* ⭐ 新：用 flex 平均排列，不會跑版 */}
+ <div
+  style={{
+    position: "relative",
+    width: `${lineSvgWidth}px`,
+    height: "40px",
+    marginTop: "5px",
+  }}
+>
+  {semEntries.map(([sem, count], idx) => {
+    const paddingX = 20;
+    const innerW = lineSvgWidth - paddingX * 2;
+
+    const x =
+      semEntries.length === 1
+        ? lineSvgWidth / 2
+        : paddingX + (innerW * idx) / (semEntries.length - 1);
+
+    return (
+      <div
+        key={sem}
+        style={{
+          position: "absolute",
+          left: `${x}px`,
+          transform: "translateX(-50%)",
+          textAlign: "center",
+          fontSize: "12px",
+          minWidth: "40px",
+        }}
+      >
+        <div>{sem}</div>
+        <div>{count}</div>
+      </div>
+    );
+  })}
+</div>
+
+</div>
                                     )}
 
                                     {/* 長條圖 */}

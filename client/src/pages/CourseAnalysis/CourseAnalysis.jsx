@@ -1,8 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./CourseAnalysis.css";
 
+
 const CourseAnalysis = () => {
+          const navigate = useNavigate();
+  
   const [keyword, setKeyword] = useState("");
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,6 +41,13 @@ const CourseAnalysis = () => {
 
   return (
     <div className="course-analysis-container">
+       <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="teacher-back-button"
+            >
+                ← 返回
+            </button>
       <h2 className="course-analysis-title">課程分析 / 老師搜尋</h2>
 
       {/* 搜尋列 */}

@@ -1,10 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const COLORS = ["#4CAF50", "#FF9800", "#03A9F4", "#E91E63", "#9C27B0", "#009688"];
 
 const SemesterDepartmentStats = () => {
+        const navigate = useNavigate();
+    
   const [semester, setSemester] = useState(""); // 選擇學期
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,7 +48,14 @@ const SemesterDepartmentStats = () => {
   }, [semester]);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="teacher-page-wrapper">
+         <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="teacher-back-button"
+            >
+                ← 返回
+            </button>
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>每學期課程與科系分佈</h2>
 
       {/* 選學期 */}

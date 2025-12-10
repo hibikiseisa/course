@@ -30,7 +30,7 @@ const Statistics = () => {
         {/* 第二個 */}
         <button
           className={`statistics-card ${selected === 2 ? "selected" : ""}`}
-          onClick={() => handleSelect(2, "/Statistics/teacher")}
+          onClick={() => handleSelect(2, "/CourseAnalysis")}
         >
           各老師與課程相關統計
         </button>

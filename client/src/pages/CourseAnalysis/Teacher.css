@@ -71,6 +71,7 @@
   justify-content: center;
   gap: 8px;
   margin-bottom: 18px;
+  white-space: nowrap;  
 }
 
 .teacher-sem-label {
@@ -141,7 +142,9 @@
 /* 折線圖 */
 
 .teacher-chart-line-wrapper {
+  position: relative;
   margin-top: 4px;
+  justify-content: center;
 }
 
 .teacher-chart-line-svg {
@@ -183,6 +186,10 @@
 .teacher-chart-bar-container {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  margin: 0 auto;
+  width: max-content;
   gap: 12px;
   min-width: max(100%, 40px * 8);
   padding-bottom: 6px;
