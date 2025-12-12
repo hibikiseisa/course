@@ -17,12 +17,12 @@
 }
 
 .statistics-card {
-  width: 180px;
+  width: 200px;
   height: 200px;
   font-size: 18px;
   border-radius: 15px;
   border: 2px solid transparent;
-  background-color: #eaffea;
+  background-color: #c6ebc6;
   cursor: pointer;
   transition: 0.2s;
       gap: 20px;
@@ -31,5 +31,8 @@
 
 /* hover 效果 */
 .statistics-card:hover {
-  background: #c5fdc0;
+  background: rgb(157, 201, 153);
 }
+
+
+

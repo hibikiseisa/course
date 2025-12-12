@@ -44,9 +44,9 @@ const CourseAnalysis = () => {
        <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="teacher-back-button"
+                className="teacher-back-buttons"
             >
-                ← 返回
+                ← 回上頁
             </button>
       <h2 className="course-analysis-title">課程分析 / 老師搜尋</h2>
 

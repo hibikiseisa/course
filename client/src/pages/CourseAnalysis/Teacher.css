@@ -142,14 +142,18 @@
 /* 折線圖 */
 
 .teacher-chart-line-wrapper {
-  position: relative;
   margin-top: 4px;
-  justify-content: center;
+  display: flex;               /* ⭐ 必填：啟動 flex 模式 */
+  flex-direction: column;      /* 上下排列 SVG + label */
+  align-items: center;         /* 水平置中所有內容 */
+  justify-content: center;     /* 垂直置中（可有可無） */
 }
+
 
 .teacher-chart-line-svg {
   width: 100%;
   height: 160px;
+  margin: 0 auto;   /* 保證 SVG 自己也居中 */
   display: block;
 }
 

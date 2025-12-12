@@ -2,12 +2,19 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import "./SemesterDepartmentStats.css";
 
 const COLORS = ["#4CAF50", "#FF9800", "#03A9F4", "#E91E63", "#9C27B0", "#009688"];
 
 const SemesterDepartmentStats = () => {
         const navigate = useNavigate();
-    
+    // 自動產生學期列表
+const allSems = [];
+for (let y = 105; y <= 114; y++) {
+    allSems.push(`${y}1`);
+    allSems.push(`${y}2`);
+}
+
   const [semester, setSemester] = useState(""); // 選擇學期
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -48,29 +55,33 @@ const SemesterDepartmentStats = () => {
   }, [semester]);
 
   return (
-    <div className="teacher-page-wrapper">
+    <div className="page-wrapper">
          <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="teacher-back-button"
+                className="back-button"
             >
                 ← 返回
             </button>
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>每學期課程與科系分佈</h2>
 
       {/* 選學期 */}
-      <div style={{ marginBottom: "20px", textAlign: "center" }}>
-        <label>
-          選擇學期：
-          <select value={semester} onChange={(e) => setSemester(e.target.value)} style={{ marginLeft: "10px" }}>
-            <option value="">請選擇學期</option>
-            <option value="1051">105-1</option>
-            <option value="1052">105-2</option>
-            <option value="1061">106-1</option>
-            {/* 可以改成從 API 取得學期清單 */}
-          </select>
-        </label>
-      </div>
+<div className="sem-select">
+    <label className="sem-label">選擇學期：</label>
+
+    <select
+        value={semester}
+        onChange={(e) => setSemester(e.target.value)}
+        className="sem-dropdown"
+    >
+        {allSems.map((sem) => (
+            <option key={sem} value={sem}>
+                {sem}
+            </option>
+        ))}
+    </select>
+</div>
+
 
       {loading && <p style={{ textAlign: "center" }}>資料載入中...</p>}
 

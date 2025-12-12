@@ -1,8 +1,15 @@
+import axios from 'axios';
+
+import { useSnackbar } from 'notistack'; // 引入 useSnackbar
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./Teacher.css";
 
-const Teacher = () => {
+
+const Teacher = ({ course , isFavorite, onAddToFavorites }) => {
+        const userId = localStorage.getItem('id'); // 從 localStorage 獲取用戶ID
+    const { enqueueSnackbar } = useSnackbar(); // 使用 enqueueSnackbar 顯示通知
+
     const { name } = useParams();
     const navigate = useNavigate();
 
@@ -15,6 +22,24 @@ const Teacher = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [localIsFavorite, setLocalIsFavorite] = useState(isFavorite);
+    const [favoriteList, setFavoriteList] = useState({});
+const [fullCourses, setFullCourses] = useState([]);
+const fetchFullCourse = async (course) => {
+  try {
+    // 這邊用課程全碼或科目代碼查
+    const code = course.課程全碼 || course.科目代碼;
+    const res = await axios.get("http://localhost:5000/api/courses", {
+      params: { courseCode: code },
+    });
+    return res.data[0] || course; // 如果找不到就 fallback
+  } catch (err) {
+    console.error("取得完整課程資料失敗", err);
+    return course;
+  }
+};
+
+
 
     // 所有學期
     const allSems = [];
@@ -48,6 +73,7 @@ const Teacher = () => {
             .map((day) => mapping[day] || day)
             .join(", ");
     };
+    console.log(course);
 
     // 課別顏色
     const getBackgroundColor = (courseType) => {
@@ -64,7 +90,78 @@ const Teacher = () => {
                 return "lightgray";
         }
     };
+const fetchFavorites = async () => {
+    if (!userId) return;
 
+    try {
+        const response = await axios.get(`http://localhost:5000/api/favorites/${userId}`);
+
+        // 把收藏資料轉成 { courseId: true }
+        const favMap = {};
+        response.data.forEach(fav => {
+            favMap[fav.courseId] = true;
+        });
+
+        setFavoriteList(favMap);
+    } catch (error) {
+        console.error("取得收藏資料失敗:", error);
+    }
+};
+
+useEffect(() => {
+    if (userId) fetchFavorites();
+}, [userId]);
+
+const getCourseId = (course) => {
+  // 優先使用唯一欄位，例如科目代碼
+ return course._id || null;
+};
+
+const handleAddFavoriteClick = async (course) => {
+  const courseId = getCourseId(course);
+   console.log("收藏課程:", { userId, courseId }); // 🔹 log
+  if (!courseId || !userId) {
+    enqueueSnackbar('課程ID或用戶ID缺失，無法收藏', { variant: 'error' });
+    return;
+  }
+
+  try {
+    const response = await axios.post('http://localhost:5000/api/favorites', {
+      userId,
+      courseId
+    });
+     console.log("收藏回傳:", response.data); // 🔹 log
+    setFavoriteList(prev => ({ ...prev, [courseId]: true }));
+    enqueueSnackbar("已加入收藏！", { variant: "success" });
+  } catch (err) {
+    enqueueSnackbar("收藏失敗", { variant: "error" });
+    console.error("收藏錯誤:", err.response?.data || err.message); // 🔹 log 更完整
+    console.error(err);
+  }
+};
+
+const handleRemoveFavoriteClick = async (course) => {
+  const courseId = getCourseId(course);
+  if (!courseId || !userId) {
+    enqueueSnackbar('課程ID或用戶ID缺失，無法取消收藏', { variant: 'error' });
+    return;
+  }
+
+  try {
+    await axios.delete(`http://localhost:5000/api/favorites/${userId}/${courseId}`);
+    setFavoriteList(prev => {
+      const updated = { ...prev };
+      delete updated[courseId];
+      return updated;
+    });
+    enqueueSnackbar("已取消收藏！", { variant: "info" });
+  } catch (err) {
+    enqueueSnackbar("取消收藏失敗", { variant: "error" });
+    console.error(err);
+  }
+};
+    
+    
     // 取得老師基本資料
     useEffect(() => {
         const fetchTeacher = async () => {
@@ -115,6 +212,17 @@ const Teacher = () => {
     const top3Courses = stats?.top3_courses || [];
     const thisSemInfo = stats?.this_semester || {};
     const thisSemCourses = thisSemInfo.courses || [];
+useEffect(() => {
+  const fetchAllFullCourses = async () => {
+    if (!thisSemCourses || thisSemCourses.length === 0) return;
+    const results = await Promise.all(
+      thisSemCourses.map((c) => fetchFullCourse(c))
+    );
+    setFullCourses(results);
+  };
+
+  fetchAllFullCourses();
+}, [thisSemCourses]);
 
     const semEntries = Object.entries(coursesPerSem);
     const semValues = semEntries.map(([, v]) => Number(v) || 0);
@@ -196,7 +304,7 @@ const Teacher = () => {
                 onClick={() => navigate(-1)}
                 className="teacher-back-button"
             >
-                ← 返回
+                ← 返回搜尋
             </button>
 
             {loading && <p>載入中…</p>}
@@ -215,6 +323,10 @@ const Teacher = () => {
                                     <p>職稱：{teacher.position}</p>
                                     <p>電話：{teacher.phone}</p>
                                     <p>信箱：{teacher.email}</p>
+                                </div>
+                                 <div className="teacher-header-info">
+                                   
+                                    <p>專長：{teacher.expertise}</p>
                                 </div>
                             </div>
                         </div>
@@ -275,9 +387,12 @@ const Teacher = () => {
 <div className="teacher-chart-line-wrapper">
 <svg
   className="teacher-chart-line-svg"
-  width={lineSvgWidth}
+  width="100%"     // ⭐ 讓 SVG 依容器寬度展開
   height="170"
+  viewBox={`0 0 ${lineSvgWidth} 170`} // ⭐ 保留比例不變
+  preserveAspectRatio="xMidYMid meet" // ⭐ 置中顯示內容
 >
+
   {/* 底線 */}
   <line
     x1="0"
@@ -468,12 +583,12 @@ const Teacher = () => {
                     <div className="teacher-card teacher-course-list-card">
 
 
-                        {thisSemCourses.length === 0 ? (
-                            <p className="teacher-course-empty-text">該學期無課程</p>
-                        ) : (
-                            <div className="teacher-course-results">
-                                <table className="teacher-course-table">
-                                    <thead>
+                       {fullCourses.length === 0 ? (
+    <p className="teacher-course-empty-text">該學期無課程</p>
+) : (
+    <div className="teacher-course-results">
+        <table className="teacher-course-table">
+            <thead>
                                         <tr>
                                             <th>No.</th>
                                             <th>學期</th>
@@ -486,68 +601,69 @@ const Teacher = () => {
                                             <th>上課時間 / 節次</th>
                                             <th>學分</th>
                                             <th>課別</th>
+                                            <th>收藏</th>
+
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {thisSemCourses.map((course, index) => {
-                                            const semester = course.學期 || course.semester || selectedSem;
-                                            const edu = course.學制 || course.education || "未提供";
-                                            const dept = course.系所名稱 || course.group_name || "未提供";
-                                            const gradeKey = (course.年級 || course.grade || "").toString();
-                                            const gradeText = gradeMapping[gradeKey] || "未提供";
+                                  <tbody>
+                {fullCourses.map((course, index) => {
+                    const courseId = course._id || course.科目代碼; // 這樣收藏一定有唯一ID
+                    const semester = course.學期 || course.semester || selectedSem;
+                    const edu = course.學制 || course.education || "未提供";
+                    const dept = course.系所名稱 || course.group_name || "未提供";
+                    const gradeKey = (course.年級 || course.grade || "").toString();
+                    const gradeText = gradeMapping[gradeKey] || "未提供";
+                    const courseCode = course.科目代碼 || course.course_no || "未提供";
+                    const courseName = course.科目中文名稱 || course.course_name || "未提供";
+                    const teacherName = Array.isArray(course.授課教師姓名)
+                        ? course.授課教師姓名.join("、")
+                        : course.授課教師姓名 || course.main_teacher || "無固定教師";
+                    const people = course.上課人數 || course.total_count || "未提供";
+                    const weekdayText = convertWeekdayToChinese(course.上課星期 || course.weekday);
+                    const periods = course.上課節次 || course.periods || "未提供";
+                    const credit = course.學分數 || course.credit || "未提供";
+                    const type = course.課別名稱 || course.course_type || "未提供";
 
-                                            const courseCode = course.科目代碼 || course.course_no || "未提供";
-                                            const courseName =
-                                                course.科目中文名稱 || course.course_name || "未提供";
-
-                                            const teacherName = Array.isArray(course.授課教師姓名)
-                                                ? course.授課教師姓名.join("、")
-                                                : course.授課教師姓名 ||
-                                                course.main_teacher ||
-                                                "無固定教師";
-
-                                            const people = course.上課人數 || course.total_count || "未提供";
-                                            const weekdayText = convertWeekdayToChinese(
-                                                course.上課星期 || course.weekday
-                                            );
-                                            const periods = course.上課節次 || course.periods || "未提供";
-                                            const credit = course.學分數 || course.credit || "未提供";
-                                            const type = course.課別名稱 || course.course_type || "未提供";
-
-                                            return (
-                                                <tr key={course._id || index}>
-                                                    <td>{index + 1}</td>
-                                                    <td>{semester}</td>
-                                                    <td>
-                                                        {edu}
-                                                        <br />
-                                                        {dept}
-                                                    </td>
-                                                    <td>{gradeText}</td>
-                                                    <td>{courseCode}</td>
-                                                    <td>{courseName}</td>
-                                                    <td>{teacherName}</td>
-                                                    <td>{people}</td>
-                                                    <td>
-                                                        {weekdayText} {periods}
-                                                    </td>
-                                                    <td>{credit}</td>
-                                                    <td>
-                                                        <span
-                                                            className="teacher-course-type-badge"
-                                                            style={{ backgroundColor: getBackgroundColor(type) }}
-                                                        >
-                                                            {type}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
+                    return (
+                        <tr key={courseId}>
+                            <td>{index + 1}</td>
+                            <td>{semester}</td>
+                            <td>{edu}<br />{dept}</td>
+                            <td>{gradeText}</td>
+                            <td>{courseCode}</td>
+                            <td>{courseName}</td>
+                            <td>{teacherName}</td>
+                            <td>{people}</td>
+                            <td>{weekdayText} {periods}</td>
+                            <td>{credit}</td>
+                            <td>
+                                <span
+                                    className="teacher-course-type-badge"
+                                    style={{ backgroundColor: getBackgroundColor(type) }}
+                                >
+                                    {type}
+                                </span>
+                            </td>
+                            <td>
+                                <div className="modal-buttons">
+                                    {favoriteList[courseId] ? (
+                                        <button onClick={() => handleRemoveFavoriteClick(course)} className="add-to-favorites">
+                                            取消收藏
+                                        </button>
+                                    ) : (
+                                        <button onClick={() => handleAddFavoriteClick(course)} className="add-to-favorites">
+                                            收藏
+                                        </button>
+                                    )}
+                                </div>
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    </div>
+)}                    </div>
 
                 </>
             )}

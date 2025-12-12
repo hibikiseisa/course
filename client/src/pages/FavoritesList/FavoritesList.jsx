@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useSnackbar } from 'notistack'; // 引入 useSnackbar
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CourseModal from '../CourseSearch/CourseModal/CourseModal';
 
 import './FavoritesList.css';
