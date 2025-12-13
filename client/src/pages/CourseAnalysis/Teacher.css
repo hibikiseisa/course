@@ -404,3 +404,26 @@
     min-width: 760px;
   }
 }
+
+
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.favorite-icon {
+  font-size: 20px;
+  color: #9ca3af; /* 灰色 */
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.favorite-icon:hover {
+  transform: scale(1.2);
+}
+
+.favorite-icon.active {
+  color: #facc15; /* ⭐ 星星金色 */
+  /* 愛心版本可用：#ef4444 */
+}

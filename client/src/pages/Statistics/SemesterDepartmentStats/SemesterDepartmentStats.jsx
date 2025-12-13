@@ -1,19 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import "./SemesterDepartmentStats.css";
 
-const COLORS = ["#4CAF50", "#FF9800", "#03A9F4", "#E91E63", "#9C27B0", "#009688"];
-
 const SemesterDepartmentStats = () => {
-        const navigate = useNavigate();
-    // 自動產生學期列表
-const allSems = [];
-for (let y = 105; y <= 114; y++) {
+  const navigate = useNavigate();
+
+  // 自動產生學期列表
+  const allSems = [];
+  for (let y = 105; y <= 114; y++) {
     allSems.push(`${y}1`);
     allSems.push(`${y}2`);
-}
+  }
 
   const [semester, setSemester] = useState(""); // 選擇學期
   const [data, setData] = useState([]);
@@ -28,16 +27,19 @@ for (let y = 105; y <= 114; y++) {
         params: { semester: selectedSemester }
       });
 
-      // 依系所統計課程數量
-      const deptMap = {};
+      // 時段統計
+      const timeMap = { 早: 0, 中: 0, 晚: 0 };
       res.data.forEach((course) => {
-        const dept = course.系所名稱 || "未分類";
-        deptMap[dept] = (deptMap[dept] || 0) + 1;
+        const timeStr = course.上課時間 || ""; // 假設是 "08:10" 這種格式
+        const hour = Number(timeStr.split(":")[0]) || 0;
+        if (hour >= 8 && hour < 11) timeMap.早 += 1;
+        else if (hour >= 11 && hour < 17) timeMap.中 += 1;
+        else if (hour >= 17 && hour < 21) timeMap.晚 += 1;
       });
 
-      const chartData = Object.keys(deptMap).map((dept) => ({
-        系所名稱: dept,
-        課程數量: deptMap[dept]
+      const chartData = Object.keys(timeMap).map((period) => ({
+        時段: period,
+        課程數量: timeMap[period]
       }));
 
       setData(chartData);
@@ -56,94 +58,75 @@ for (let y = 105; y <= 114; y++) {
 
   return (
     <div className="page-wrapper">
-         <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="back-button"
-            >
-                ← 返回
-            </button>
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>每學期課程與科系分佈</h2>
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="back-button"
+      >
+        ← 返回
+      </button>
+
+      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>每學期課程上課時段分布</h2>
 
       {/* 選學期 */}
-<div className="sem-select">
-    <label className="sem-label">選擇學期：</label>
-
-    <select
-        value={semester}
-        onChange={(e) => setSemester(e.target.value)}
-        className="sem-dropdown"
-    >
-        {allSems.map((sem) => (
+      <div className="sem-select">
+        <label className="sem-label">選擇學期：</label>
+        <select
+          value={semester}
+          onChange={(e) => setSemester(e.target.value)}
+          className="sem-dropdown"
+        >
+          {allSems.map((sem) => (
             <option key={sem} value={sem}>
-                {sem}
+              {sem}
             </option>
-        ))}
-    </select>
-</div>
-
+          ))}
+        </select>
+      </div>
 
       {loading && <p style={{ textAlign: "center" }}>資料載入中...</p>}
 
       {!loading && data.length > 0 && (
-        <>
+        <div style={{ marginTop: "40px" }}>
           {/* Bar Chart */}
           <div style={{ width: "100%", height: 350 }}>
-            <h3>📊 各系所課程數量（Bar Chart）</h3>
+            <h3>🕒 課程上課時段分布（Bar Chart）</h3>
             <ResponsiveContainer>
               <BarChart data={data}>
-                <XAxis dataKey="系所名稱" />
+                <XAxis dataKey="時段" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="課程數量">
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
+                <Bar dataKey="課程數量" fill="#4CAF50" />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Pie Chart */}
-          <div style={{ width: "100%", height: 350, marginTop: "40px" }}>
-            <h3>🥧 各系所開課比例（Pie Chart）</h3>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie data={data} dataKey="課程數量" nameKey="系所名稱" outerRadius={120} label>
-                  {data.map((entry, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
           {/* Table */}
-          <div style={{ marginTop: "40px" }}>
-            <h3>📄 數據表格</h3>
+          <div style={{ marginTop: "20px" }}>
+            <h3>📄 課程數量表格</h3>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "#f0f0f0" }}>
-                  <th style={{ padding: "8px", border: "1px solid #ddd" }}>系所</th>
+                  <th style={{ padding: "8px", border: "1px solid #ddd" }}>時段</th>
                   <th style={{ padding: "8px", border: "1px solid #ddd" }}>課程數量</th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr key={row.系所名稱}>
-                    <td style={{ padding: "8px", border: "1px solid #ddd" }}>{row.系所名稱}</td>
+                  <tr key={row.時段}>
+                    <td style={{ padding: "8px", border: "1px solid #ddd" }}>{row.時段}</td>
                     <td style={{ padding: "8px", border: "1px solid #ddd" }}>{row.課程數量}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </>
+        </div>
       )}
 
-      {!loading && data.length === 0 && semester && <p style={{ textAlign: "center" }}>該學期無課程資料</p>}
+      {!loading && data.length === 0 && semester && (
+        <p style={{ textAlign: "center" }}>該學期無課程資料</p>
+      )}
     </div>
   );
 };

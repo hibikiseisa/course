@@ -930,7 +930,7 @@ app.get('/api/teacher-stats', async (req, res) => {
                 // -------------------------
                 if (sem_no === thisSem) {
                     // 清掉 _id、index（如果有的話）
-                    const { _id, index, ...cleanDoc } = doc;
+                    const {  index, ...cleanDoc } = doc;
                     semCourses.push(cleanDoc);
                 }
 

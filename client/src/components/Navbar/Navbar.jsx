@@ -47,7 +47,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
                 <button onClick={() => navigate("/help")} className="navbar-link">
                   操作說明
                 </button>                
-                <button onClick={() => navigate("/Statistics")} className="navbar-link">
+                <button onClick={() => navigate("/CourseAnalysis")} className="navbar-link">
                   統計與分析                
                 </button>
                 <button onClick={() => navigate("/FavoritesList")} className="navbar-link">
@@ -66,7 +66,7 @@ const Navbar = ({ isLoggedIn, username, setIsLoggedIn, viewAsStudent, toggleView
             ) : (
               // 管理者菜單
               <>
-                  <button onClick={() => navigate("/Statistics")} className="navbar-link">
+                  <button onClick={() => navigate("/CourseAnalysis")} className="navbar-link">
                   統計與分析                
                 </button>
                 <button onClick={() => navigate("/help")} className="navbar-link">

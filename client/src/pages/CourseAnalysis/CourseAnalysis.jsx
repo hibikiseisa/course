@@ -41,13 +41,7 @@ const CourseAnalysis = () => {
 
   return (
     <div className="course-analysis-container">
-       <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="teacher-back-buttons"
-            >
-                ← 回上頁
-            </button>
+     
       <h2 className="course-analysis-title">課程分析 / 老師搜尋</h2>
 
       {/* 搜尋列 */}

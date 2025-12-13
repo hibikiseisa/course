@@ -20,6 +20,7 @@ const CourseSimulation = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('');
   const { enqueueSnackbar } = useSnackbar(); // 使用 enqueueSnackbar 顯示通知
+const [deletedCourses, setDeletedCourses] = useState([]);
 
   const userId = localStorage.getItem('id') || 'defaultUserId';
 

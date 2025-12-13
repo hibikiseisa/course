@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 import { useSnackbar } from 'notistack'; // 引入 useSnackbar
 import { useEffect, useState } from "react";
@@ -24,21 +25,6 @@ const Teacher = ({ course , isFavorite, onAddToFavorites }) => {
     const [error, setError] = useState(null);
     const [localIsFavorite, setLocalIsFavorite] = useState(isFavorite);
     const [favoriteList, setFavoriteList] = useState({});
-const [fullCourses, setFullCourses] = useState([]);
-const fetchFullCourse = async (course) => {
-  try {
-    // 這邊用課程全碼或科目代碼查
-    const code = course.課程全碼 || course.科目代碼;
-    const res = await axios.get("http://localhost:5000/api/courses", {
-      params: { courseCode: code },
-    });
-    return res.data[0] || course; // 如果找不到就 fallback
-  } catch (err) {
-    console.error("取得完整課程資料失敗", err);
-    return course;
-  }
-};
-
 
 
     // 所有學期
@@ -160,7 +146,7 @@ const handleRemoveFavoriteClick = async (course) => {
     console.error(err);
   }
 };
-    
+
     
     // 取得老師基本資料
     useEffect(() => {
@@ -212,17 +198,6 @@ const handleRemoveFavoriteClick = async (course) => {
     const top3Courses = stats?.top3_courses || [];
     const thisSemInfo = stats?.this_semester || {};
     const thisSemCourses = thisSemInfo.courses || [];
-useEffect(() => {
-  const fetchAllFullCourses = async () => {
-    if (!thisSemCourses || thisSemCourses.length === 0) return;
-    const results = await Promise.all(
-      thisSemCourses.map((c) => fetchFullCourse(c))
-    );
-    setFullCourses(results);
-  };
-
-  fetchAllFullCourses();
-}, [thisSemCourses]);
 
     const semEntries = Object.entries(coursesPerSem);
     const semValues = semEntries.map(([, v]) => Number(v) || 0);
@@ -583,14 +558,15 @@ useEffect(() => {
                     <div className="teacher-card teacher-course-list-card">
 
 
-                       {fullCourses.length === 0 ? (
+                       {thisSemCourses.length === 0 ? (
     <p className="teacher-course-empty-text">該學期無課程</p>
 ) : (
     <div className="teacher-course-results">
         <table className="teacher-course-table">
             <thead>
                                         <tr>
-                                            <th>No.</th>
+                                                 <th>收藏</th>
+                                         
                                             <th>學期</th>
                                             <th>學制 / 系所</th>
                                             <th>年級</th>
@@ -601,13 +577,13 @@ useEffect(() => {
                                             <th>上課時間 / 節次</th>
                                             <th>學分</th>
                                             <th>課別</th>
-                                            <th>收藏</th>
+                                       
 
                                         </tr>
                                     </thead>
                                   <tbody>
-                {fullCourses.map((course, index) => {
-                    const courseId = course._id || course.科目代碼; // 這樣收藏一定有唯一ID
+                {thisSemCourses.map((course, index) => {
+                    const courseId = course._id 
                     const semester = course.學期 || course.semester || selectedSem;
                     const edu = course.學制 || course.education || "未提供";
                     const dept = course.系所名稱 || course.group_name || "未提供";
@@ -626,7 +602,24 @@ useEffect(() => {
 
                     return (
                         <tr key={courseId}>
-                            <td>{index + 1}</td>
+                                               <td>
+  <button
+    onClick={() =>
+      favoriteList[courseId]
+        ? handleRemoveFavoriteClick(course)
+        : handleAddFavoriteClick(course)
+    }
+    className="favorite-btn"
+    title={favoriteList[courseId] ? "取消收藏" : "加入收藏"}
+  >
+    {favoriteList[courseId] ? (
+      <FaStar className="favorite-icon active" />
+    ) : (
+      <FaRegStar className="favorite-icon" />
+    )}
+  </button>
+</td>
+                           
                             <td>{semester}</td>
                             <td>{edu}<br />{dept}</td>
                             <td>{gradeText}</td>
@@ -644,19 +637,8 @@ useEffect(() => {
                                     {type}
                                 </span>
                             </td>
-                            <td>
-                                <div className="modal-buttons">
-                                    {favoriteList[courseId] ? (
-                                        <button onClick={() => handleRemoveFavoriteClick(course)} className="add-to-favorites">
-                                            取消收藏
-                                        </button>
-                                    ) : (
-                                        <button onClick={() => handleAddFavoriteClick(course)} className="add-to-favorites">
-                                            收藏
-                                        </button>
-                                    )}
-                                </div>
-                            </td>
+         
+
                         </tr>
                     );
                 })}
